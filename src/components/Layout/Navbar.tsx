@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useUser, UserButton } from '@clerk/clerk-react'
-import { ShoppingCart, Menu, X, Package } from 'lucide-react'
+import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 
