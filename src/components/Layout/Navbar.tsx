@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useUser, UserButton } from '@clerk/clerk-react'
-import { ShoppingCart, Menu, X, User, Package } from 'lucide-react'
+import { ShoppingCart, Menu, X, Package } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -9,7 +9,6 @@ const Navbar: React.FC = () => {
   const { user } = useUser()
   const { isAdmin } = useAuth()
   const { getTotalItems } = useCart()
-  const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
