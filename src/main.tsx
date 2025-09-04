@@ -68,7 +68,51 @@ const router = createBrowserRouter([
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ClerkProvider publishableKey={env.CLERK_PUBLISHABLE_KEY}>
+    <ClerkProvider
+      publishableKey={env.CLERK_PUBLISHABLE_KEY}
+      appearance={{
+        baseTheme: {
+          // Aquí puedes definir tu tema base si es necesario
+        },
+        elements: {
+          rootBox: "max-w-md mx-auto my-8 p-6 bg-blanco rounded-lg shadow-xl border border-gray-200",
+          card: "shadow-none border-none bg-transparent",
+          headerTitle: "text-gris-oscuro",
+          headerSubtitle: "text-gris-claro",
+          socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200",
+          formButtonPrimary: "bg-amarillo hover:bg-dorado text-gris-oscuro normal-case",
+          formFieldInput: "bg-hueso text-gris-oscuro focus:ring-amarillo focus:border-amarillo",
+          footerActionLink: "text-amarillo hover:text-dorado",
+          // Personaliza el logo
+          header: {
+            // Añade el logo arriba del formulario
+            marginTop: "2rem",
+            marginBottom: "2rem",
+            textAlign: "center",
+            '&::before': {
+              content: '""',
+              display: 'block',
+              width: '100px',
+              height: '100px',
+              margin: '0 auto 1rem',
+              backgroundImage: 'url(/logo.jpg)',
+              backgroundSize: 'contain',
+              backgroundRepeat: 'no-repeat',
+              backgroundPosition: 'center',
+            },
+          },
+        },
+        variables: {
+          colorPrimary: "#FFD700", // Amarillo
+          colorText: "#333333",     // Gris oscuro
+          colorBackground: "#f5f1e9", // Hueso
+          colorInputBackground: "#f5f1e9", // Hueso para inputs
+          colorInputText: "#333333",
+          borderRadiusButton: "0.5rem",
+          borderRadius: "0.5rem",
+        }
+      }}
+    >
       <RouterProvider router={router} />
     </ClerkProvider>
   </React.StrictMode>,

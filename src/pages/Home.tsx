@@ -55,29 +55,31 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-amarillo to-dorado py-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl md:text-6xl font-bold text-gris-oscuro mb-6">
-            Bienvenido a Mercadillo Lima
-          </h1>
-          <p className="text-xl md:text-2xl text-gris-oscuro mb-8 max-w-3xl mx-auto">
-            Descubre los mejores productos de Lima, Perú. 
-            Calidad garantizada y envío rápido a todo el país.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/catalogo"
-              className="btn-secondary text-lg px-8 py-3 flex items-center justify-center space-x-2"
-            >
-              <span>Ver Catálogo</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
-            <Link
-              to="/carrito"
-              className="bg-blanco text-gris-oscuro hover:bg-hueso font-semibold py-3 px-8 rounded-lg transition-colors duration-200 text-lg"
-            >
-              Mi Carrito
-            </Link>
+      <section className="relative w-full h-96 overflow-hidden">
+        <img src="/banner.png" alt="Mercadillo Lima Perú Banner" className="w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 flex items-center justify-center text-center p-4">
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">
+              Bienvenido a Mercadillo Lima
+            </h1>
+            <p className="text-xl md:text-2xl text-hueso mb-8">
+              Descubre los mejores productos de Lima, Perú. Calidad garantizada y envío rápido a todo el país.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/catalogo"
+                className="btn-primary text-lg px-8 py-3 flex items-center justify-center space-x-2"
+              >
+                <span>Ver Catálogo</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link
+                to="/carrito"
+                className="bg-blanco text-gris-oscuro hover:bg-hueso font-semibold py-3 px-8 rounded-lg transition-colors duration-200 text-lg"
+              >
+                Mi Carrito
+              </Link>
+            </div>
           </div>
         </div>
       </section>
