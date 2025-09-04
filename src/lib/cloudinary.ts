@@ -1,9 +1,7 @@
-const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
-const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET
+import { env } from '@/config/env'
 
-if (!cloudName || !uploadPreset) {
-  throw new Error('Missing Cloudinary environment variables')
-}
+const cloudName = env.CLOUDINARY_CLOUD_NAME
+const uploadPreset = env.CLOUDINARY_UPLOAD_PRESET
 
 export const uploadImage = async (file: File): Promise<string> => {
   const formData = new FormData()

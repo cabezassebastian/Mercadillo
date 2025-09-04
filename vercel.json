@@ -1,0 +1,19 @@
+{
+  "functions": {
+    "api/checkout.ts": {
+      "maxDuration": 30
+    },
+    "api/webhook.ts": {
+      "maxDuration": 30
+    },
+    "api/orders.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "STRIPE_SECRET_KEY": "@stripe_secret_key",
+    "STRIPE_WEBHOOK_SECRET": "@stripe_webhook_secret",
+    "SUPABASE_URL": "@supabase_url",
+    "SUPABASE_SERVICE_ROLE_KEY": "@supabase_service_role_key"
+  }
+}
