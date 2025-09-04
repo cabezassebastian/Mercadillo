@@ -1,12 +1,7 @@
 import { loadStripe } from '@stripe/stripe-js'
+import { env } from '@/config/env'
 
-const stripePublishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
-
-if (!stripePublishableKey) {
-  throw new Error('Missing Stripe publishable key')
-}
-
-export const stripePromise = loadStripe(stripePublishableKey)
+export const stripePromise = loadStripe(env.STRIPE_PUBLISHABLE_KEY)
 
 export interface CheckoutSession {
   id: string

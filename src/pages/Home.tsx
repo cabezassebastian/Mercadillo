@@ -14,7 +14,7 @@ const Home: React.FC = () => {
         const { data, error } = await supabase
           .from('productos')
           .select('*')
-          .eq('stock', '>', 0)
+          .gt('stock', 0) // Corrección: Usar .gt para stock > 0
           .order('created_at', { ascending: false })
           .limit(8)
 
