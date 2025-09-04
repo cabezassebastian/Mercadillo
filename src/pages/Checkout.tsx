@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
-import { CreditCard, MapPin, User, Phone, Mail } from 'lucide-react'
+import { CreditCard, User } from 'lucide-react'
 
 const Checkout: React.FC = () => {
-  const navigate = useNavigate()
-  const { items, getSubtotal, getIGV, getTotal, clearCart } = useCart()
+  const { items, getSubtotal, getIGV, getTotal } = useCart()
   const { user, updateUser } = useAuth()
   const [isProcessing, setIsProcessing] = useState(false)
   const [formData, setFormData] = useState({

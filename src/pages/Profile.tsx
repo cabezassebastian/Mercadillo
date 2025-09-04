@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
-import { User, Package, MapPin, Phone, Mail, Edit3 } from 'lucide-react'
+import { User, Package, Edit3 } from 'lucide-react'
 import { supabase, Pedido } from '@/lib/supabase'
 
 const Profile: React.FC = () => {
