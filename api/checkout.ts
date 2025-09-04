@@ -26,8 +26,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .insert([{
         usuario_id: req.headers['x-user-id'] as string,
         items,
-        subtotal: total / 1.18, // Remover IGV para obtener subtotal
-        igv: total * 0.18 / 1.18, // Calcular IGV
+        subtotal: parseFloat((total / 1.18).toFixed(2)), // Calcular subtotal y redondear a 2 decimales
+        igv: parseFloat((total - (total / 1.18)).toFixed(2)), // Calcular IGV y redondear a 2 decimales
         total,
         estado: 'pendiente',
         direccion_envio: direccion,
@@ -40,6 +40,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       console.error('Error creating order:', pedidoError)
       return res.status(500).json({ error: 'Error creating order' })
     }
+
+    // Determinar la URL base para las redirecciones
+    const appUrl = process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : process.env.PUBLIC_URL || 'http://localhost:5173'; // Usar VERCEL_URL o PUBLIC_URL, con fallback a localhost
 
     // Crear sesión de pago con Stripe
     const session = await stripe.checkout.sessions.create({
@@ -56,8 +59,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         quantity: item.cantidad,
       })),
       mode: 'payment',
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/carrito`,
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/carrito`,
       metadata: {
         pedido_id: pedido.id,
         usuario_id: req.headers['x-user-id'] as string,
