@@ -1,14 +1,10 @@
-import React, { useState } from 'react'
+import React from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { 
   Package, 
   ShoppingCart, 
   Users, 
-  BarChart3, 
-  Plus,
-  Edit,
-  Trash2,
-  Upload
+  BarChart3
 } from 'lucide-react'
 import AdminProducts from '../components/Admin/AdminProducts'
 import AdminOrders from '../components/Admin/AdminOrders'

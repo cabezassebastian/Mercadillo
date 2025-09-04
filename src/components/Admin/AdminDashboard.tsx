@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Package, ShoppingCart, Users, DollarSign, TrendingUp, TrendingDown } from 'lucide-react'
+import { Package, ShoppingCart, Users, DollarSign, TrendingUp } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
 
 interface DashboardStats {
@@ -10,6 +10,13 @@ interface DashboardStats {
   pedidosHoy: number
   pedidosMes: number
 }
+
+type Pedido = {
+  id: string;
+  total: number;
+  created_at: string;
+  estado?: string; // Hacemos 'estado' opcional
+};
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -28,29 +35,31 @@ const AdminDashboard: React.FC = () => {
         // Obtener estadísticas básicas
         const [productosResult, pedidosResult, usuariosResult] = await Promise.all([
           supabase.from('productos').select('id', { count: 'exact' }),
-          supabase.from('pedidos').select('id, total, created_at', { count: 'exact' }),
+          supabase.from('pedidos').select('id, total, created_at, estado', { count: 'exact' }),
           supabase.from('usuarios').select('id', { count: 'exact' })
         ])
+
+        const typedPedidosData = (pedidosResult.data || []) as Pedido[]
 
         const totalProductos = productosResult.count || 0
         const totalPedidos = pedidosResult.count || 0
         const totalUsuarios = usuariosResult.count || 0
 
         // Calcular ingresos totales
-        const ingresosTotales = pedidosResult.data?.reduce((sum, pedido) => 
-          pedido.estado !== 'cancelado' ? sum + pedido.total : sum, 0
+        const ingresosTotales = typedPedidosData.reduce((sum, pedido) => 
+          (pedido.estado && pedido.estado !== 'cancelado') ? sum + pedido.total : sum, 0
         ) || 0
 
         // Calcular pedidos de hoy
         const hoy = new Date().toISOString().split('T')[0]
-        const pedidosHoy = pedidosResult.data?.filter(pedido => 
+        const pedidosHoy = typedPedidosData.filter(pedido => 
           pedido.created_at.startsWith(hoy)
         ).length || 0
 
         // Calcular pedidos del mes
         const inicioMes = new Date()
         inicioMes.setDate(1)
-        const pedidosMes = pedidosResult.data?.filter(pedido => 
+        const pedidosMes = typedPedidosData.filter(pedido => 
           new Date(pedido.created_at) >= inicioMes
         ).length || 0
 

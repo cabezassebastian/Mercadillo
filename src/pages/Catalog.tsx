@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Search, Filter, Grid, List } from 'lucide-react'
+import { Search, Grid, List } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import ProductCard from '@/components/Product/ProductCard'
 

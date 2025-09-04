@@ -11,7 +11,6 @@ const Product: React.FC = () => {
   const [producto, setProducto] = useState<Producto | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
-  const [selectedImage, setSelectedImage] = useState(0)
 
   useEffect(() => {
     const fetchProducto = async () => {

@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useUser } from '@clerk/clerk-react'
 import { Producto } from '@/lib/supabase'
 
 export interface CartItem {
@@ -30,7 +29,6 @@ export const useCart = () => {
 }
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user } = useUser()
   const [items, setItems] = useState<CartItem[]>([])
 
   // Cargar carrito desde localStorage al inicializar
