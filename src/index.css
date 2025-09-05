@@ -30,4 +30,13 @@
   }
 }
 
+@layer utilities {
+  .bg-rojo-claro {
+    background-color: #fee2e2; /* light red */
+  }
+  .text-rojo-oscuro {
+    color: #991b1b; /* dark red */
+  }
+}
+
 

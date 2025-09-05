@@ -7,6 +7,7 @@ const Catalog: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([])
   const [filteredProductos, setFilteredProductos] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) // Nuevo estado para manejar errores
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('')
   const [sortBy, setSortBy] = useState('nombre')
@@ -15,21 +16,35 @@ const Catalog: React.FC = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .gt('stock', 0) // Añadido: Filtrar por stock > 0
-          .order('created_at', { ascending: false })
+        setIsLoading(true)
+        setError(null)
 
-        if (error) {
-          console.error('Error fetching products:', error)
-          return
+        let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
+        let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false })
+
+        if (supabaseError) {
+          console.warn('Error inicial al obtener productos en catálogo (posible columna created_at faltante): ', supabaseError.message)
+          // Si falla la ordenación por created_at, intentar sin ordenación
+          console.log('Intentando obtener productos en catálogo sin ordenación por created_at...')
+          const { data: fallbackData, error: fallbackError } = await productsQuery
+
+          if (fallbackError) {
+            console.error('Error fetching products in catalog (fallback): ', fallbackError)
+            setError('No se pudo cargar la información del catálogo, inténtalo más tarde')
+            setProductos([]) // Asegura que los productos estén vacíos en caso de error
+            setFilteredProductos([])
+            return
+          }
+          data = fallbackData
         }
 
         setProductos(data || [])
         setFilteredProductos(data || [])
-      } catch (error) {
-        console.error('Error in fetchProductos:', error)
+      } catch (err) {
+        console.error('Error en fetchProductos en Catalog:', err)
+        setError('Ocurrió un error inesperado al cargar el catálogo.')
+        setProductos([]) // Asegura que los productos estén vacíos en caso de error
+        setFilteredProductos([])
       } finally {
         setIsLoading(false)
       }
@@ -95,6 +110,15 @@ const Catalog: React.FC = () => {
             Encuentra los mejores productos de Lima, Perú
           </p>
         </div>
+
+        {/* Display error message if there is one */}
+        {error && (
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-rojo-claro rounded-lg shadow-md max-w-md mx-auto my-4">
+            <p className="text-xl font-semibold text-rojo-oscuro mb-4">⚠️ Error al cargar el catálogo</p>
+            <p className="text-gray-700">{error}</p>
+            <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
+          </div>
+        )}
 
         {/* Filters and Search */}
         <div className="bg-blanco rounded-lg shadow-md p-6 mb-8">
