@@ -72,14 +72,22 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       publishableKey={env.CLERK_PUBLISHABLE_KEY}
       appearance={{
         elements: {
-          rootBox: "max-w-md mx-auto my-8 p-6 bg-blanco rounded-lg shadow-xl border border-gray-200",
-          card: "shadow-none border-none bg-transparent",
+          rootBox: "", // Limpiamos rootBox para evitar el doble panel
+          modalBackdrop: "bg-black/50 fixed inset-0 flex items-center justify-center z-50",
+          card: "bg-white rounded-2xl shadow-xl p-6 w-[95%] mx-auto relative sm:max-w-lg md:max-w-3xl lg:max-w-4xl", // Estilos para el modal principal
           headerTitle: "text-gris-oscuro",
           headerSubtitle: "text-gris-claro",
           socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200",
           formButtonPrimary: "bg-amarillo hover:bg-dorado text-gris-oscuro normal-case",
           formFieldInput: "bg-hueso text-gris-oscuro focus:ring-amarillo focus:border-amarillo",
           footerActionLink: "text-amarillo hover:text-dorado",
+          // Asegurar que el botón de cerrar sea visible y esté bien posicionado
+          closeButton: "z-50 text-gris-oscuro top-4 right-4 focus:ring-amarillo focus:border-amarillo",
+          // Estilos para el dropdown del UserButton
+          userButtonPopoverCard: "w-56 max-w-xs p-3 py-2 bg-white rounded-lg shadow-lg border border-gray-200",
+          userButtonPopoverListItem: "px-3 py-2",
+          userButtonPopoverListItemText: "text-sm",
+          userButtonPopoverListItemHover: "bg-gray-100",
           // Personaliza el logo
           header: {
             // Añade el logo arriba del formulario
@@ -109,7 +117,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         }
       }}
     >
-      <RouterProvider router={router} />
+      <RouterProvider router={router} future={{ v7_startTransition: true }} />
     </ClerkProvider>
   </React.StrictMode>,
 )
