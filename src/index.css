@@ -39,4 +39,18 @@
   }
 }
 
+/* Estilos globales para UserButton Popover de Clerk */
+.cl-userButtonPopoverCard {
+  max-width: 220px !important;
+  width: 100% !important; /* Asegura que el max-width sea efectivo */
+  font-size: 14px !important;
+  padding: 6px !important;
+  box-sizing: border-box !important; /* Incluye padding y border en el ancho/alto */
+}
+
+.cl-userButtonPopoverActionButton {
+  padding: 4px 8px !important;
+  font-size: 14px !important;
+}
+
 
