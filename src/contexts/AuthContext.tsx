@@ -6,6 +6,7 @@ interface AuthContextType {
   user: Usuario | null
   isAdmin: boolean
   isLoading: boolean
+  error: string | null // Añadido para manejar errores de autenticación/carga de usuario
   updateUser: (userData: Partial<Usuario>) => Promise<void>
 }
 
@@ -23,26 +24,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { user: clerkUser, isLoaded } = useUser()
   const [user, setUser] = useState<Usuario | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) // Estado para errores de carga de usuario
 
   useEffect(() => {
     const fetchUser = async () => {
       if (!isLoaded) return
 
-      if (!clerkUser) {
+      setIsLoading(true)
+      setError(null) // Resetear errores al iniciar la carga
+
+      if (!clerkUser || !clerkUser.id) {
+        console.warn('AuthContext: Usuario de Clerk no autenticado o ID no disponible.');
         setUser(null)
+        setError('Usuario no autenticado o ID no disponible.'); // Mensaje específico para este caso
         setIsLoading(false)
         return
       }
 
       try {
         // Buscar usuario en Supabase
-        const { data: existingUser, error } = await supabase
+        const { data: existingUser, error: supabaseFetchError } = await supabase
           .from('usuarios')
-          .select('*')
+          .select('id, email, nombre, apellido, rol') // Especificar columnas
           .eq('id', clerkUser.id)
           .single()
 
-        if (error && error.code === 'PGRST116') {
+        if (supabaseFetchError && supabaseFetchError.code === 'PGRST116') {
           // Usuario no existe, crear nuevo usuario
           const newUser: Omit<Usuario, 'created_at'> = {
             id: clerkUser.id,
@@ -52,26 +59,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             rol: 'cliente',
           }
 
-          const { data: createdUser, error: createError } = await supabase
+          const { data: createdUser, error: supabaseCreateError } = await supabase
             .from('usuarios')
             .insert([newUser])
-            .select()
+            .select('id, email, nombre, apellido, rol') // Especificar columnas también aquí
             .single()
 
-          if (createError) {
-            console.error('Error creating user:', createError)
+          if (supabaseCreateError) {
+            console.error('Error creating user:', supabaseCreateError)
+            setError('Error al crear el perfil de usuario. Inténtalo más tarde.')
             return
           }
 
           setUser(createdUser)
-        } else if (error) {
-          console.error('Error fetching user:', error)
+        } else if (supabaseFetchError) {
+          console.error('Error fetching user:', supabaseFetchError)
+          setError('Error al cargar la información del usuario. Inténtalo más tarde.')
           return
         } else {
           setUser(existingUser)
         }
-      } catch (error) {
-        console.error('Error in fetchUser:', error)
+      } catch (err) {
+        console.error('Error inesperado en fetchUser:', err)
+        setError('Ocurrió un error inesperado al gestionar tu perfil.')
       } finally {
         setIsLoading(false)
       }
@@ -84,21 +94,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (!user) return
 
     try {
-      const { data, error } = await supabase
+      const { data, error: supabaseUpdateError } = await supabase
         .from('usuarios')
         .update(userData)
         .eq('id', user.id)
         .select()
         .single()
 
-      if (error) {
-        console.error('Error updating user:', error)
+      if (supabaseUpdateError) {
+        console.error('Error updating user:', supabaseUpdateError)
+        // Podríamos manejar este error de actualización de forma más granular si es necesario
         return
       }
 
       setUser(data)
-    } catch (error) {
-      console.error('Error in updateUser:', error)
+    } catch (err) {
+      console.error('Error inesperado en updateUser:', err)
     }
   }
 
@@ -108,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     user,
     isAdmin,
     isLoading,
+    error, // Exponer el estado de error
     updateUser,
   }
 

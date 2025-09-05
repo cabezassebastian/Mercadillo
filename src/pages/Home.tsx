@@ -7,25 +7,35 @@ import ProductCard from '@/components/Product/ProductCard'
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null) // Nuevo estado para manejar errores
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
       try {
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .gt('stock', 0) // Corrección: Usar .gt para stock > 0
-          .order('created_at', { ascending: false })
-          .limit(8)
+        setIsLoading(true)
+        setError(null)
 
-        if (error) {
-          console.error('Error fetching products:', error)
-          return
+        let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
+        let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false }).limit(8)
+
+        if (supabaseError) {
+          console.warn('Error inicial al obtener productos (posible columna created_at faltante): ', supabaseError.message)
+          // Si falla la ordenación por created_at, intentar sin ordenación
+          console.log('Intentando obtener productos sin ordenación por created_at...')
+          const { data: fallbackData, error: fallbackError } = await productsQuery.limit(8)
+
+          if (fallbackError) {
+            console.error('Error fetching products (fallback): ', fallbackError)
+            setError('No se pudo cargar la información, inténtalo más tarde')
+            return
+          }
+          data = fallbackData
         }
 
         setFeaturedProducts(data || [])
-      } catch (error) {
-        console.error('Error in fetchFeaturedProducts:', error)
+      } catch (err) {
+        console.error('Error en fetchFeaturedProducts:', err)
+        setError('Ocurrió un error inesperado al cargar los productos.')
       } finally {
         setIsLoading(false)
       }
@@ -120,6 +130,12 @@ const Home: React.FC = () => {
           {isLoading ? (
             <div className="flex justify-center">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amarillo"></div>
+            </div>
+          ) : error ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-rojo-claro rounded-lg shadow-md max-w-md mx-auto">
+              <p className="text-xl font-semibold text-rojo-oscuro mb-4">⚠️ Error al cargar productos</p>
+              <p className="text-gray-700">{error}</p>
+              <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
