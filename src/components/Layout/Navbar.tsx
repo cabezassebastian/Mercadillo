@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-8 w-auto" />
+            <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-16 w-auto" />
           </Link>
 
           {/* Desktop Navigation */}
