@@ -63,12 +63,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ producto }) => {
               <span>Agregar</span>
             </button>
             
-            <Link
-              to={`/producto/${producto.id}`}
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = `/producto/${producto.id}`;
+              }}
               className="btn-secondary flex items-center justify-center px-3"
             >
               <Eye className="w-4 h-4" />
-            </Link>
+            </button>
           </div>
         </div>
       </Link>

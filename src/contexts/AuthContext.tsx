@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { supabase, Usuario } from '@/lib/supabase'
+import { useAuth as useClerkAuth } from '@clerk/clerk-react'
 
 interface AuthContextType {
   user: Usuario | null
@@ -25,6 +26,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Usuario | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null) // Estado para errores de carga de usuario
+  const { session, isLoaded: isClerkLoaded, isSignedIn } = useClerkAuth() // Añadir isClerkLoaded y isSignedIn
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -74,7 +76,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(createdUser)
         } else if (supabaseFetchError) {
           console.error('Error fetching user:', supabaseFetchError)
-          setError('Error al cargar la información del usuario. Inténtalo más tarde.')
+          if (supabaseFetchError.code === '401') {
+            setError('No autorizado. Por favor, asegúrate de haber iniciado sesión y tener los permisos correctos.')
+          } else if (supabaseFetchError.code === '406') {
+            setError('Solicitud no aceptable. Verifica la configuración de la base de datos o los datos enviados.')
+          } else {
+            setError('Error al cargar la información del usuario. Inténtalo más tarde.')
+          }
           return
         } else {
           setUser(existingUser)
@@ -112,6 +120,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Error inesperado en updateUser:', err)
     }
   }
+
+  // Efecto para sincronizar la sesión de Clerk con Supabase
+  useEffect(() => {
+    if (!isClerkLoaded) return; // Esperar a que Clerk cargue su sesión
+
+    if (isSignedIn && session?.accessToken) {
+      supabase.auth.setSession({
+        access_token: session.accessToken,
+        refresh_token: session.refreshToken || '',
+      }).then(({ error }) => {
+        if (error) {
+          console.error('Error al establecer la sesión de Supabase:', error)
+          setError('Error de autenticación: No se pudo sincronizar la sesión.')
+        }
+      })
+    } else if (isClerkLoaded && !isSignedIn) {
+      // Clerk está cargado pero el usuario no ha iniciado sesión, limpiar la sesión de Supabase
+      supabase.auth.setSession({ access_token: null, refresh_token: null }).then(({ error }) => {
+        if (error) {
+          console.error('Error al limpiar la sesión de Supabase:', error)
+        }
+      })
+    }
+  }, [session?.accessToken, session?.refreshToken, isClerkLoaded, isSignedIn]) // Añadir dependencias
 
   const isAdmin = user?.rol === 'admin'
 
