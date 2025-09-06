@@ -3,7 +3,6 @@ import { env } from '@/config/env'
 
 export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY)
 
-// Tipos para la base de datos
 export interface Producto {
   id: string
   nombre: string
