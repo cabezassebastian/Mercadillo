@@ -28,7 +28,7 @@ const router = createBrowserRouter([
     path: "/",
     element: <App />,
     children: [
-      { index: true, element: <Home /> }, // Ruta de inicio
+      { index: true, element: <Home /> },
       { path: "catalogo", element: <Catalog /> },
       { path: "producto/:id", element: <Product /> },
       { path: "carrito", element: <Cart /> },
@@ -59,11 +59,11 @@ const router = createBrowserRouter([
     ],
   },
   {
-    path: "/sign-in/*", // Ruta para iniciar sesion
+    path: "/sign-in/*",
     element: <SignInPage />,
   },
   {
-    path: "/sign-up/*", // Ruta para registrarse
+    path: "/sign-up/*",
     element: <SignUpPage />,
   },
 ]);
@@ -75,16 +75,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         publishableKey={env.CLERK_PUBLISHABLE_KEY}
         appearance={{
           elements: {
-            rootBox: "", // Limpia rootBox para evitar un doble panel
+            rootBox: "",
             headerTitle: "text-gris-oscuro",
             headerSubtitle: "text-gris-claro",
             socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200",
-            formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg py-2", // Botones personalizados
-            formFieldInput: "border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400", // Inputs personalizados
+            formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg py-2",
+            formFieldInput: "border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400",
             footerActionLink: "text-amarillo hover:text-dorado",
-            // Asegura que el boton de cerrar sea visible y este bien posicionado
             closeButton: "z-50 text-gris-oscuro top-4 right-4 focus:ring-amarillo focus:border-amarillo",
-            // Estilos para el dropdown del UserButton
             userButtonPopoverCard: {
               width: "220px",
               borderRadius: "10px",
@@ -92,7 +90,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               fontSize: "14px",
               padding: "6px",
               backgroundColor: "white", 
-              border: "1px solid rgb(229 231 235)", // gray-200 en Tailwind
+              border: "1px solid rgb(229 231 235)",
             },
             userButtonPopoverListItem: {},
             userButtonPopoverListItemText: "text-sm",
@@ -107,17 +105,14 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             },
           },
           variables: {
-            colorPrimary: "#FFD700", // Amarillo
-            colorText: "#333333",     // Gris oscuro
-            colorBackground: "#f5f1e9", // Hueso
-            colorInputBackground: "#f5f1e9", // Hueso para inputs
+            colorPrimary: "#FFD700",
+            colorText: "#333333",
+            colorBackground: "#f5f1e9",
+            colorInputBackground: "#f5f1e9",
             colorInputText: "#333333",
             borderRadius: "0.5rem",
-            fontFamily: "Inter, sans-serif", // Tipografia moderna
+            fontFamily: "Inter, sans-serif",
           }
-        }}
-        layout={{ // Propiedades de layout para Clerk
-          socialButtonsVariant: "iconButton", // Botones sociales compactos
         }}
       >
         <RouterProvider router={router} future={{ v7_startTransition: true }} />

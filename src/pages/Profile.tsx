@@ -97,13 +97,13 @@ const Profile: React.FC = () => {
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Información del usuario */}
+          {/* Informacion del usuario */}
           <div className="lg:col-span-1">
             <div className="card p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gris-oscuro flex items-center">
                   <User className="w-6 h-6 mr-2 text-amarillo" />
-                  Información Personal
+                  Informacion Personal
                 </h2>
                 <button
                   onClick={() => setIsEditing(!isEditing)}
@@ -132,7 +132,7 @@ const Profile: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Teléfono
+                    Telefono
                   </label>
                   {isEditing ? (
                     <input
@@ -148,7 +148,7 @@ const Profile: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-600 mb-1">
-                    Dirección
+                    Direccion
                   </label>
                   {isEditing ? (
                     <textarea
@@ -199,7 +199,7 @@ const Profile: React.FC = () => {
               {pedidos.length === 0 ? (
                 <div className="text-center py-8">
                   <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                  <p className="text-gray-600">No tienes pedidos aún</p>
+                  <p className="text-gray-600">No tienes pedidos aun</p>
                 </div>
               ) : (
                 <div className="space-y-4">
