@@ -14,14 +14,14 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^4.29.1",
-    "@supabase/supabase-js": "^2.38.4",
     "@stripe/stripe-js": "^2.2.2",
+    "@supabase/supabase-js": "^2.38.4",
     "@vercel/node": "^3.0.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.294.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "lucide-react": "^0.294.0",
-    "clsx": "^2.0.0",
     "stripe": "^14.0.0"
   },
   "devDependencies": {
@@ -40,5 +40,3 @@
     "vite": "^4.5.0"
   }
 }
-
-

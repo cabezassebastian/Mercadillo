@@ -9,6 +9,7 @@ interface AuthContextType {
   isLoading: boolean
   error: string | null // Añadido para manejar errores de autenticación/carga de usuario
   updateUser: (userData: Partial<Usuario>) => Promise<void>
+  logout: () => Promise<void> // Añadimos la función de logout
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -147,12 +148,35 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isAdmin = user?.rol === 'admin'
 
+  const logout = async () => {
+    try {
+      const { error: signOutError } = await supabase.auth.signOut()
+      if (signOutError) {
+        // Captura específicamente AuthSessionMissingError si Supabase lo lanza
+        if (signOutError.message.includes('Auth session missing')) {
+          console.warn('AuthContext: Intento de cerrar sesión sin sesión activa en Supabase.')
+        } else {
+          console.error('AuthContext: Error al cerrar sesión en Supabase:', signOutError)
+          setError('Error al cerrar sesión. Inténtalo de nuevo.')
+        }
+        return
+      }
+      setUser(null)
+      setError(null)
+      // Clerk ya maneja su propio estado de desautenticación, no necesitamos llamar a su logout aquí
+    } catch (err) {
+      console.error('AuthContext: Error inesperado durante el logout:', err)
+      setError('Ocurrió un error inesperado al intentar cerrar sesión.')
+    }
+  }
+
   const value: AuthContextType = {
     user,
     isAdmin,
     isLoading,
     error, // Exponer el estado de error
     updateUser,
+    logout, // Exponer la función de logout
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
