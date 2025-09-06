@@ -13,7 +13,7 @@
     "verify": "node verify-setup.cjs"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^4.29.1",
+    "@clerk/clerk-react": "^5.46.1",
     "@stripe/stripe-js": "^2.2.2",
     "@supabase/supabase-js": "^2.38.4",
     "@vercel/node": "^3.0.0",
@@ -25,6 +25,7 @@
     "stripe": "^14.0.0"
   },
   "devDependencies": {
+    "@clerk/types": "^4.84.1",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@typescript-eslint/eslint-plugin": "^6.10.0",

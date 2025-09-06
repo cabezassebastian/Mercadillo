@@ -7,7 +7,7 @@ import ProductCard from '@/components/Product/ProductCard'
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null) // Nuevo estado para manejar errores
+  const [error, setError] = useState<string | null>(null) 
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -19,14 +19,14 @@ const Home: React.FC = () => {
         let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false }).limit(8)
 
         if (supabaseError) {
-          console.warn('Error inicial al obtener productos (posible columna created_at faltante): ', supabaseError.message)
-          // Si falla la ordenación por created_at, intentar sin ordenación
-          console.log('Intentando obtener productos sin ordenación por created_at...')
+          console.warn('Error al obtener productos por created_at:', supabaseError.message)
+          // Si falla la ordenacion por created_at, intentar sin ordenacion
+          console.log('Intentando obtener productos sin ordenacion por created_at...')
           const { data: fallbackData, error: fallbackError } = await productsQuery.limit(8)
 
           if (fallbackError) {
-            console.error('Error fetching products (fallback): ', fallbackError)
-            setError('No se pudo cargar la información, inténtalo más tarde')
+            console.error('Error al obtener productos (fallback): ', fallbackError)
+            setError('No se pudo cargar la informacion, intentalo mas tarde')
             return
           }
           data = fallbackData
@@ -35,7 +35,7 @@ const Home: React.FC = () => {
         setFeaturedProducts(data || [])
       } catch (err) {
         console.error('Error en fetchFeaturedProducts:', err)
-        setError('Ocurrió un error inesperado al cargar los productos.')
+        setError('Ocurrio un error inesperado al cargar los productos.')
       } finally {
         setIsLoading(false)
       }
@@ -47,7 +47,7 @@ const Home: React.FC = () => {
   const features = [
     {
       icon: <Truck className="w-8 h-8" />,
-      title: 'Envío Rápido',
+      title: 'Envio Rapido',
       description: 'Entrega en 24-48 horas en Lima'
     },
     {
@@ -58,29 +58,29 @@ const Home: React.FC = () => {
     {
       icon: <Headphones className="w-8 h-8" />,
       title: 'Soporte 24/7',
-      description: 'Atención al cliente siempre disponible'
+      description: 'Atencion al cliente siempre disponible'
     }
   ]
 
   return (
     <div className="min-h-screen">
-      {/* Hero Section */}
+      {/* Seccion Hero */}
       <section className="relative w-full h-96 overflow-hidden">
-        <img src="/banner.png" alt="Mercadillo Lima Perú Banner" className="w-full h-full object-cover" />
+        <img src="/banner.png" alt="Mercadillo Lima Peru Banner" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 flex items-center justify-center text-center p-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">
               Bienvenido a Mercadillo Lima
             </h1>
             <p className="text-xl md:text-2xl text-hueso mb-8">
-              Descubre los mejores productos de Lima, Perú. Calidad garantizada y envío rápido a todo el país.
+              Descubre los mejores productos de Lima, Peru. Calidad garantizada y envio rapido a todo el pais.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/catalogo"
                 className="btn-primary text-lg px-8 py-3 flex items-center justify-center space-x-2"
               >
-                <span>Ver Catálogo</span>
+                <span>Ver Catalogo</span>
                 <ArrowRight className="w-5 h-5" />
               </Link>
               <Link
@@ -94,7 +94,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Features Section */}
+      {/* Seccion de Caracteristicas */}
       <section className="py-16 bg-blanco">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -115,7 +115,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Featured Products */}
+      {/* Productos Destacados */}
       <section className="py-16 bg-hueso">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -123,7 +123,7 @@ const Home: React.FC = () => {
               Productos Destacados
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Descubre nuestra selección de productos más populares y mejor valorados
+              Descubre nuestra seleccion de productos mas populares y mejor valorados
             </p>
           </div>
 
@@ -135,7 +135,7 @@ const Home: React.FC = () => {
             <div className="flex flex-col items-center justify-center p-8 text-center bg-rojo-claro rounded-lg shadow-md max-w-md mx-auto">
               <p className="text-xl font-semibold text-rojo-oscuro mb-4">⚠️ Error al cargar productos</p>
               <p className="text-gray-700">{error}</p>
-              <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
+              <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexion a internet o intentalo de nuevo mas tarde.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -157,7 +157,7 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* Seccion de Testimonios */}
       <section className="py-16 bg-blanco">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -167,24 +167,24 @@ const Home: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
+            {[ // Datos de testimonios
               {
-                name: 'María González',
+                name: 'Maria Gonzalez',
                 location: 'Miraflores, Lima',
                 rating: 5,
-                comment: 'Excelente servicio y productos de calidad. El envío fue súper rápido.'
+                comment: 'Excelente servicio y productos de calidad. El envio fue super rapido.'
               },
               {
                 name: 'Carlos Mendoza',
                 location: 'San Isidro, Lima',
                 rating: 5,
-                comment: 'Muy buena experiencia de compra. Definitivamente volveré a comprar.'
+                comment: 'Muy buena experiencia de compra. Definitivamente volvere a comprar.'
               },
               {
-                name: 'Ana Rodríguez',
+                name: 'Ana Rodriguez',
                 location: 'La Molina, Lima',
                 rating: 5,
-                comment: 'Productos auténticos y precios justos. Recomendado al 100%.'
+                comment: 'Productos autenticos y precios justos. Recomendado al 100%.'
               }
             ].map((testimonial, index) => (
               <div key={index} className="card p-6">
