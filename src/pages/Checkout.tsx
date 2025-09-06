@@ -26,7 +26,7 @@ const Checkout: React.FC = () => {
     e.preventDefault()
     
     if (!formData.terminos) {
-      alert('Debes aceptar los términos y condiciones')
+      alert('Debes aceptar los terminos y condiciones')
       return
     }
 
@@ -41,7 +41,7 @@ const Checkout: React.FC = () => {
         })
       }
 
-      // Crear sesión de pago
+      // Crear sesion de pago
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -72,7 +72,7 @@ const Checkout: React.FC = () => {
 
     } catch (error) {
       console.error('Error en checkout:', error)
-      alert('Error al procesar el pago. Inténtalo de nuevo.')
+      alert('Error al procesar el pago. Intentalo de nuevo.')
     } finally {
       setIsProcessing(false)
     }
@@ -93,12 +93,12 @@ const Checkout: React.FC = () => {
         </h1>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Formulario de envío */}
+          {/* Formulario de envio */}
           <div className="space-y-6">
             <div className="card p-6">
               <h2 className="text-xl font-bold text-gris-oscuro mb-6 flex items-center">
                 <User className="w-6 h-6 mr-2 text-amarillo" />
-                Información de Envío
+                Informacion de Envio
               </h2>
 
               <div className="space-y-4">
@@ -128,7 +128,7 @@ const Checkout: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro mb-2">
-                    Teléfono
+                    Telefono
                   </label>
                   <input
                     type="tel"
@@ -143,7 +143,7 @@ const Checkout: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro mb-2">
-                    Dirección de Envío
+                    Direccion de Envio
                   </label>
                   <textarea
                     name="direccion"
@@ -152,17 +152,17 @@ const Checkout: React.FC = () => {
                     required
                     rows={3}
                     className="input-field"
-                    placeholder="Ingresa tu dirección completa"
+                    placeholder="Ingresa tu direccion completa"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Método de pago */}
+            {/* Metodo de pago */}
             <div className="card p-6">
               <h2 className="text-xl font-bold text-gris-oscuro mb-6 flex items-center">
                 <CreditCard className="w-6 h-6 mr-2 text-amarillo" />
-                Método de Pago
+                Metodo de Pago
               </h2>
 
               <div className="space-y-4">
@@ -177,7 +177,7 @@ const Checkout: React.FC = () => {
                     className="text-amarillo"
                   />
                   <label htmlFor="stripe" className="flex-1">
-                    <div className="font-medium text-gris-oscuro">Tarjeta de Crédito/Débito</div>
+                    <div className="font-medium text-gris-oscuro">Tarjeta de Credito/Debito</div>
                     <div className="text-sm text-gray-600">Visa, Mastercard, American Express</div>
                   </label>
                 </div>
@@ -200,7 +200,7 @@ const Checkout: React.FC = () => {
               </div>
             </div>
 
-            {/* Términos y condiciones */}
+            {/* Terminos y condiciones */}
             <div className="card p-6">
               <div className="flex items-start space-x-3">
                 <input
@@ -215,11 +215,11 @@ const Checkout: React.FC = () => {
                 <label htmlFor="terminos" className="text-sm text-gray-600">
                   Acepto los{' '}
                   <a href="/terminos" className="text-amarillo hover:underline">
-                    términos y condiciones
+                    terminos y condiciones
                   </a>{' '}
                   y la{' '}
                   <a href="/privacidad" className="text-amarillo hover:underline">
-                    política de privacidad
+                    politica de privacidad
                   </a>
                 </label>
               </div>

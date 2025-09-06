@@ -1,21 +1,20 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useUser, useSession, useAuth as useClerkAuthHook } from '@clerk/clerk-react'
-import { createClient, SupabaseClient } from '@supabase/supabase-js' // Importar createClient y SupabaseClient
-import { env } from '@/config/env' // Importar env para las variables de Supabase
-import { supabase, Usuario } from '@/lib/supabase' // Re-importar supabase
+import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { env } from '@/config/env'
+import { supabase, Usuario } from '@/lib/supabase'
 import { UserResource } from '@clerk/types';
 
 interface AuthContextType {
   clerkUser: UserResource | null | undefined;
-  supabaseUser: Usuario | null;
+  user: Usuario | null; // Renombrado de supabaseUser a user
   isAdmin: boolean;
   isLoading: boolean;
   isAuthenticated: boolean | undefined;
   error: string | null;
-  // Remover getSupabaseToken de la interfaz ya que el cliente autenticado se expone directamente
   updateUser: (userData: Partial<Usuario>) => Promise<void>;
   logout: () => Promise<void>;
-  supabaseAuthenticatedClient: SupabaseClient | null; // El cliente de Supabase con token de Clerk
+  supabaseAuthenticatedClient: SupabaseClient | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -30,15 +29,14 @@ export const useAuth = () => {
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user: clerkUser, isLoaded } = useUser()
-  const [supabaseUser, setSupabaseUser] = useState<Usuario | null>(null)
+  const [user, setUser] = useState<Usuario | null>(null) // Renombrado de supabaseUser a user
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { session, isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
   const { getToken } = useClerkAuthHook();
 
-  const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null); // Nuevo estado
+  const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null);
 
-  // Funcion para obtener el token de Clerk para Supabase
   const getClerkTokenForSupabase = useCallback(async (): Promise<string | null> => {
     if (!session) {
       console.warn('AuthContext: No hay sesion de Clerk para obtener el token de Supabase.');
@@ -53,7 +51,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [session, getToken]);
 
-  // Efecto para crear/actualizar el cliente de Supabase con el token de Clerk
   useEffect(() => {
     const initializeSupabaseClient = async () => {
       if (!isClerkLoaded) return;
@@ -77,17 +74,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setSupabaseAuthenticatedClient(null);
         }
       } else {
-        // Si no esta autenticado, el cliente autenticado es null
         setSupabaseAuthenticatedClient(null);
       }
     };
 
     initializeSupabaseClient();
-  }, [isClerkLoaded, isAuthenticated, session, getClerkTokenForSupabase, env.SUPABASE_URL, env.SUPABASE_ANON_KEY]); // Dependencias para re-inicializar el cliente
+  }, [isClerkLoaded, isAuthenticated, session, getClerkTokenForSupabase, env.SUPABASE_URL, env.SUPABASE_ANON_KEY]);
 
   useEffect(() => {
     const fetchUser = async () => {
-      // Asegurarse de que el cliente autenticado y clerkUser esten disponibles
       if (!isLoaded || !supabaseAuthenticatedClient) return;
 
       setIsLoading(true)
@@ -95,14 +90,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (!clerkUser || !clerkUser.id) {
         console.warn('AuthContext: Usuario de Clerk no autenticado o ID no disponible.');
-        setSupabaseUser(null)
+        setUser(null) // Usar user
         setError('Usuario no autenticado o ID no disponible.');
         setIsLoading(false)
         return
       }
 
       try {
-        // Busca el usuario en Supabase usando el cliente autenticado
         const { data: existingUser, error: supabaseFetchError } = await supabaseAuthenticatedClient
           .from('usuarios')
           .select('id, email, nombre, apellido, rol, created_at')
@@ -130,7 +124,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return
           }
 
-          setSupabaseUser(createdUser)
+          setUser(createdUser) // Usar user
         } else if (supabaseFetchError) {
           console.error('Error fetching user:', supabaseFetchError)
           if (supabaseFetchError.code === '401') {
@@ -142,7 +136,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           return
         } else {
-          setSupabaseUser(existingUser)
+          setUser(existingUser) // Usar user
         }
       } catch (err) {
         console.error('Error inesperado en fetchUser:', err)
@@ -153,16 +147,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     fetchUser()
-  }, [clerkUser, isLoaded, supabaseAuthenticatedClient]) // Anadir supabaseAuthenticatedClient a las dependencias
+  }, [clerkUser, isLoaded, supabaseAuthenticatedClient])
 
   const updateUser = async (userData: Partial<Usuario>) => {
-    if (!supabaseUser || !supabaseAuthenticatedClient) return
+    if (!user || !supabaseAuthenticatedClient) return // Usar user
 
     try {
       const { data, error: supabaseUpdateError } = await supabaseAuthenticatedClient
         .from('usuarios')
         .update(userData)
-        .eq('id', supabaseUser.id)
+        .eq('id', user.id) // Usar user.id
         .select()
         .single()
 
@@ -171,15 +165,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return
       }
 
-      setSupabaseUser(data)
+      setUser(data) // Usar user
     } catch (err) {
       console.error('Error inesperado en updateUser:', err)
     }
   }
 
-  // Remover el useEffect de syncSupabaseSession ya que el cliente autenticado se inicializa de forma declarativa
-  // La logica de logout se mantiene igual para limpiar la sesion de Supabase
-  const isAdmin = supabaseUser?.rol === 'admin'
+  const isAdmin = user?.rol === 'admin' // Usar user
 
   const logout = async () => {
     try {
@@ -193,7 +185,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
         return
       }
-      setSupabaseUser(null)
+      setUser(null) // Usar user
       setError(null)
     } catch (err) {
       console.error('AuthContext: Error inesperado durante el logout:', err)
@@ -203,12 +195,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const value: AuthContextType = {
     clerkUser,
-    supabaseUser,
+    user, // Exponer user
     isAdmin,
     isLoading,
     isAuthenticated,
     error,
-    // Ya no se expone getSupabaseToken directamente
     updateUser,
     logout,
     supabaseAuthenticatedClient,
