@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/" }
+  ],
   "functions": {
     "api/checkout.ts": {
       "maxDuration": 30
