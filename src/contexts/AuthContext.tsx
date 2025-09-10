@@ -1,9 +1,23 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useUser, useSession, useAuth as useClerkAuthHook } from '@clerk/clerk-react'
 import { createClient, SupabaseClient } from '@supabase/supabase-js'
-import { env } from '@/config/env'
-import { supabase, Usuario } from '@/lib/supabase'
-import { UserResource } from '@clerk/types';
+import { UserResource } from '@clerk/types'
+
+// Variables de entorno de Vite
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+// Interface para Usuario (movida desde supabase.ts para evitar dependencia circular)
+export interface Usuario {
+  id: string
+  email: string
+  nombre: string
+  apellido: string
+  telefono?: string
+  direccion?: string
+  rol: 'cliente' | 'admin'
+  created_at: string
+}
 
 interface AuthContextType {
   clerkUser: UserResource | null | undefined;
@@ -60,8 +74,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         if (accessToken) {
           const authenticatedSupabase = createClient(
-            env.SUPABASE_URL,
-            env.SUPABASE_ANON_KEY,
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY,
             {
               global: {
                 headers: { Authorization: `Bearer ${accessToken}` },
@@ -79,7 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
 
     initializeSupabaseClient();
-  }, [isClerkLoaded, isAuthenticated, session, getClerkTokenForSupabase, env.SUPABASE_URL, env.SUPABASE_ANON_KEY]);
+  }, [isClerkLoaded, isAuthenticated, session, getClerkTokenForSupabase]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -174,23 +188,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.rol === 'admin' // Usar user
 
   const logout = async () => {
-    try {
-      const { error: signOutError } = await supabase.auth.signOut()
-      if (signOutError) {
-        if (signOutError.message.includes('Auth session missing')) {
-          console.warn('AuthContext: Intento de cerrar sesion sin sesion activa en Supabase.')
-        } else {
-          console.error('AuthContext: Error al cerrar sesion en Supabase:', signOutError)
-          setError('Error al cerrar sesion. Intentalo de nuevo.')
-        }
-        return
-      }
-      setUser(null) // Usar user
-      setError(null)
-    } catch (err) {
-      console.error('AuthContext: Error inesperado durante el logout:', err)
-      setError('Ocurrio un error inesperado al intentar cerrar sesion.')
-    }
+    // Clerk maneja el logout automaticamente, solo limpiamos el estado local
+    setUser(null)
+    setError(null)
+    setSupabaseAuthenticatedClient(null)
   }
 
   const value: AuthContextType = {

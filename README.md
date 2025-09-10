@@ -74,14 +74,14 @@ Configura las siguientes variables:
 
 ```env
 # Clerk Authentication
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_your_clerk_publishable_key_here
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsubWVyY2FkaWxsby5hcHAk
 
 # Supabase
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 
 # Stripe
-VITE_STRIPE_PUBLISHABLE_KEY=pk_test_your_stripe_publishable_key_here
+VITE_STRIPE_PUBLISHABLE_KEY=pk_live_xxxxxxxxxx
 
 # Cloudinary
 VITE_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
@@ -184,16 +184,17 @@ pnpm lint
 ### Variables de Entorno para Produccion
 ```env
 # Clerk
-VITE_CLERK_PUBLISHABLE_KEY=pk_live_...
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsubWVyY2FkaWxsby5hcHAk
+VITE_CLERK_SECRET_KEY=sk_live_eOa7rnDzNSWzhuOR7qXvGKnbFt2LlljzkXN1wDLgQl
 
 # Supabase
 VITE_SUPABASE_URL=https://your-project.supabase.co
 VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # Stripe
-VITE_STRIPE_PUBLISHABLE_KEY=pk_live_...
-STRIPE_SECRET_KEY=sk_live_...
-STRIPE_WEBHOOK_SECRET=whsec_...
+VITE_STRIPE_PUBLISHABLE_KEY=pk_live_xxxxxxxxxx
+STRIPE_SECRET_KEY=sk_live_xxxxxxxxxx
+STRIPE_WEBHOOK_SECRET=whsec_your_stripe_webhook_secret_here
 
 # Cloudinary
 VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name

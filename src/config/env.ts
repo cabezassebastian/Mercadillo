@@ -1,4 +1,6 @@
-// Configuración de variables de entorno con validación
+// Configuracion de variables de entorno para Vite
+// En produccion: usa claves live (pk_live, sk_live) en Vercel
+
 export const env = {
   CLERK_PUBLISHABLE_KEY: import.meta.env.VITE_CLERK_PUBLISHABLE_KEY,
   SUPABASE_URL: import.meta.env.VITE_SUPABASE_URL,
@@ -24,5 +26,8 @@ for (const envVar of requiredEnvVars) {
     throw new Error(`Missing required environment variable: VITE_${envVar}`)
   }
 }
+
+// Detectar si estamos en modo desarrollo basado en las claves
+export const isDevelopment = import.meta.env.DEV
 
 export default env

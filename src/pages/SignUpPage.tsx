@@ -1,7 +1,6 @@
 import { SignUp } from "@clerk/clerk-react";
-import React from "react";
 
-const SignUpPage: React.FC = () => {
+const SignUpPage = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 p-4">
       <div className="bg-white p-8 rounded-2xl shadow-lg w-full max-w-md text-center">
@@ -10,7 +9,7 @@ const SignUpPage: React.FC = () => {
           path="/sign-up" // Ruta de autenticacion
           routing="path" // Usa el enrutamiento basado en la ruta
           signInUrl="/sign-in" // URL para la pagina de inicio de sesion
-          redirectUrl="/" // URL a la que redirigir despues de registrarse
+          fallbackRedirectUrl="/" // URL a la que redirigir despues de registrarse
           appearance={{
             elements: {
               card: "shadow-none w-full p-0", // Deshabilita estilos de tarjeta predeterminados de Clerk

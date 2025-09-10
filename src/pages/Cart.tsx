@@ -1,9 +1,8 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 
-const Cart: React.FC = () => {
+const Cart = () => {
   const { 
     items, 
     updateQuantity, 
