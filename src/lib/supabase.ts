@@ -1,7 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
-import { env } from '@/config/env'
 
-export const supabase = createClient(env.SUPABASE_URL, env.SUPABASE_ANON_KEY)
+// Cliente Supabase para operaciones publicas (sin autenticacion)
+export const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY
+)
 
 export interface Producto {
   id: string
@@ -35,17 +38,6 @@ export interface PedidoItem {
   precio: number
   nombre: string
   imagen: string
-}
-
-export interface Usuario {
-  id: string
-  email: string
-  nombre: string
-  apellido: string
-  telefono?: string
-  direccion?: string
-  rol: 'cliente' | 'admin'
-  created_at: string
 }
 
 

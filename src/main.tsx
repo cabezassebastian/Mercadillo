@@ -5,8 +5,6 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
 import './index.css'
 
-import { env } from '@/config/env'
-
 // Importaciones de paginas y rutas protegidas
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
@@ -68,11 +66,21 @@ const router = createBrowserRouter([
   },
 ]);
 
+// Configuracion de Clerk para desarrollo y produccion
+const clerkPubKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || ""
+
+if (!clerkPubKey) {
+  throw new Error('VITE_CLERK_PUBLISHABLE_KEY is required')
+}
+
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <ErrorBoundary> {/* Envuelve toda la aplicacion con ErrorBoundary */}
+    <ErrorBoundary>
       <ClerkProvider
-        publishableKey={env.CLERK_PUBLISHABLE_KEY}
+        publishableKey={clerkPubKey}
+        fallbackRedirectUrl={
+          import.meta.env.DEV ? "http://localhost:3000" : "https://mercadillo.vercel.app"
+        }
         appearance={{
           elements: {
             rootBox: "",

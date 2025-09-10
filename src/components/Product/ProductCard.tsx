@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import { ShoppingCart, Eye } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
@@ -8,7 +7,7 @@ interface ProductCardProps {
   producto: Producto
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ producto }) => {
+const ProductCard = ({ producto }: ProductCardProps) => {
   const { addToCart } = useCart()
 
   const handleAddToCart = (e: React.MouseEvent) => {

@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes, Route, Link, useLocation } from 'react-router-dom'
 import { 
   Package, 
@@ -11,7 +10,7 @@ import AdminOrders from '../components/Admin/AdminOrders'
 import AdminUsers from '../components/Admin/AdminUsers'
 import AdminDashboard from '../components/Admin/AdminDashboard'
 
-const Admin: React.FC = () => {
+const Admin = () => {
   const location = useLocation()
 
   const menuItems = [
