@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Users, UserCheck, UserX, Mail, Calendar } from 'lucide-react'
-import { supabase, Usuario } from '@/lib/supabase'
+import { supabase } from '@/lib/supabase'
+import { Usuario } from '@/contexts/AuthContext'
 
 const AdminUsers: React.FC = () => {
   const [usuarios, setUsuarios] = useState<Usuario[]>([])

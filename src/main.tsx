@@ -78,9 +78,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     <ErrorBoundary>
       <ClerkProvider
         publishableKey={clerkPubKey}
-        fallbackRedirectUrl={
-          import.meta.env.DEV ? "http://localhost:3000" : "https://mercadillo.vercel.app"
-        }
+        signInFallbackRedirectUrl="/"
+        signUpFallbackRedirectUrl="/"
         appearance={{
           elements: {
             rootBox: "",
