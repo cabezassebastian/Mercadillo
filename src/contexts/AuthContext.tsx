@@ -1,11 +1,10 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { useUser, useSession, useAuth as useClerkAuthHook } from '@clerk/clerk-react'
-import { createClient, SupabaseClient } from '@supabase/supabase-js'
+import { SupabaseClient } from '@supabase/supabase-js'
 import { UserResource } from '@clerk/types'
+import { supabase } from "@/lib/supabaseClient"; // Importacion del cliente Supabase centralizado
 
-// Variables de entorno de Vite
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Variables de entorno de Vite - ELIMINADAS
 
 // Interface para Usuario (movida desde supabase.ts para evitar dependencia circular)
 export interface Usuario {
@@ -73,21 +72,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const accessToken = await getClerkTokenForSupabase();
 
         if (accessToken) {
-          const authenticatedSupabase = createClient(
-            SUPABASE_URL,
-            SUPABASE_ANON_KEY,
-            {
-              global: {
-                headers: { Authorization: `Bearer ${accessToken}` },
-              },
+          try {
+            // Establecer la sesion para la instancia global de Supabase
+            const { error: setSessionError } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: '' });
+
+            if (setSessionError) {
+              console.error('AuthContext: Error al establecer la sesion de Supabase con el token de Clerk:', setSessionError);
+              setSupabaseAuthenticatedClient(null);
+            } else {
+              setSupabaseAuthenticatedClient(supabase); // Usar la instancia global de supabase
             }
-          );
-          setSupabaseAuthenticatedClient(authenticatedSupabase);
+          } catch (err) {
+            console.error('AuthContext: Error inesperado al establecer la sesion de Supabase:', err);
+            setSupabaseAuthenticatedClient(null);
+          }
         } else {
           console.warn('AuthContext: No se pudo obtener el accessToken de Clerk para Supabase. Cliente Supabase autenticado sera null.');
           setSupabaseAuthenticatedClient(null);
         }
       } else {
+        // Si no esta autenticado, cerrar sesion en Supabase y limpiar el cliente autenticado
+        try {
+          const { error: signOutError } = await supabase.auth.signOut();
+          if (signOutError) {
+            console.error('AuthContext: Error al cerrar la sesion de Supabase:', signOutError);
+          }
+        } catch (err) {
+          console.error('AuthContext: Error inesperado al cerrar la sesion de Supabase:', err);
+        }
         setSupabaseAuthenticatedClient(null);
       }
     };
@@ -188,7 +200,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const isAdmin = user?.rol === 'admin' // Usar user
 
   const logout = async () => {
-    // Clerk maneja el logout automaticamente, solo limpiamos el estado local
+    // Clerk maneja el logout automaticamente, pero tambien necesitamos cerrar la sesion de Supabase
+    try {
+      await supabase.auth.signOut();
+    } catch (err) {
+      console.error('AuthContext: Error al cerrar la sesion de Supabase durante el logout:', err);
+    }
     setUser(null)
     setError(null)
     setSupabaseAuthenticatedClient(null)
