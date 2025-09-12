@@ -55,11 +55,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isClerkLoaded) {
       if (isAuthenticated) {
         setSupabaseAuthenticatedClient(globalSupabase); // Si esta autenticado en Clerk, usa el cliente global autenticado por AuthSync
+        console.log("AuthContext: Cliente Supabase conectado.");
       } else {
         setSupabaseAuthenticatedClient(null); // Si no esta autenticado, no hay cliente autenticado
+        console.log("AuthContext: Cliente Supabase desconectado.");
       }
     } else {
       setSupabaseAuthenticatedClient(null); // Mientras Clerk carga, no hay cliente autenticado
+      console.log("AuthContext: Cliente Supabase desconectado (Clerk no cargado).");
     }
   }, [isClerkLoaded, isAuthenticated]);
 
