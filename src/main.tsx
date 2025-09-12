@@ -15,6 +15,7 @@ import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
+import AuthSync from './components/AuthSync'; // Importa el nuevo componente AuthSync
 
 // Paginas de autenticacion de Clerk
 import SignInPage from './pages/SignInPage'
@@ -122,6 +123,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           }
         }}
       >
+        <AuthSync /> {/* Renderiza AuthSync aqui */}
         <RouterProvider router={router} future={{ v7_startTransition: true }} />
       </ClerkProvider>
     </ErrorBoundary>

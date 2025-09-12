@@ -44,66 +44,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { session, isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
-  const { getToken } = useClerkAuthHook();
+  const { getToken: getClerkToken } = useClerkAuthHook(); // Renombrar para evitar conflicto si se mantiene getClerkTokenForSupabase en algun lugar.
 
   const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null);
 
-  const getClerkTokenForSupabase = useCallback(async (): Promise<string | null> => {
-    if (!session) {
-      console.warn('AuthContext: No hay sesion de Clerk para obtener el token de Supabase.');
-      return null;
-    }
-    try {
-      const token = await getToken({ template: "supabase" });
-      return token;
-    } catch (err) {
-      console.error('AuthContext: Error al obtener el token de Clerk para Supabase:', err);
-      return null;
-    }
-  }, [session, getToken]);
+  // Se elimina getClerkTokenForSupabase y el useEffect de initializeSupabaseClient
+  // porque AuthSync se encarga de la sincronizacion de la sesion de Supabase.
 
   useEffect(() => {
-    const initializeSupabaseClient = async () => {
-      if (!isClerkLoaded) return;
-
-      if (isAuthenticated && session) {
-        const accessToken = await getClerkTokenForSupabase();
-
-        if (accessToken) {
-          try {
-            // Usar la instancia global de Supabase y establecer su sesion
-            const { error: setSessionError } = await globalSupabase.auth.setSession({ access_token: accessToken, refresh_token: '' });
-
-            if (setSessionError) {
-              console.error('AuthContext: Error al establecer la sesion de Supabase con el token de Clerk:', setSessionError);
-              setSupabaseAuthenticatedClient(null);
-            } else {
-              setSupabaseAuthenticatedClient(globalSupabase); // Usar la instancia global de supabase
-            }
-          } catch (err) {
-            console.error('AuthContext: Error inesperado al establecer la sesion de Supabase:', err);
-            setSupabaseAuthenticatedClient(null);
-          }
-        } else {
-          console.warn('AuthContext: No se pudo obtener el accessToken de Clerk para Supabase. Cliente Supabase autenticado sera null.');
-          setSupabaseAuthenticatedClient(null);
-        }
+    // Establecer supabaseAuthenticatedClient basado en el estado de autenticacion de Clerk
+    if (isClerkLoaded) {
+      if (isAuthenticated) {
+        setSupabaseAuthenticatedClient(globalSupabase); // Si esta autenticado en Clerk, usa el cliente global autenticado por AuthSync
       } else {
-        // Si no esta autenticado, cerrar sesion en Supabase y limpiar el cliente autenticado
-        try {
-          const { error: signOutError } = await globalSupabase.auth.signOut();
-          if (signOutError) {
-            console.error('AuthContext: Error al cerrar la sesion de Supabase:', signOutError);
-          }
-        } catch (err) {
-          console.error('AuthContext: Error inesperado al cerrar la sesion de Supabase:', err);
-        }
-        setSupabaseAuthenticatedClient(null);
+        setSupabaseAuthenticatedClient(null); // Si no esta autenticado, no hay cliente autenticado
       }
-    };
-
-    initializeSupabaseClient();
-  }, [isClerkLoaded, isAuthenticated, session, getClerkTokenForSupabase]);
+    } else {
+      setSupabaseAuthenticatedClient(null); // Mientras Clerk carga, no hay cliente autenticado
+    }
+  }, [isClerkLoaded, isAuthenticated]);
 
   useEffect(() => {
     const fetchUser = async () => {
