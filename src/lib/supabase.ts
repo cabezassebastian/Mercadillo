@@ -1,10 +1,8 @@
-import { createClient } from '@supabase/supabase-js'
+import { supabase } from "./supabaseClient";
 
-// Cliente Supabase para operaciones publicas (sin autenticacion)
-export const supabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY
-)
+// El cliente de Supabase ya está inicializado en supabaseClient.ts
+// Se re-exporta para compatibilidad con módulos que aún lo importen directamente.
+export { supabase };
 
 export interface Producto {
   id: string
