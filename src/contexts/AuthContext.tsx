@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useUser, useSession, useAuth as useClerkAuthHook } from '@clerk/clerk-react'
 import { SupabaseClient } from '@supabase/supabase-js' // Solo importamos el tipo SupabaseClient
 import { UserResource } from '@clerk/types'
@@ -43,8 +43,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [user, setUser] = useState<Usuario | null>(null) // Renombrado de supabaseUser a user
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const { session, isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
-  const { getToken: getClerkToken } = useClerkAuthHook(); // Renombrar para evitar conflicto si se mantiene getClerkTokenForSupabase en algun lugar.
+  const { isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
+  // Se eliminan session y getClerkToken porque ya no se usan directamente aqui
 
   const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null);
 
@@ -52,7 +52,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // porque AuthSync se encarga de la sincronizacion de la sesion de Supabase.
 
   useEffect(() => {
-    // Establecer supabaseAuthenticatedClient basado en el estado de autenticacion de Clerk
+    // Establecer supabaseAuthenticatedClient basado en el estado de autentacion de Clerk
     if (isClerkLoaded) {
       if (isAuthenticated) {
         setSupabaseAuthenticatedClient(globalSupabase); // Si esta autenticado en Clerk, usa el cliente global autenticado por AuthSync
