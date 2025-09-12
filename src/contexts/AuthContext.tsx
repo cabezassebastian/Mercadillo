@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
-import { useUser, useSession, useAuth as useClerkAuthHook } from '@clerk/clerk-react'
+import { useUser, useSession } from '@clerk/clerk-react'
 import { SupabaseClient } from '@supabase/supabase-js' // Solo importamos el tipo SupabaseClient
 import { UserResource } from '@clerk/types'
 import { supabase as globalSupabase } from "@/lib/supabaseClient"; // Cliente Supabase centralizado
@@ -44,7 +44,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const { isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
-  // Se eliminan session y getClerkToken porque ya no se usan directamente aqui
 
   const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null);
 
