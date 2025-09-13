@@ -22,7 +22,6 @@ const AuthSync: React.FC = () => {
 
           if (clerkToken) {
             console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}, Inicio: ${clerkToken.substring(0, 20)}, Fin: ${clerkToken.substring(clerkToken.length - 20)}`);
-            console.log("AuthSync: Token COMPLETO para depuracion (REMOVER DESPUES):", clerkToken); // TEMPORARY for debugging
             // Si hay token, establecer la sesion en Supabase
             const { error: setSessionError } = await globalSupabase.auth.setSession({
               access_token: clerkToken,
