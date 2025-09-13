@@ -1,0 +1,13 @@
+[auth]
+# JWT configuration for Clerk integration
+jwt_expiry = 3600
+jwt_secret = "super-secret-jwt-token-with-at-least-32-characters-long"
+
+[auth.external.clerk]
+enabled = true
+client_id = "clerk"
+secret = "your-clerk-secret"
+url = "https://api.clerk.com"
+
+[functions.clerk-jwt-transform]
+verify_jwt = false
