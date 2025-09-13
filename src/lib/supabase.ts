@@ -1,8 +1,22 @@
 import { supabase } from "./supabaseClient";
+import { createClient } from "@supabase/supabase-js";
 
 // El cliente de Supabase ya está inicializado en supabaseClient.ts
 // Se re-exporta para compatibilidad con módulos que aún lo importen directamente.
 export { supabase };
+
+// Cliente administrativo para operaciones que requieren privilegios elevados
+// Solo usar cuando sea absolutamente necesario
+export const supabaseAdmin = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      autoRefreshToken: false,
+      persistSession: false
+    }
+  }
+);
 
 export interface Producto {
   id: string
