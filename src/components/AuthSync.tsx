@@ -7,7 +7,13 @@ const AuthSync: React.FC = () => {
 
   useEffect(() => {
     const syncClerkWithSupabase = async () => {
-      if (!isLoaded) return; // Esperar a que Clerk cargue
+      console.log("AuthSync: Iniciando sincronizacion.");
+      console.log(`AuthSync: Clerk isLoaded: ${isLoaded}, isSignedIn: ${isSignedIn}`);
+
+      if (!isLoaded) {
+        console.log("AuthSync: Clerk aún no está listo. Sincronizacion pospuesta.");
+        return; // Esperar a que Clerk cargue
+      }
 
       if (isSignedIn) {
         console.log("AuthSync: Usuario autenticado en Clerk. Intentando obtener JWT para Supabase.");
@@ -15,6 +21,8 @@ const AuthSync: React.FC = () => {
           const clerkToken = await getToken({ template: "supabase" });
 
           if (clerkToken) {
+            console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}, Inicio: ${clerkToken.substring(0, 20)}, Fin: ${clerkToken.substring(clerkToken.length - 20)}`);
+            console.log("AuthSync: Token COMPLETO para depuracion (REMOVER DESPUES):", clerkToken); // TEMPORARY for debugging
             // Si hay token, establecer la sesion en Supabase
             const { error: setSessionError } = await globalSupabase.auth.setSession({
               access_token: clerkToken,
@@ -27,7 +35,7 @@ const AuthSync: React.FC = () => {
               console.log("AuthSync: Sesion de Supabase establecida exitosamente con token de Clerk.");
             }
           } else {
-            console.warn("AuthSync: No se pudo obtener el token de Clerk para Supabase.");
+            console.warn("AuthSync: Clerk no devolvió token. Cerrando sesion de Supabase."); // Restored original message
             await globalSupabase.auth.signOut(); // Asegurarse de cerrar sesion si no hay token
           }
         } catch (err) {
