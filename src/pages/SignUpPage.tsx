@@ -19,12 +19,13 @@ const SignUpPage = () => {
             </p>
           </div>
           
-          <SignUp
-            path="/sign-up"
-            routing="path"
-            signInUrl="/sign-in"
-            fallbackRedirectUrl="/"
-            appearance={{
+          <div className="clerk-continue-wrapper">
+            <SignUp
+              path="/sign-up"
+              routing="path"
+              signInUrl="/sign-in"
+              fallbackRedirectUrl="/"
+              appearance={{
               elements: {
                 card: "shadow-none bg-transparent p-0 w-full",
                 rootBox: "w-full",
@@ -34,7 +35,7 @@ const SignUpPage = () => {
                 socialButtonsBlockButtonText: "font-medium text-gris-oscuro dark:text-gray-200",
                 dividerLine: "bg-gray-300 dark:bg-gray-600 my-6",
                 dividerText: "text-gris-claro dark:text-gray-400 text-sm px-4 bg-white dark:bg-gray-800",
-                formButtonPrimary: "!bg-gray-800 hover:!bg-gray-700 !text-gray-100 !border !border-gray-600 font-semibold rounded-lg py-3 px-4 w-full transition-colors duration-200 no-underline hover:no-underline focus:no-underline active:no-underline !outline-none !shadow-none",
+                formButtonPrimary: "inline-flex items-center justify-center px-6 py-2 rounded-lg font-semibold transition-colors duration-200",
                 formFieldInput: "border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
                 formFieldLabel: "text-gris-oscuro dark:text-gray-200 font-medium mb-2 block text-left",
                 footerActionLink: "text-amarillo hover:text-dorado font-medium transition-colors duration-200",
@@ -42,11 +43,11 @@ const SignUpPage = () => {
                 closeButton: "hidden",
               },
               variables: {
-                colorPrimary: "#1f2937",
-                colorText: "#f3f4f6",
-                colorBackground: "#1f2937",
-                colorInputBackground: "#374151",
-                colorInputText: "#f3f4f6",
+                colorPrimary: "#fbbf24",
+                colorText: "#111827",
+                colorBackground: "#ffffff",
+                colorInputBackground: "#ffffff",
+                colorInputText: "#111827",
                 colorNeutral: "#6b7280",
                 borderRadius: "0.75rem",
                 fontFamily: "Inter, sans-serif",
@@ -55,12 +56,11 @@ const SignUpPage = () => {
               layout: {
                 unsafe_disableDevelopmentModeWarnings: true,
               }
-            }}
-          />
+              }}
+            />
+          </div>
         </div>
       </div>
     </div>
   );
-};
-
-export default SignUpPage;
+};export default SignUpPage;

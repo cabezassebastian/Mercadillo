@@ -61,6 +61,19 @@
     box-shadow: none !important;
     outline: none !important;
   }
+  
+  /* Fix Continue button underline in dark mode (Tailwind only) */
+  .clerk-continue-wrapper :where(a, button) {
+    @apply no-underline hover:no-underline focus:no-underline active:no-underline;
+    @apply focus:outline-none focus:ring-0 appearance-none shadow-none;
+    @apply before:content-none after:content-none;
+  }
+  
+  .clerk-continue-wrapper :where(a, button) {
+    @apply bg-yellow-400 text-gray-900 font-semibold;
+    @apply dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700;
+    @apply dark:focus:ring-yellow-400;
+  }
 }
 
 @layer utilities {
