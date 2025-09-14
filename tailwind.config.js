@@ -10,7 +10,7 @@ export default {
         amarillo: '#FFD700',
         dorado: '#b8860b',
         blanco: '#ffffff',
-        hueso: '#f5f1e9',
+        hueso: '#f8f9fa',
         'gris-oscuro': '#333333',
         'gris-claro': '#aaa',
       },
