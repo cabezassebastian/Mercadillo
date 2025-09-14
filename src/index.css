@@ -46,11 +46,15 @@
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:focus:ring-yellow-500;
   }
   
-  /* Eliminar subrayado en botones de Clerk */
+  /* SOLUCIÓN DEFINITIVA: Eliminar subrayado negro del botón Continue */
   .cl-formButtonPrimary,
   .cl-formButtonPrimary *,
   button[type="submit"],
-  button[type="submit"] * {
+  button[type="submit"] *,
+  .clerk-continue-wrapper button,
+  .clerk-continue-wrapper button *,
+  .clerk-continue-wrapper a,
+  .clerk-continue-wrapper a * {
     text-decoration: none !important;
     text-decoration-line: none !important;
     text-decoration-color: transparent !important;
@@ -60,6 +64,38 @@
     border-bottom: none !important;
     box-shadow: none !important;
     outline: none !important;
+    background-image: none !important;
+    background: transparent !important;
+  }
+  
+  /* Forzar botón Continue a ser completamente amarillo en modo claro */
+  .clerk-continue-wrapper button[type="submit"],
+  .clerk-continue-wrapper .cl-formButtonPrimary {
+    background-color: #FFD700 !important;
+    background: #FFD700 !important;
+    color: #333333 !important;
+    border: none !important;
+    text-decoration: none !important;
+  }
+  
+  /* Forzar botón Continue a ser completamente oscuro en modo dark */
+  .dark .clerk-continue-wrapper button[type="submit"],
+  .dark .clerk-continue-wrapper .cl-formButtonPrimary {
+    background-color: #1f2937 !important;
+    background: #1f2937 !important;
+    color: #f3f4f6 !important;
+    border: 1px solid #374151 !important;
+    text-decoration: none !important;
+  }
+  
+  /* Eliminar cualquier elemento pseudo que cause el bloque negro */
+  .clerk-continue-wrapper button::before,
+  .clerk-continue-wrapper button::after,
+  .clerk-continue-wrapper a::before,
+  .clerk-continue-wrapper a::after {
+    display: none !important;
+    content: none !important;
+    background: none !important;
   }
   
   /* Fix Continue button underline in dark mode (Tailwind only) */
