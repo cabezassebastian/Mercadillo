@@ -41,6 +41,41 @@ const ClerkDarkMode = () => {
         }
       })
 
+      // Forzar TODOS los divs dentro de modales/formularios de Clerk
+      const clerkContainers = document.querySelectorAll('[class*="cl-"], [data-clerk], [role="dialog"], .cl-signIn, .cl-signUp')
+      clerkContainers.forEach((container: Element) => {
+        // Buscar TODOS los divs dentro de cada contenedor
+        const allDivs = container.querySelectorAll('div')
+        allDivs.forEach((div: Element) => {
+          const htmlDiv = div as HTMLElement
+          if (htmlDiv.style) {
+            // Verificar si es un botón primario (mantener dorado)
+            const isPrimaryButton = htmlDiv.classList.contains('cl-formButtonPrimary') ||
+                                   htmlDiv.querySelector('button[type="submit"]') ||
+                                   htmlDiv.textContent?.includes('Continue') ||
+                                   htmlDiv.textContent?.includes('Continuar')
+            
+            if (!isPrimaryButton) {
+              htmlDiv.style.setProperty('background-color', '#1f2937', 'important')
+              htmlDiv.style.setProperty('background', '#1f2937', 'important')
+              htmlDiv.style.setProperty('color', '#f3f4f6', 'important')
+              htmlDiv.style.setProperty('border-color', '#374151', 'important')
+            }
+          }
+        })
+
+        // También forzar otros elementos contenedores
+        const allElements = container.querySelectorAll('section, article, header, footer, main, aside, nav')
+        allElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          if (htmlElement.style) {
+            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+            htmlElement.style.setProperty('background', '#1f2937', 'important')
+            htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+          }
+        })
+      })
+
       // Forzar elementos específicos conocidos por ser problemáticos
       const problematicSelectors = [
         '.cl-card',
@@ -52,7 +87,18 @@ const ClerkDarkMode = () => {
         '.cl-signUp-footer',
         '.cl-userProfile-content',
         '.cl-userButtonPopoverCard',
-        '[class*="cl-internal-"]'
+        '[class*="cl-internal-"]',
+        '.cl-signIn',
+        '.cl-signUp',
+        '.cl-signIn *',
+        '.cl-signUp *',
+        '.cl-main',
+        '.cl-header',
+        '.cl-formContainer',
+        '.cl-form',
+        '.cl-socialButtonsContainer',
+        '.cl-divider',
+        '.cl-alternativeMethodsBlockButton'
       ]
 
       problematicSelectors.forEach(selector => {
@@ -121,6 +167,67 @@ const ClerkDarkMode = () => {
         })
       })
 
+      // FORZAR ULTRA-AGRESIVO: Todos los elementos dentro de sign-in/sign-up
+      const signInUpModals = document.querySelectorAll('.cl-signIn, .cl-signUp, [role="dialog"]')
+      signInUpModals.forEach((modal: Element) => {
+        // Forzar el modal principal
+        const htmlModal = modal as HTMLElement
+        if (htmlModal.style) {
+          htmlModal.style.setProperty('background-color', '#1f2937', 'important')
+          htmlModal.style.setProperty('background', '#1f2937', 'important')
+        }
+
+        // Forzar ABSOLUTAMENTE TODOS los elementos hijos
+        const allChildren = modal.querySelectorAll('*')
+        allChildren.forEach((child: Element) => {
+          const htmlChild = child as HTMLElement
+          
+          // Identificar tipos de elementos
+          const isInput = htmlChild.tagName === 'INPUT'
+          const isButton = htmlChild.tagName === 'BUTTON'
+          const isLink = htmlChild.tagName === 'A'
+          const isImage = htmlChild.tagName === 'IMG' || htmlChild.tagName === 'SVG'
+          const isPrimaryButton = isButton && (
+            htmlChild.classList.contains('cl-formButtonPrimary') ||
+            htmlChild.textContent?.includes('Continue') ||
+            htmlChild.textContent?.includes('Continuar')
+          )
+          const isSocialButton = htmlChild.classList.contains('cl-socialButtonsBlockButton')
+
+          if (htmlChild.style) {
+            if (isPrimaryButton) {
+              // Mantener botón primario dorado
+              htmlChild.style.setProperty('background-color', '#FFD700', 'important')
+              htmlChild.style.setProperty('background', '#FFD700', 'important')
+              htmlChild.style.setProperty('color', '#333333', 'important')
+            } else if (isInput) {
+              // Inputs oscuros
+              htmlChild.style.setProperty('background-color', '#374151', 'important')
+              htmlChild.style.setProperty('background', '#374151', 'important')
+              htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+              htmlChild.style.setProperty('border', '1px solid #4b5563', 'important')
+            } else if (isSocialButton) {
+              // Botones sociales oscuros
+              htmlChild.style.setProperty('background-color', '#374151', 'important')
+              htmlChild.style.setProperty('background', '#374151', 'important')
+              htmlChild.style.setProperty('color', '#d1d5db', 'important')
+              htmlChild.style.setProperty('border', '1px solid #4b5563', 'important')
+            } else if (isLink) {
+              // Links dorados
+              htmlChild.style.setProperty('color', '#fbbf24', 'important')
+              htmlChild.style.setProperty('background-color', 'transparent', 'important')
+              htmlChild.style.setProperty('background', 'transparent', 'important')
+            } else if (!isImage && !isButton) {
+              // TODOS los demás elementos (divs, spans, etc.) oscuros
+              htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+              htmlChild.style.setProperty('background', '#1f2937', 'important')
+              htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+              htmlChild.style.setProperty('border-color', '#374151', 'important')
+            }
+          }
+        })
+      })
+
       // Forzar el backdrop final
       const modalBackdrops = document.querySelectorAll('.cl-modalBackdrop, [data-clerk-modal-backdrop]')
       modalBackdrops.forEach((backdrop: Element) => {
@@ -174,7 +281,16 @@ const ClerkDarkMode = () => {
         '.cl-modalContent',
         '.cl-componentModal',
         '.cl-modalBackdrop',
-        '[data-clerk-modal-backdrop]'
+        '[data-clerk-modal-backdrop]',
+        '.cl-signIn',
+        '.cl-signUp',
+        '.cl-main',
+        '.cl-header',
+        '.cl-formContainer',
+        '.cl-form',
+        '.cl-socialButtonsContainer',
+        '.cl-divider',
+        '.cl-alternativeMethodsBlockButton'
       ]
 
       allSelectors.forEach(selector => {
