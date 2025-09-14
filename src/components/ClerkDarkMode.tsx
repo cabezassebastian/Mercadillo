@@ -270,7 +270,7 @@ const ClerkDarkMode = () => {
 
           if (htmlChild.style) {
             if (isPrimaryButton) {
-              // Forzar botón primario con colores fijos (no usar modo oscuro)
+              // Mantener SIEMPRE la apariencia clara del botón (como en modo claro)
               htmlChild.style.setProperty('background-color', '#FFD700', 'important')
               htmlChild.style.setProperty('background', '#FFD700', 'important')
               htmlChild.style.setProperty('color', '#333333', 'important')
@@ -284,10 +284,11 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('box-shadow', 'none', 'important')
               htmlChild.style.setProperty('outline', 'none', 'important')
               htmlChild.style.setProperty('border', 'none', 'important')
+              htmlChild.style.setProperty('font-weight', '600', 'important')
               
-              // Agregar event listeners para hover
+              // Agregar event listeners para hover (mantener colores claros)
               htmlChild.addEventListener('mouseenter', () => {
-                htmlChild.style.setProperty('background-color', '#FFC000', 'important')
+                htmlChild.style.setProperty('background-color', '#b8860b', 'important')
                 htmlChild.style.setProperty('color', '#333333', 'important')
                 htmlChild.style.setProperty('text-decoration', 'none', 'important')
                 htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
@@ -415,7 +416,7 @@ const ClerkDarkMode = () => {
         }
       })
 
-      // Mantener estilos del botón primario incluso en modo claro
+      // Mantener estilos del botón primario idénticos en ambos modos
       const primaryButtons = document.querySelectorAll('button[type="submit"], .cl-formButtonPrimary')
       primaryButtons.forEach((button: Element) => {
         const htmlButton = button as HTMLElement
@@ -424,10 +425,16 @@ const ClerkDarkMode = () => {
                                htmlButton.classList.contains('cl-formButtonPrimary')
         
         if (isPrimaryButton && htmlButton.style) {
+          // Forzar exactamente la misma apariencia que en modo claro
           htmlButton.style.setProperty('background-color', '#FFD700', 'important')
           htmlButton.style.setProperty('color', '#333333', 'important')
           htmlButton.style.setProperty('text-decoration', 'none', 'important')
           htmlButton.style.setProperty('border', 'none', 'important')
+          htmlButton.style.setProperty('font-weight', '600', 'important')
+          htmlButton.style.setProperty('text-decoration-line', 'none', 'important')
+          htmlButton.style.setProperty('text-decoration-color', 'transparent', 'important')
+          htmlButton.style.setProperty('box-shadow', 'none', 'important')
+          htmlButton.style.setProperty('outline', 'none', 'important')
         }
       })
 
