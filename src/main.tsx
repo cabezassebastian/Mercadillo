@@ -102,7 +102,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
           appearance={{
             baseTheme: undefined,
             elements: {
-              rootBox: "w-full max-w-md mx-auto",
+              rootBox: "w-full max-w-md mx-auto bg-white dark:bg-gray-800",
               card: "w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden",
               headerTitle: "text-gris-oscuro dark:text-gray-100 text-2xl font-bold text-center mb-2",
               headerSubtitle: "text-gris-claro dark:text-gray-400 text-center mb-6",
@@ -133,6 +133,16 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               formFieldErrorText: "text-red-600 dark:text-red-400",
               identityPreviewText: "text-gray-600 dark:text-gray-300",
               identityPreviewEditButton: "text-amarillo dark:text-yellow-400 hover:text-dorado dark:hover:text-yellow-300",
+              // Elementos específicos para UserProfile
+              userProfile: "bg-white dark:bg-gray-800",
+              profileSection: "bg-white dark:bg-gray-800",
+              profileSectionContent: "bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100",
+              profileSectionTitle: "text-gray-900 dark:text-gray-100",
+              profileSectionSubtitle: "text-gray-600 dark:text-gray-400",
+              profileSectionPrimaryButton: "bg-amarillo hover:bg-dorado text-gris-oscuro",
+              navbar: "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700",
+              navbarButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700",
+              badge: "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300",
             },
             variables: {
               colorPrimary: "#FFD700",
