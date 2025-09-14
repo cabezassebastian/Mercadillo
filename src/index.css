@@ -506,6 +506,270 @@
   background-color: #4b5563 !important;
 }
 
+/* Estilos más agresivos para eliminar todos los fondos blancos */
+.dark [class*="cl-"] {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+/* Específicamente para el card del modal */
+.dark .cl-card,
+.dark .cl-signIn-start,
+.dark .cl-signUp-start,
+.dark .cl-rootBox {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+}
+
+/* Footer del modal con línea sutil blanca */
+.dark .cl-footer,
+.dark .cl-signIn-footer,
+.dark .cl-signUp-footer {
+  background-color: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+}
+
+/* Eliminar cualquier borde o línea blanca */
+.dark .cl-dividerRow,
+.dark .cl-dividerLine {
+  background-color: #4b5563 !important;
+  border: none !important;
+}
+
+/* El texto "or" entre opciones */
+.dark .cl-dividerText {
+  background-color: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+/* Partes del UserProfile que aparecen blancas */
+.dark .cl-userProfile {
+  background-color: #1f2937 !important;
+}
+
+.dark .cl-userProfile-content {
+  background-color: #1f2937 !important;
+}
+
+.dark .cl-userProfile-navbar {
+  background-color: #111827 !important;
+  border-right: 1px solid #374151 !important;
+}
+
+/* Elementos específicos del sidebar que aparecen blancos */
+.dark .cl-navbar,
+.dark .cl-navbarMobileMenuButton {
+  background-color: #111827 !important;
+}
+
+.dark .cl-navbarButton {
+  background-color: transparent !important;
+  color: #d1d5db !important;
+}
+
+.dark .cl-navbarButton:hover {
+  background-color: #374151 !important;
+}
+
+.dark .cl-navbarButton[aria-current="page"],
+.dark .cl-navbarButton[data-active="true"] {
+  background-color: #374151 !important;
+  color: #fbbf24 !important;
+}
+
+/* UserButton popup más específico */
+.dark .cl-userButtonPopoverCard {
+  background-color: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .cl-userButtonPopoverActions {
+  background-color: #1f2937 !important;
+}
+
+.dark .cl-userButtonPopoverActionButton {
+  background-color: transparent !important;
+  color: #d1d5db !important;
+}
+
+.dark .cl-userButtonPopoverActionButton:hover {
+  background-color: #374151 !important;
+}
+
+.dark .cl-userButtonPopoverFooter {
+  background-color: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+}
+
+/* Forzar todos los elementos internos */
+.dark [class*="cl-internal-"] {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Para elementos que Clerk genera dinámicamente */
+.dark [data-clerk] *,
+.dark [data-clerk-modal] *,
+.dark [role="dialog"] * {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Excepciones para mantener estilos específicos */
+.dark .cl-formButtonPrimary,
+.dark .cl-formButtonPrimary *,
+.dark button[data-clerk-primary="true"],
+.dark button[data-clerk-primary="true"] * {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark .cl-footerActionLink,
+.dark .cl-footerActionLink *,
+.dark a[data-clerk-link="true"],
+.dark a[data-clerk-link="true"] * {
+  background-color: transparent !important;
+  color: #fbbf24 !important;
+}
+
+.dark img,
+.dark svg {
+  background-color: transparent !important;
+}
+
+/* Input fields específicos */
+.dark input[data-clerk-input="true"],
+.dark .cl-formFieldInput {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* Contenedores principales que pueden aparecer blancos */
+.dark .cl-signIn,
+.dark .cl-signUp,
+.dark .cl-userProfile,
+.dark .cl-userButton {
+  background-color: #1f2937 !important;
+}
+
+/* Eliminar líneas blancas muy sutiles que aparecen en los bordes */
+.dark [class*="cl-"] {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.dark .cl-card {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .cl-userButtonPopoverCard {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Forzar específicamente los elementos problemáticos del modal */
+.dark .cl-signIn-start,
+.dark .cl-signUp-start {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+}
+
+/* El contenedor principal del modal */
+.dark [data-clerk-modal] {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Eliminar cualquier borde blanco sutil */
+.dark .cl-card,
+.dark .cl-rootBox,
+.dark .cl-signIn-start,
+.dark .cl-signUp-start {
+  border: 1px solid #374151 !important;
+  outline: none !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Footer específico con línea blanca sutil */
+.dark .cl-footer,
+.dark .cl-signIn-footer,
+.dark .cl-signUp-footer {
+  background: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* UserProfile navbar que aparece medio blanco */
+.dark .cl-userProfile-navbar,
+.dark .cl-navbar {
+  background: #111827 !important;
+  border-right: 1px solid #374151 !important;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+}
+
+/* UserButton popup con líneas blancas sutiles */
+.dark .cl-userButtonPopoverCard {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  outline: none !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .cl-userButtonPopoverFooter {
+  background: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+}
+
+/* Eliminar cualquier pseudo-elemento que pueda crear líneas blancas */
+.dark [class*="cl-"]::before,
+.dark [class*="cl-"]::after {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* Forzar absolutamente todos los elementos dentro de modales */
+.dark [role="dialog"] {
+  background: #1f2937 !important;
+}
+
+.dark [role="dialog"] * {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Excepciones necesarias */
+.dark [role="dialog"] .cl-formButtonPrimary,
+.dark [role="dialog"] .cl-formButtonPrimary * {
+  background: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark [role="dialog"] .cl-footerActionLink,
+.dark [role="dialog"] .cl-footerActionLink * {
+  background: transparent !important;
+  color: #fbbf24 !important;
+}
+
+.dark [role="dialog"] img,
+.dark [role="dialog"] svg {
+  background: transparent !important;
+}
+
+.dark [role="dialog"] input,
+.dark [role="dialog"] .cl-formFieldInput {
+  background: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
 /* Mejoras específicas para formularios de autenticación */
 .cl-formFieldInput {
   font-size: 16px !important;
