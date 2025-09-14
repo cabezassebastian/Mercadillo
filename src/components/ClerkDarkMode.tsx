@@ -6,6 +6,80 @@ const ClerkDarkMode = () => {
 
   useEffect(() => {
     const forceClerkDarkMode = () => {
+      // FORZAR ELEMENTOS DEL LAYOUT PRINCIPAL (fuera de Clerk)
+      // Buscar contenedores principales de las páginas de auth
+      const pageContainers = document.querySelectorAll('.min-h-screen, [class*="bg-hueso"]')
+      pageContainers.forEach((container: Element) => {
+        const htmlContainer = container as HTMLElement
+        if (htmlContainer.style) {
+          htmlContainer.style.setProperty('background-color', '#111827', 'important')
+          htmlContainer.style.setProperty('background', '#111827', 'important')
+        }
+      })
+
+      // Forzar divs con bg-white que están fuera de Clerk
+      const whiteBgDivs = document.querySelectorAll('div[class*="bg-white"]')
+      whiteBgDivs.forEach((div: Element) => {
+        const htmlDiv = div as HTMLElement
+        // Solo si contiene elementos de Clerk o está en una página de auth
+        if (htmlDiv.querySelector('[data-clerk-component]') || 
+            htmlDiv.closest('[data-clerk-component]') ||
+            window.location.pathname.includes('sign-in') ||
+            window.location.pathname.includes('sign-up')) {
+          if (htmlDiv.style) {
+            htmlDiv.style.setProperty('background-color', '#1f2937', 'important')
+            htmlDiv.style.setProperty('background', '#1f2937', 'important')
+            htmlDiv.style.setProperty('border-color', '#374151', 'important')
+          }
+        }
+      })
+
+      // Forzar textos específicos en páginas de auth
+      const authTexts = document.querySelectorAll('h1, p, label, span')
+      authTexts.forEach((text: Element) => {
+        const htmlText = text as HTMLElement
+        if ((window.location.pathname.includes('sign-in') || 
+             window.location.pathname.includes('sign-up')) &&
+            htmlText.style) {
+          
+          // Verificar si tiene clases de texto claro
+          const hasLightText = htmlText.classList.contains('text-gris-oscuro') ||
+                              htmlText.classList.contains('text-gris-claro') ||
+                              htmlText.classList.contains('text-gray-900')
+          
+          if (hasLightText) {
+            htmlText.style.setProperty('color', '#f3f4f6', 'important')
+          }
+        }
+      })
+
+      // Forzar elementos con clases específicas problemáticas
+      const problemClasses = [
+        '.bg-white',
+        '.rounded-2xl', 
+        '.shadow-xl',
+        '.border-gray-200'
+      ]
+      
+      problemClasses.forEach(className => {
+        const elements = document.querySelectorAll(className)
+        elements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          // Solo si está relacionado con auth
+          if (htmlElement.querySelector('[data-clerk-component]') || 
+              htmlElement.closest('[data-clerk-component]') ||
+              window.location.pathname.includes('sign-in') ||
+              window.location.pathname.includes('sign-up')) {
+            if (htmlElement.style) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('background', '#1f2937', 'important')
+              htmlElement.style.setProperty('border-color', '#374151', 'important')
+              htmlElement.style.setProperty('box-shadow', '0 25px 50px -12px rgba(0, 0, 0, 0.5)', 'important')
+            }
+          }
+        })
+      })
+
       // Enhanced aggressive dark mode enforcement for Clerk components v2.0
       const clerkElements = document.querySelectorAll('[class*="cl-"], [data-clerk], [role="dialog"]')
       
@@ -240,6 +314,58 @@ const ClerkDarkMode = () => {
     }
 
     const clearClerkDarkMode = () => {
+      // Limpiar elementos del layout principal
+      const pageContainers = document.querySelectorAll('.min-h-screen, [class*="bg-hueso"]')
+      pageContainers.forEach((container: Element) => {
+        const htmlContainer = container as HTMLElement
+        if (htmlContainer.style) {
+          htmlContainer.style.removeProperty('background-color')
+          htmlContainer.style.removeProperty('background')
+        }
+      })
+
+      // Limpiar divs con bg-white
+      const whiteBgDivs = document.querySelectorAll('div[class*="bg-white"]')
+      whiteBgDivs.forEach((div: Element) => {
+        const htmlDiv = div as HTMLElement
+        if (htmlDiv.style) {
+          htmlDiv.style.removeProperty('background-color')
+          htmlDiv.style.removeProperty('background')
+          htmlDiv.style.removeProperty('border-color')
+          htmlDiv.style.removeProperty('box-shadow')
+        }
+      })
+
+      // Limpiar textos específicos
+      const authTexts = document.querySelectorAll('h1, p, label, span')
+      authTexts.forEach((text: Element) => {
+        const htmlText = text as HTMLElement
+        if (htmlText.style) {
+          htmlText.style.removeProperty('color')
+        }
+      })
+
+      // Limpiar elementos con clases problemáticas
+      const problemClasses = [
+        '.bg-white',
+        '.rounded-2xl', 
+        '.shadow-xl',
+        '.border-gray-200'
+      ]
+      
+      problemClasses.forEach(className => {
+        const elements = document.querySelectorAll(className)
+        elements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          if (htmlElement.style) {
+            htmlElement.style.removeProperty('background-color')
+            htmlElement.style.removeProperty('background')
+            htmlElement.style.removeProperty('border-color')
+            htmlElement.style.removeProperty('box-shadow')
+          }
+        })
+      })
+
       // Limpiar estilos forzados y restaurar a modo claro
       const clerkElements = document.querySelectorAll('[class*="cl-"], [data-clerk], [role="dialog"]')
       
