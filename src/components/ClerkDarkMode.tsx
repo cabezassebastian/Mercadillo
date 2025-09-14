@@ -7,7 +7,7 @@ const ClerkDarkMode = () => {
   useEffect(() => {
     const forceClerkDarkMode = () => {
       if (theme === 'dark') {
-        // Buscar todos los elementos de Clerk y forzar el modo oscuro más agresivamente
+        // Enhanced aggressive dark mode enforcement for Clerk components v2.0
         const clerkElements = document.querySelectorAll('[class*="cl-"], [data-clerk], [role="dialog"]')
         
         clerkElements.forEach((element: Element) => {
