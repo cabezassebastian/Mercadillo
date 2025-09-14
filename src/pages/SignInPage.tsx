@@ -35,7 +35,7 @@ const SignInPage = () => {
                 socialButtonsBlockButtonText: "font-medium text-gris-oscuro dark:text-gray-200",
                 dividerLine: "bg-gray-300 dark:bg-gray-600 my-6",
                 dividerText: "text-gris-claro dark:text-gray-400 text-sm px-4 bg-white dark:bg-gray-800",
-                formButtonPrimary: "inline-flex items-center justify-center px-6 py-2 rounded-lg font-semibold transition-colors duration-200",
+                formButtonPrimary: "inline-flex items-center justify-center px-6 py-2 rounded-lg font-semibold transition-colors duration-200 bg-amarillo text-gray-900 dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700 no-underline hover:no-underline focus:no-underline appearance-none shadow-none focus:outline-none focus:ring-0",
                 formFieldInput: "border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
                 formFieldLabel: "text-gris-oscuro dark:text-gray-200 font-medium mb-2 block text-left",
                 footerActionLink: "text-amarillo hover:text-dorado font-medium transition-colors duration-200",
@@ -63,4 +63,6 @@ const SignInPage = () => {
       </div>
     </div>
   );
-};export default SignInPage;
+};
+
+export default SignInPage;

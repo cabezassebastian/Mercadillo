@@ -63,7 +63,7 @@
   }
   
   /* Fix Continue button underline in dark mode (Tailwind only) */
-  .clerk-continue-wrapper :where(a, button) {
+  .clerk-continue-wrapper :where(a, button, span) {
     @apply no-underline hover:no-underline focus:no-underline active:no-underline;
     @apply focus:outline-none focus:ring-0 appearance-none shadow-none;
     @apply before:content-none after:content-none;
