@@ -276,6 +276,9 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('color', '#333333', 'important')
               htmlChild.style.setProperty('text-decoration', 'none', 'important')
               htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
+              htmlChild.style.setProperty('text-decoration-color', 'transparent', 'important')
+              htmlChild.style.setProperty('text-decoration-style', 'none', 'important')
+              htmlChild.style.setProperty('text-decoration-thickness', '0', 'important')
               htmlChild.style.setProperty('text-underline-offset', 'unset', 'important')
               htmlChild.style.setProperty('border-bottom', 'none', 'important')
               htmlChild.style.setProperty('box-shadow', 'none', 'important')
@@ -286,11 +289,15 @@ const ClerkDarkMode = () => {
               htmlChild.addEventListener('mouseenter', () => {
                 htmlChild.style.setProperty('background-color', '#FFC000', 'important')
                 htmlChild.style.setProperty('color', '#333333', 'important')
+                htmlChild.style.setProperty('text-decoration', 'none', 'important')
+                htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
               })
               
               htmlChild.addEventListener('mouseleave', () => {
                 htmlChild.style.setProperty('background-color', '#FFD700', 'important')
                 htmlChild.style.setProperty('color', '#333333', 'important')
+                htmlChild.style.setProperty('text-decoration', 'none', 'important')
+                htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
               })
             } else if (isInput) {
               // Inputs oscuros
