@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useUser, UserButton } from '@clerk/clerk-react'
-import { ShoppingCart, Menu, X } from 'lucide-react'
+import { ShoppingCart, Menu, X, Search } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -10,13 +10,35 @@ const Navbar: React.FC = () => {
   const { isAdmin } = useAuth()
   const { getTotalItems } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
+  // Detectar si estamos en la página de inicio
+  const isHomePage = location.pathname === '/'
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchTerm.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(searchTerm.trim())}`)
+      setSearchTerm('')
+    } else {
+      navigate('/catalogo')
+    }
+    // Cerrar menú móvil después de hacer búsqueda
+    setIsMenuOpen(false)
+  }
+
   const navItems = [
-    { name: 'Inicio', path: '/' },
     { name: 'Catálogo', path: '/catalogo' },
   ]
+
+  // Solo agregar "Inicio" si NO estamos en la página principal
+  if (!isHomePage) {
+    navItems.unshift({ name: 'Inicio', path: '/' })
+  }
 
   if (isAdmin) {
     navItems.push({ name: 'Admin', path: '/admin' })
@@ -31,8 +53,25 @@ const Navbar: React.FC = () => {
             <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-16 w-auto" />
           </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Desktop Navigation with Conditional Search */}
+          <div className="hidden md:flex items-center space-x-6">
+            {/* Search Bar - Solo en página de inicio */}
+            {isHomePage && (
+              <form onSubmit={handleSearch} className="relative">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <input
+                    type="text"
+                    placeholder="Buscar productos..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm"
+                  />
+                </div>
+              </form>
+            )}
+            
+            {/* Navigation Links */}
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -95,6 +134,22 @@ const Navbar: React.FC = () => {
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-200">
             <div className="flex flex-col space-y-4">
+              {/* Mobile Search Bar - Solo en página de inicio */}
+              {isHomePage && (
+                <form onSubmit={handleSearch} className="relative">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                    <input
+                      type="text"
+                      placeholder="Buscar productos..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm"
+                    />
+                  </div>
+                </form>
+              )}
+              
               {navItems.map((item) => (
                 <Link
                   key={item.name}

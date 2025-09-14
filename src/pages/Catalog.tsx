@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Search, Grid, List } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import ProductCard from '@/components/Product/ProductCard'
@@ -12,6 +13,15 @@ const Catalog: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('')
   const [sortBy, setSortBy] = useState('nombre')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [searchParams, setSearchParams] = useSearchParams()
+
+  // Obtener término de búsqueda de la URL al cargar
+  useEffect(() => {
+    const urlSearchTerm = searchParams.get('search')
+    if (urlSearchTerm) {
+      setSearchTerm(urlSearchTerm)
+    }
+  }, [searchParams])
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -130,7 +140,15 @@ const Catalog: React.FC = () => {
                 type="text"
                 placeholder="Buscar productos..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value)
+                  // Actualizar URL cuando se cambia el término de búsqueda
+                  if (e.target.value.trim()) {
+                    setSearchParams({ search: e.target.value.trim() })
+                  } else {
+                    setSearchParams({})
+                  }
+                }}
                 className="input-field pl-10"
               />
             </div>
