@@ -128,7 +128,7 @@ const PrivacyPage: React.FC = () => {
                 <li>Retirar su consentimiento en cualquier momento</li>
               </ul>
               <p>
-                Para ejercer estos derechos, contáctenos en contacto@mercadillolima.com
+                Para ejercer estos derechos, contáctenos en contactomercadillo@gmail.com
               </p>
             </div>
           </div>
@@ -183,7 +183,7 @@ const PrivacyPage: React.FC = () => {
             </p>
             <p className="text-sm text-gris-claro mt-2">
               Si tiene alguna pregunta sobre esta Política de Privacidad, 
-              póngase en contacto con nosotros en contacto@mercadillolima.com
+              póngase en contacto con nosotros en contactomercadillo@gmail.com
             </p>
           </div>
         </div>
