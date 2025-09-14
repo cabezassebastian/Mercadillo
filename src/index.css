@@ -1010,6 +1010,179 @@
   color: #10b981 !important;
 }
 
+/* Forzar ABSOLUTAMENTE todo el modal a ser oscuro */
+.dark .cl-modalBackdrop,
+.dark .cl-modalBackdrop *,
+.dark [data-clerk-modal],
+.dark [data-clerk-modal] *,
+.dark .cl-modal,
+.dark .cl-modal *,
+.dark .cl-componentModal,
+.dark .cl-componentModal *,
+.dark .cl-rootBox,
+.dark .cl-rootBox *,
+.dark .cl-card,
+.dark .cl-card *,
+.dark .cl-signIn,
+.dark .cl-signIn *,
+.dark .cl-signUp,
+.dark .cl-signUp *,
+.dark [role="dialog"],
+.dark [role="dialog"] * {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+/* Excepciones específicas para elementos que necesitan colores diferentes */
+.dark .cl-formButtonPrimary,
+.dark button[type="submit"],
+.dark button[data-localization-key*="continue"],
+.dark button[data-localization-key*="signIn"],
+.dark button[data-localization-key*="signUp"] {
+  background-color: #FFD700 !important;
+  background: #FFD700 !important;
+  color: #333333 !important;
+  border: none !important;
+  font-weight: 600 !important;
+}
+
+.dark .cl-formButtonPrimary:hover,
+.dark button[type="submit"]:hover,
+.dark button[data-localization-key*="continue"]:hover,
+.dark button[data-localization-key*="signIn"]:hover,
+.dark button[data-localization-key*="signUp"]:hover {
+  background-color: #b8860b !important;
+  background: #b8860b !important;
+  color: #333333 !important;
+}
+
+/* Input fields específicos */
+.dark input,
+.dark .cl-formFieldInput,
+.dark input[type="email"],
+.dark input[type="password"],
+.dark input[type="text"] {
+  background-color: #374151 !important;
+  background: #374151 !important;
+  color: #f9fafb !important;
+  border: 1px solid #4b5563 !important;
+}
+
+/* Botones sociales */
+.dark .cl-socialButtonsBlockButton,
+.dark button[data-localization-key*="google"] {
+  background-color: #374151 !important;
+  background: #374151 !important;
+  color: #d1d5db !important;
+  border: 1px solid #4b5563 !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover,
+.dark button[data-localization-key*="google"]:hover {
+  background-color: #4b5563 !important;
+  background: #4b5563 !important;
+}
+
+/* Enlaces */
+.dark .cl-footerActionLink,
+.dark a[data-localization-key*="signUp"],
+.dark a[data-localization-key*="signIn"] {
+  color: #fbbf24 !important;
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Iconos y SVGs */
+.dark img,
+.dark svg,
+.dark .cl-socialButtonsIcon {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* Forzar el backdrop del modal */
+.dark .cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.9) !important;
+  background: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Clases específicas que Clerk genera dinámicamente */
+.dark [class*="cl-internal-"],
+.dark [class*="cl-formButton"],
+.dark [class*="cl-modalContent"],
+.dark [class*="cl-card"] {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Forzar específicamente el botón Continue */
+.dark button:contains("Continue"),
+.dark button[aria-label*="Continue"],
+.dark [role="button"]:contains("Continue") {
+  background-color: #FFD700 !important;
+  background: #FFD700 !important;
+  color: #333333 !important;
+}
+
+/* Selector específico para forzar TODOS los elementos de Clerk a ser oscuros */
+html.dark [class*="cl-"]:not(.cl-formButtonPrimary):not(.cl-socialButtonsBlockButton):not(.cl-footerActionLink):not(input):not(img):not(svg) {
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+html.dark .cl-formButtonPrimary {
+  background-color: #FFD700 !important;
+  background: #FFD700 !important;
+  color: #333333 !important;
+  border: none !important;
+}
+
+html.dark .cl-formButtonPrimary:hover {
+  background-color: #b8860b !important;
+  background: #b8860b !important;
+}
+
+html.dark input[class*="cl-"] {
+  background-color: #374151 !important;
+  background: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+/* Forzar el modal backdrop */
+html.dark .cl-modalBackdrop {
+  background: rgba(0, 0, 0, 0.9) !important;
+}
+
+/* Aplicar a cualquier elemento dentro de un modal de Clerk */
+html.dark [data-clerk-modal] {
+  background: #1f2937 !important;
+}
+
+html.dark [data-clerk-modal] * {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark [data-clerk-modal] .cl-formButtonPrimary {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+}
+
+html.dark [data-clerk-modal] input {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+html.dark [data-clerk-modal] .cl-footerActionLink {
+  color: #fbbf24 !important;
+  background-color: transparent !important;
+}
+
 /* Mejoras específicas para formularios de autenticación */
 .cl-formFieldInput {
   font-size: 16px !important;
