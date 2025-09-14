@@ -7,8 +7,8 @@ const ClerkDarkMode = () => {
   useEffect(() => {
     const forceClerkDarkMode = () => {
       if (theme === 'dark') {
-        // Buscar todos los elementos de Clerk y forzar el modo oscuro
-        const clerkElements = document.querySelectorAll('[class*="cl-"], [data-clerk]')
+        // Buscar todos los elementos de Clerk y forzar el modo oscuro más agresivamente
+        const clerkElements = document.querySelectorAll('[class*="cl-"], [data-clerk], [role="dialog"]')
         
         clerkElements.forEach((element: Element) => {
           const htmlElement = element as HTMLElement
@@ -20,26 +20,97 @@ const ClerkDarkMode = () => {
           
           // Forzar estilos oscuros directamente
           if (htmlElement.style) {
-            // Solo aplicar si no es un botón primario o enlace
+            // Verificar si es un elemento que debe mantener sus colores específicos
             const isButton = htmlElement.classList.contains('cl-formButtonPrimary') || 
-                            htmlElement.classList.contains('cl-profileSectionPrimaryButton')
-            const isLink = htmlElement.classList.contains('cl-footerActionLink')
+                            htmlElement.classList.contains('cl-profileSectionPrimaryButton') ||
+                            htmlElement.hasAttribute('data-clerk-primary')
+            const isLink = htmlElement.classList.contains('cl-footerActionLink') ||
+                          htmlElement.hasAttribute('data-clerk-link')
+            const isImage = htmlElement.tagName === 'IMG' || htmlElement.tagName === 'SVG'
             
-            if (!isButton && !isLink) {
-              htmlElement.style.backgroundColor = '#1f2937'
-              htmlElement.style.color = '#f3f4f6'
-              htmlElement.style.borderColor = '#374151'
+            if (!isButton && !isLink && !isImage) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+              htmlElement.style.setProperty('border-color', '#374151', 'important')
+              
+              // Para elementos específicos del sidebar
+              if (htmlElement.classList.contains('cl-navbar') || 
+                  htmlElement.classList.contains('cl-userProfile-navbar')) {
+                htmlElement.style.setProperty('background-color', '#111827', 'important')
+              }
             }
           }
         })
 
-        // Forzar el fondo del documento si está dentro de un modal de Clerk
-        const clerkModals = document.querySelectorAll('[data-clerk-modal], .cl-modal')
-        clerkModals.forEach((modal: Element) => {
+        // Forzar elementos específicos conocidos por ser problemáticos
+        const problematicSelectors = [
+          '.cl-card',
+          '.cl-signIn-start',
+          '.cl-signUp-start',
+          '.cl-rootBox',
+          '.cl-footer',
+          '.cl-signIn-footer',
+          '.cl-signUp-footer',
+          '.cl-userProfile-content',
+          '.cl-userButtonPopoverCard',
+          '[class*="cl-internal-"]'
+        ]
+
+        problematicSelectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector)
+          elements.forEach((element: Element) => {
+            const htmlElement = element as HTMLElement
+            if (htmlElement.style) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+              htmlElement.style.setProperty('border-color', '#374151', 'important')
+            }
+          })
+        })
+
+        // Forzar el navbar específicamente
+        const navbars = document.querySelectorAll('.cl-navbar, .cl-userProfile-navbar')
+        navbars.forEach((navbar: Element) => {
+          const htmlNavbar = navbar as HTMLElement
+          if (htmlNavbar.style) {
+            htmlNavbar.style.setProperty('background-color', '#111827', 'important')
+            htmlNavbar.style.setProperty('border-right', '1px solid #374151', 'important')
+          }
+        })
+
+        // Forzar dividers
+        const dividers = document.querySelectorAll('.cl-dividerLine, .cl-dividerRow')
+        dividers.forEach((divider: Element) => {
+          const htmlDivider = divider as HTMLElement
+          if (htmlDivider.style) {
+            htmlDivider.style.setProperty('background-color', '#4b5563', 'important')
+            htmlDivider.style.setProperty('border', 'none', 'important')
+          }
+        })
+
+        // Forzar todos los modales y sus contenidos
+        const modals = document.querySelectorAll('[data-clerk-modal], .cl-modal, [role="dialog"]')
+        modals.forEach((modal: Element) => {
           const htmlModal = modal as HTMLElement
           if (htmlModal.style) {
-            htmlModal.style.backgroundColor = '#1f2937'
+            htmlModal.style.setProperty('background-color', '#1f2937', 'important')
           }
+          
+          // También forzar todos los hijos del modal
+          const children = modal.querySelectorAll('*')
+          children.forEach((child: Element) => {
+            const htmlChild = child as HTMLElement
+            const isButton = htmlChild.classList.contains('cl-formButtonPrimary') ||
+                           htmlChild.hasAttribute('data-clerk-primary')
+            const isLink = htmlChild.classList.contains('cl-footerActionLink') ||
+                         htmlChild.hasAttribute('data-clerk-link')
+            const isImage = htmlChild.tagName === 'IMG' || htmlChild.tagName === 'SVG'
+            
+            if (!isButton && !isLink && !isImage && htmlChild.style) {
+              htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+              htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+            }
+          })
         })
       }
     }
@@ -47,10 +118,19 @@ const ClerkDarkMode = () => {
     // Ejecutar inmediatamente
     forceClerkDarkMode()
 
-    // Configurar un observer para detectar cambios en el DOM
-    const observer = new MutationObserver(() => {
-      if (theme === 'dark') {
-        setTimeout(forceClerkDarkMode, 100)
+    // Configurar un observer para detectar cambios en el DOM con mayor frecuencia
+    const observer = new MutationObserver((mutations) => {
+      let shouldUpdate = false
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'childList' || 
+            (mutation.type === 'attributes' && 
+             (mutation.attributeName === 'class' || mutation.attributeName === 'style'))) {
+          shouldUpdate = true
+        }
+      })
+      
+      if (shouldUpdate && theme === 'dark') {
+        setTimeout(forceClerkDarkMode, 10) // Ejecutar más rápido
       }
     })
 
@@ -62,12 +142,12 @@ const ClerkDarkMode = () => {
       attributeFilter: ['class', 'style']
     })
 
-    // Ejecutar periódicamente para asegurar que se mantenga
+    // Ejecutar periódicamente para asegurar que se mantenga (más frecuente)
     const interval = setInterval(() => {
       if (theme === 'dark') {
         forceClerkDarkMode()
       }
-    }, 1000)
+    }, 500) // Cada 500ms en lugar de 1000ms
 
     return () => {
       observer.disconnect()
