@@ -270,10 +270,11 @@ const ClerkDarkMode = () => {
 
           if (htmlChild.style) {
             if (isPrimaryButton) {
-              // Mantener SIEMPRE la apariencia clara del botón (como en modo claro)
-              htmlChild.style.setProperty('background-color', '#FFD700', 'important')
-              htmlChild.style.setProperty('background', '#FFD700', 'important')
-              htmlChild.style.setProperty('color', '#333333', 'important')
+              // En modo oscuro: hacer el botón del mismo color que el fondo
+              htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+              htmlChild.style.setProperty('background', '#1f2937', 'important')
+              htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+              htmlChild.style.setProperty('border', '1px solid #374151', 'important')
               htmlChild.style.setProperty('text-decoration', 'none', 'important')
               htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
               htmlChild.style.setProperty('text-decoration-color', 'transparent', 'important')
@@ -283,20 +284,19 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('border-bottom', 'none', 'important')
               htmlChild.style.setProperty('box-shadow', 'none', 'important')
               htmlChild.style.setProperty('outline', 'none', 'important')
-              htmlChild.style.setProperty('border', 'none', 'important')
               htmlChild.style.setProperty('font-weight', '600', 'important')
               
-              // Agregar event listeners para hover (mantener colores claros)
+              // Agregar event listeners para hover (modo oscuro)
               htmlChild.addEventListener('mouseenter', () => {
-                htmlChild.style.setProperty('background-color', '#b8860b', 'important')
-                htmlChild.style.setProperty('color', '#333333', 'important')
+                htmlChild.style.setProperty('background-color', '#374151', 'important')
+                htmlChild.style.setProperty('color', '#f3f4f6', 'important')
                 htmlChild.style.setProperty('text-decoration', 'none', 'important')
                 htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
               })
               
               htmlChild.addEventListener('mouseleave', () => {
-                htmlChild.style.setProperty('background-color', '#FFD700', 'important')
-                htmlChild.style.setProperty('color', '#333333', 'important')
+                htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+                htmlChild.style.setProperty('color', '#f3f4f6', 'important')
                 htmlChild.style.setProperty('text-decoration', 'none', 'important')
                 htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
               })
@@ -416,7 +416,7 @@ const ClerkDarkMode = () => {
         }
       })
 
-      // Mantener estilos del botón primario idénticos en ambos modos
+      // Restaurar estilos del botón primario a modo claro
       const primaryButtons = document.querySelectorAll('button[type="submit"], .cl-formButtonPrimary')
       primaryButtons.forEach((button: Element) => {
         const htmlButton = button as HTMLElement
@@ -425,7 +425,7 @@ const ClerkDarkMode = () => {
                                htmlButton.classList.contains('cl-formButtonPrimary')
         
         if (isPrimaryButton && htmlButton.style) {
-          // Forzar exactamente la misma apariencia que en modo claro
+          // Restaurar apariencia clara
           htmlButton.style.setProperty('background-color', '#FFD700', 'important')
           htmlButton.style.setProperty('color', '#333333', 'important')
           htmlButton.style.setProperty('text-decoration', 'none', 'important')
