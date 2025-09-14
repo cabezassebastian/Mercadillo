@@ -51,6 +51,9 @@ const SignInPage = () => {
                 borderRadius: "0.75rem",
                 fontFamily: "Inter, sans-serif",
                 spacingUnit: "1rem",
+              },
+              layout: {
+                unsafe_disableDevelopmentModeWarnings: true,
               }
             }}
           />
