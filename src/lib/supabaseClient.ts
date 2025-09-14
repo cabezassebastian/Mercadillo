@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// Cliente principal de Supabase
+// Cliente único de Supabase - instancia singleton
 export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL!,
   import.meta.env.VITE_SUPABASE_ANON_KEY!,
@@ -12,3 +12,6 @@ export const supabase = createClient(
     }
   }
 );
+
+// Re-exportar la misma instancia para evitar múltiples clientes
+export const supabaseAdmin = supabase;
