@@ -241,6 +241,271 @@
   color: #9ca3af !important;
 }
 
+/* Estilos globales más específicos para forzar modo oscuro en Clerk */
+.dark .cl-rootBox,
+.dark .cl-signIn-root,
+.dark .cl-signUp-root {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .cl-card,
+.dark .cl-signInCard,
+.dark .cl-signUpCard {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+.dark .cl-main {
+  background-color: #1f2937 !important;
+}
+
+.dark .cl-form {
+  background-color: #1f2937 !important;
+}
+
+/* Forzar fondo oscuro en todos los elementos contenedores */
+.dark [data-clerk-modal],
+.dark [data-clerk-modal] *,
+.dark .cl-modalContent,
+.dark .cl-modalContent * {
+  background-color: #1f2937 !important;
+}
+
+/* Elementos específicos del UserProfile y Account modal */
+.dark .cl-userProfile-root,
+.dark .cl-profileSection-root,
+.dark .cl-profileSectionContent {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+.dark .cl-profileSectionPrimaryButton {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark .cl-profileSectionPrimaryButton:hover {
+  background-color: #b8860b !important;
+}
+
+/* Sidebar del perfil de usuario */
+.dark .cl-navbar {
+  background-color: #111827 !important;
+  border-color: #374151 !important;
+}
+
+.dark .cl-navbarButton {
+  color: #d1d5db !important;
+  background-color: transparent !important;
+}
+
+.dark .cl-navbarButton:hover {
+  background-color: #374151 !important;
+}
+
+.dark .cl-navbarButton[data-active="true"] {
+  background-color: #374151 !important;
+  color: #fbbf24 !important;
+}
+
+/* Cards y secciones dentro del perfil */
+.dark .cl-card,
+.dark .cl-section {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+}
+
+/* Títulos y textos */
+.dark .cl-profileSectionTitle {
+  color: #f3f4f6 !important;
+}
+
+.dark .cl-profileSectionSubtitle {
+  color: #9ca3af !important;
+}
+
+/* Todos los textos dentro de Clerk en modo oscuro */
+.dark .cl-userProfile-root *,
+.dark .cl-card *,
+.dark .cl-modal * {
+  color: #f3f4f6 !important;
+}
+
+/* Excepciones para botones y elementos específicos que necesitan colores diferentes */
+.dark .cl-formButtonPrimary,
+.dark .cl-formButtonPrimary * {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark .cl-footerActionLink,
+.dark .cl-footerActionLink * {
+  color: #fbbf24 !important;
+}
+
+/* Inputs en modo oscuro */
+.dark .cl-formFieldInput,
+.dark .cl-formFieldInput * {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* Badges y etiquetas */
+.dark .cl-badge {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+}
+
+/* Iconos */
+.dark .cl-userPreviewMainIdentifier__emailAddress::before,
+.dark .cl-profileSectionPrimaryButton__icon {
+  filter: brightness(0.8) !important;
+}
+
+/* Forzar modo oscuro más agresivamente para todos los elementos de Clerk */
+.dark .cl-internal-b3fm6y,
+.dark .cl-internal-b3fm6y *,
+.dark .cl-modal,
+.dark .cl-modal *,
+.dark .cl-userProfile,
+.dark .cl-userProfile *,
+.dark .cl-signIn,
+.dark .cl-signIn *,
+.dark .cl-signUp,
+.dark .cl-signUp * {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Excepciones específicas que necesitan mantener sus colores */
+.dark .cl-formButtonPrimary,
+.dark .cl-profileSectionPrimaryButton,
+.dark button[data-clerk-primary="true"] {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark .cl-formButtonPrimary:hover,
+.dark .cl-profileSectionPrimaryButton:hover,
+.dark button[data-clerk-primary="true"]:hover {
+  background-color: #b8860b !important;
+}
+
+.dark .cl-footerActionLink,
+.dark a[data-clerk-link="true"] {
+  color: #fbbf24 !important;
+}
+
+/* Input fields específicamente */
+.dark input[data-clerk-input="true"],
+.dark .cl-formFieldInput {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* Forzar el fondo del modal backdrop */
+.dark .cl-modalBackdrop,
+.dark [data-clerk-modal-backdrop] {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Forzar todos los contenedores principales */
+.dark [data-clerk-root],
+.dark [data-clerk-modal],
+.dark [class*="cl-"] {
+  background-color: #1f2937 !important;
+}
+
+/* Selectores muy específicos para elementos problemáticos */
+.dark .cl-internal-b3fm6y,
+.dark .cl-internal-1mxk5f5,
+.dark .cl-internal-wkkub3 {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Para cualquier elemento de Clerk con fondo blanco en modo oscuro */
+.dark [class*="cl-"]:not(.cl-formButtonPrimary):not(.cl-footerActionLink) {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Excepciones para elementos que necesitan mantener estilos específicos */
+.dark img,
+.dark svg {
+  background-color: transparent !important;
+}
+
+/* Reestablecer estilos para botones primarios */
+.dark .cl-formButtonPrimary,
+.dark .cl-profileSectionPrimaryButton,
+.dark button[data-clerk-primary="true"] {
+  background-color: #FFD700 !important;
+  color: #333333 !important;
+  border: none !important;
+}
+
+.dark .cl-footerActionLink,
+.dark a[data-clerk-link="true"] {
+  color: #fbbf24 !important;
+  background-color: transparent !important;
+}
+
+/* Estilos específicos para elementos problemáticos conocidos */
+.dark [role="dialog"],
+.dark [role="dialog"] *:not(button):not(a):not(input):not(img):not(svg) {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Forzar fondo para contenedores principales de Clerk */
+.dark .cl-componentModal,
+.dark .cl-componentModal *:not(.cl-formButtonPrimary):not(.cl-footerActionLink) {
+  background-color: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Sidebar específico del UserProfile */
+.dark .cl-userProfile-navbar,
+.dark .cl-navbar {
+  background-color: #111827 !important;
+}
+
+/* Contenido principal del UserProfile */
+.dark .cl-userProfile-content,
+.dark .cl-profileSection-content {
+  background-color: #1f2937 !important;
+}
+
+/* Headers y títulos */
+.dark .cl-profileSection-header h1,
+.dark .cl-profileSection-header h2,
+.dark .cl-profileSection-header h3 {
+  color: #f3f4f6 !important;
+}
+
+/* Lista de elementos en el perfil */
+.dark .cl-profileSection-itemList li {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+}
+
+/* Botones de acción secundarios */
+.dark .cl-profileSection-itemButton,
+.dark button[data-clerk-secondary="true"] {
+  background-color: #374151 !important;
+  color: #d1d5db !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .cl-profileSection-itemButton:hover,
+.dark button[data-clerk-secondary="true"]:hover {
+  background-color: #4b5563 !important;
+}
+
 /* Mejoras específicas para formularios de autenticación */
 .cl-formFieldInput {
   font-size: 16px !important;
