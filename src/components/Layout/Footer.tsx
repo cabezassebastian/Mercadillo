@@ -29,7 +29,7 @@ const Footer = () => {
               </div>
               <div className="flex items-center space-x-2 text-gris-claro">
                 <Mail className="w-4 h-4" />
-                <span>contacto@mercadillolima.com</span>
+                <span>contactomercadillo@gmail.com</span>
               </div>
             </div>
           </div>

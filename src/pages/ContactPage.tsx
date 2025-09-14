@@ -90,7 +90,7 @@ const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gris-oscuro mb-1">Correo Electrónico</h3>
-                    <p className="text-gray-600">contacto@mercadillolima.com</p>
+                    <p className="text-gray-600">contactomercadillo@gmail.com</p>
                     <p className="text-sm text-gris-claro">Respuesta en 24-48 horas</p>
                   </div>
                 </div>

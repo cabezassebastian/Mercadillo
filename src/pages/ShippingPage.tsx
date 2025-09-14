@@ -183,7 +183,7 @@ const ShippingPage: React.FC = () => {
                 <h3 className="font-semibold text-gris-oscuro mb-4">Servicio al Cliente</h3>
                 <div className="space-y-2 text-gray-600">
                   <p><strong>Teléfono:</strong> +51 977 933 410</p>
-                  <p><strong>Email:</strong> contacto@mercadillolima.com</p>
+                  <p><strong>Email:</strong> contactomercadillo@gmail.com</p>
                   <p><strong>Horarios:</strong> Lunes a Viernes 9:00 AM - 6:00 PM</p>
                   <p><strong>Sábados:</strong> 9:00 AM - 2:00 PM</p>
                 </div>

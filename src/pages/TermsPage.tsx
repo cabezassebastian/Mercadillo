@@ -141,7 +141,7 @@ const TermsPage: React.FC = () => {
             </p>
             <p className="text-sm text-gris-claro mt-2">
               Si tiene alguna pregunta sobre estos Términos y Condiciones, 
-              póngase en contacto con nosotros en contacto@mercadillolima.com
+              póngase en contacto con nosotros en contactomercadillo@gmail.com
             </p>
           </div>
         </div>
