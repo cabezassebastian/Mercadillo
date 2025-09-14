@@ -270,9 +270,10 @@ const ClerkDarkMode = () => {
 
           if (htmlChild.style) {
             if (isPrimaryButton) {
-              // En modo oscuro: hacer el botón del mismo color que el fondo
+              // SOLUCIÓN DEFINITIVA: Forzar estilos del botón Continue
               htmlChild.style.setProperty('background-color', '#1f2937', 'important')
               htmlChild.style.setProperty('background', '#1f2937', 'important')
+              htmlChild.style.setProperty('background-image', 'none', 'important')
               htmlChild.style.setProperty('color', '#f3f4f6', 'important')
               htmlChild.style.setProperty('border', '1px solid #374151', 'important')
               htmlChild.style.setProperty('text-decoration', 'none', 'important')
@@ -286,9 +287,25 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('outline', 'none', 'important')
               htmlChild.style.setProperty('font-weight', '600', 'important')
               
+              // Eliminar cualquier pseudo-elemento
+              const style = document.createElement('style')
+              style.textContent = `
+                .cl-formButtonPrimary::before,
+                .cl-formButtonPrimary::after,
+                button[type="submit"]::before,
+                button[type="submit"]::after {
+                  display: none !important;
+                  content: none !important;
+                  background: none !important;
+                }
+              `
+              document.head.appendChild(style)
+              
               // Agregar event listeners para hover (modo oscuro)
               htmlChild.addEventListener('mouseenter', () => {
                 htmlChild.style.setProperty('background-color', '#374151', 'important')
+                htmlChild.style.setProperty('background', '#374151', 'important')
+                htmlChild.style.setProperty('background-image', 'none', 'important')
                 htmlChild.style.setProperty('color', '#f3f4f6', 'important')
                 htmlChild.style.setProperty('text-decoration', 'none', 'important')
                 htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
@@ -296,6 +313,8 @@ const ClerkDarkMode = () => {
               
               htmlChild.addEventListener('mouseleave', () => {
                 htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+                htmlChild.style.setProperty('background', '#1f2937', 'important')
+                htmlChild.style.setProperty('background-image', 'none', 'important')
                 htmlChild.style.setProperty('color', '#f3f4f6', 'important')
                 htmlChild.style.setProperty('text-decoration', 'none', 'important')
                 htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
@@ -416,7 +435,7 @@ const ClerkDarkMode = () => {
         }
       })
 
-      // Restaurar estilos del botón primario a modo claro
+      // SOLUCIÓN DEFINITIVA: Restaurar botón a modo claro
       const primaryButtons = document.querySelectorAll('button[type="submit"], .cl-formButtonPrimary')
       primaryButtons.forEach((button: Element) => {
         const htmlButton = button as HTMLElement
@@ -425,8 +444,10 @@ const ClerkDarkMode = () => {
                                htmlButton.classList.contains('cl-formButtonPrimary')
         
         if (isPrimaryButton && htmlButton.style) {
-          // Restaurar apariencia clara
+          // Forzar apariencia clara y amarilla
           htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+          htmlButton.style.setProperty('background', '#FFD700', 'important')
+          htmlButton.style.setProperty('background-image', 'none', 'important')
           htmlButton.style.setProperty('color', '#333333', 'important')
           htmlButton.style.setProperty('text-decoration', 'none', 'important')
           htmlButton.style.setProperty('border', 'none', 'important')
@@ -435,6 +456,20 @@ const ClerkDarkMode = () => {
           htmlButton.style.setProperty('text-decoration-color', 'transparent', 'important')
           htmlButton.style.setProperty('box-shadow', 'none', 'important')
           htmlButton.style.setProperty('outline', 'none', 'important')
+          
+          // Eliminar cualquier pseudo-elemento también en modo claro
+          const style = document.createElement('style')
+          style.textContent = `
+            .cl-formButtonPrimary::before,
+            .cl-formButtonPrimary::after,
+            button[type="submit"]::before,
+            button[type="submit"]::after {
+              display: none !important;
+              content: none !important;
+              background: none !important;
+            }
+          `
+          document.head.appendChild(style)
         }
       })
 
