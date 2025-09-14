@@ -143,24 +143,89 @@ const ClerkDarkMode = () => {
         })
 
         // Forzar botones primarios para mantener el color correcto
-        const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary')
+        const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"], button[data-localization-key*="continue"], button[data-localization-key*="signIn"], button[data-localization-key*="signUp"]')
         primaryButtons.forEach((button: Element) => {
           const htmlButton = button as HTMLElement
           if (htmlButton.style) {
             htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+            htmlButton.style.setProperty('background', '#FFD700', 'important')
             htmlButton.style.setProperty('color', '#333333', 'important')
             htmlButton.style.setProperty('border', 'none', 'important')
+            htmlButton.style.setProperty('font-weight', '600', 'important')
+          }
+          
+          // Agregar event listeners para hover
+          htmlButton.addEventListener('mouseenter', () => {
+            htmlButton.style.setProperty('background-color', '#b8860b', 'important')
+            htmlButton.style.setProperty('background', '#b8860b', 'important')
+          })
+          
+          htmlButton.addEventListener('mouseleave', () => {
+            htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+            htmlButton.style.setProperty('background', '#FFD700', 'important')
+          })
+        })
+
+        // Buscar específicamente botones que contengan "Continue"
+        const allButtons = document.querySelectorAll('button')
+        allButtons.forEach((button: Element) => {
+          const htmlButton = button as HTMLElement
+          if (htmlButton.textContent?.includes('Continue') || 
+              htmlButton.textContent?.includes('Continuar') ||
+              htmlButton.getAttribute('aria-label')?.includes('Continue')) {
+            htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+            htmlButton.style.setProperty('background', '#FFD700', 'important')
+            htmlButton.style.setProperty('color', '#333333', 'important')
+            htmlButton.style.setProperty('border', 'none', 'important')
+            
+            // Event listeners para hover
+            htmlButton.addEventListener('mouseenter', () => {
+              htmlButton.style.setProperty('background-color', '#b8860b', 'important')
+              htmlButton.style.setProperty('background', '#b8860b', 'important')
+            })
+            
+            htmlButton.addEventListener('mouseleave', () => {
+              htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+              htmlButton.style.setProperty('background', '#FFD700', 'important')
+            })
           }
         })
 
-        // Forzar botones sociales
-        const socialButtons = document.querySelectorAll('.cl-socialButtonsBlockButton')
-        socialButtons.forEach((button: Element) => {
-          const htmlButton = button as HTMLElement
-          if (htmlButton.style) {
-            htmlButton.style.setProperty('background-color', '#374151', 'important')
-            htmlButton.style.setProperty('color', '#d1d5db', 'important')
-            htmlButton.style.setProperty('border', '1px solid #4b5563', 'important')
+        // Forzar absolutamente todos los elementos del modal a ser oscuros
+        const modalElements = document.querySelectorAll('[data-clerk-modal], [data-clerk-modal] *, .cl-modal, .cl-modal *, .cl-componentModal, .cl-componentModal *, [role="dialog"], [role="dialog"] *')
+        modalElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          const isButton = htmlElement.tagName === 'BUTTON' && 
+                          (htmlElement.classList.contains('cl-formButtonPrimary') ||
+                           htmlElement.textContent?.includes('Continue') ||
+                           htmlElement.textContent?.includes('Continuar') ||
+                           (htmlElement as HTMLButtonElement).type === 'submit')
+          const isInput = htmlElement.tagName === 'INPUT'
+          const isLink = htmlElement.tagName === 'A' || htmlElement.classList.contains('cl-footerActionLink')
+          const isImage = htmlElement.tagName === 'IMG' || htmlElement.tagName === 'SVG'
+          const isSocialButton = htmlElement.classList.contains('cl-socialButtonsBlockButton')
+          
+          if (htmlElement.style) {
+            if (isButton && !isSocialButton) {
+              htmlElement.style.setProperty('background-color', '#FFD700', 'important')
+              htmlElement.style.setProperty('background', '#FFD700', 'important')
+              htmlElement.style.setProperty('color', '#333333', 'important')
+            } else if (isInput) {
+              htmlElement.style.setProperty('background-color', '#374151', 'important')
+              htmlElement.style.setProperty('background', '#374151', 'important')
+              htmlElement.style.setProperty('color', '#f9fafb', 'important')
+              htmlElement.style.setProperty('border-color', '#4b5563', 'important')
+            } else if (isSocialButton) {
+              htmlElement.style.setProperty('background-color', '#374151', 'important')
+              htmlElement.style.setProperty('background', '#374151', 'important')
+              htmlElement.style.setProperty('color', '#d1d5db', 'important')
+              htmlElement.style.setProperty('border-color', '#4b5563', 'important')
+            } else if (!isLink && !isImage) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('background', '#1f2937', 'important')
+              htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+              htmlElement.style.setProperty('border-color', '#374151', 'important')
+            }
           }
         })
       }
