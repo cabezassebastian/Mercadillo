@@ -172,60 +172,138 @@ const ClerkDarkMode = () => {
           const htmlButton = button as HTMLElement
           if (htmlButton.textContent?.includes('Continue') || 
               htmlButton.textContent?.includes('Continuar') ||
-              htmlButton.getAttribute('aria-label')?.includes('Continue')) {
-            htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+              htmlButton.getAttribute('aria-label')?.includes('Continue') ||
+              htmlButton.classList.contains('cl-formButtonPrimary') ||
+              (htmlButton as HTMLButtonElement).type === 'submit') {
+            
             htmlButton.style.setProperty('background', '#FFD700', 'important')
+            htmlButton.style.setProperty('background-color', '#FFD700', 'important')
             htmlButton.style.setProperty('color', '#333333', 'important')
             htmlButton.style.setProperty('border', 'none', 'important')
+            htmlButton.style.setProperty('box-shadow', 'none', 'important')
+            htmlButton.style.setProperty('outline', 'none', 'important')
+            htmlButton.style.setProperty('position', 'relative', 'important')
+            htmlButton.style.setProperty('overflow', 'hidden', 'important')
+            htmlButton.style.setProperty('transition', 'all 0.2s ease', 'important')
             
-            // Event listeners para hover
-            htmlButton.addEventListener('mouseenter', () => {
-              htmlButton.style.setProperty('background-color', '#b8860b', 'important')
-              htmlButton.style.setProperty('background', '#b8860b', 'important')
-            })
+            // Remover cualquier pseudo-elemento problemático
+            const style = document.createElement('style')
+            style.textContent = `
+              .dark .cl-formButtonPrimary::before,
+              .dark .cl-formButtonPrimary::after {
+                display: none !important;
+              }
+            `
+            document.head.appendChild(style)
             
-            htmlButton.addEventListener('mouseleave', () => {
-              htmlButton.style.setProperty('background-color', '#FFD700', 'important')
-              htmlButton.style.setProperty('background', '#FFD700', 'important')
-            })
+            // Limpiar event listeners anteriores
+            const newButton = htmlButton.cloneNode(true) as HTMLElement
+            htmlButton.parentNode?.replaceChild(newButton, htmlButton)
+            
+            // Agregar event listeners limpios
+            newButton.addEventListener('mouseenter', (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              newButton.style.setProperty('background', '#b8860b', 'important')
+              newButton.style.setProperty('background-color', '#b8860b', 'important')
+              newButton.style.setProperty('color', '#333333', 'important')
+              newButton.style.setProperty('transform', 'translateY(-1px)', 'important')
+              newButton.style.setProperty('box-shadow', '0 4px 12px rgba(255, 215, 0, 0.3)', 'important')
+            }, { passive: false })
+            
+            newButton.addEventListener('mouseleave', (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              newButton.style.setProperty('background', '#FFD700', 'important')
+              newButton.style.setProperty('background-color', '#FFD700', 'important')
+              newButton.style.setProperty('color', '#333333', 'important')
+              newButton.style.setProperty('transform', 'translateY(0)', 'important')
+              newButton.style.setProperty('box-shadow', 'none', 'important')
+            }, { passive: false })
+            
+            newButton.addEventListener('mousedown', (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              newButton.style.setProperty('background', '#d4af37', 'important')
+              newButton.style.setProperty('background-color', '#d4af37', 'important')
+              newButton.style.setProperty('transform', 'translateY(0)', 'important')
+            }, { passive: false })
+            
+            newButton.addEventListener('mouseup', (e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              newButton.style.setProperty('background', '#b8860b', 'important')
+              newButton.style.setProperty('background-color', '#b8860b', 'important')
+            }, { passive: false })
           }
         })
 
         // Forzar absolutamente todos los elementos del modal a ser oscuros
-        const modalElements = document.querySelectorAll('[data-clerk-modal], [data-clerk-modal] *, .cl-modal, .cl-modal *, .cl-componentModal, .cl-componentModal *, [role="dialog"], [role="dialog"] *')
-        modalElements.forEach((element: Element) => {
-          const htmlElement = element as HTMLElement
-          const isButton = htmlElement.tagName === 'BUTTON' && 
-                          (htmlElement.classList.contains('cl-formButtonPrimary') ||
-                           htmlElement.textContent?.includes('Continue') ||
-                           htmlElement.textContent?.includes('Continuar') ||
-                           (htmlElement as HTMLButtonElement).type === 'submit')
-          const isInput = htmlElement.tagName === 'INPUT'
-          const isLink = htmlElement.tagName === 'A' || htmlElement.classList.contains('cl-footerActionLink')
-          const isImage = htmlElement.tagName === 'IMG' || htmlElement.tagName === 'SVG'
-          const isSocialButton = htmlElement.classList.contains('cl-socialButtonsBlockButton')
-          
-          if (htmlElement.style) {
-            if (isButton && !isSocialButton) {
-              htmlElement.style.setProperty('background-color', '#FFD700', 'important')
-              htmlElement.style.setProperty('background', '#FFD700', 'important')
-              htmlElement.style.setProperty('color', '#333333', 'important')
-            } else if (isInput) {
-              htmlElement.style.setProperty('background-color', '#374151', 'important')
-              htmlElement.style.setProperty('background', '#374151', 'important')
-              htmlElement.style.setProperty('color', '#f9fafb', 'important')
-              htmlElement.style.setProperty('border-color', '#4b5563', 'important')
-            } else if (isSocialButton) {
-              htmlElement.style.setProperty('background-color', '#374151', 'important')
-              htmlElement.style.setProperty('background', '#374151', 'important')
-              htmlElement.style.setProperty('color', '#d1d5db', 'important')
-              htmlElement.style.setProperty('border-color', '#4b5563', 'important')
-            } else if (!isLink && !isImage) {
-              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
-              htmlElement.style.setProperty('background', '#1f2937', 'important')
-              htmlElement.style.setProperty('color', '#f3f4f6', 'important')
-              htmlElement.style.setProperty('border-color', '#374151', 'important')
+        const modalSelectors = [
+          '[data-clerk-modal]',
+          '[data-clerk-modal] *',
+          '.cl-modal',
+          '.cl-modal *',
+          '.cl-componentModal',
+          '.cl-componentModal *',
+          '[role="dialog"]',
+          '[role="dialog"] *',
+          '.cl-card',
+          '.cl-card *',
+          '.cl-signIn',
+          '.cl-signIn *',
+          '.cl-signUp',
+          '.cl-signUp *'
+        ]
+
+        modalSelectors.forEach(selector => {
+          const elements = document.querySelectorAll(selector)
+          elements.forEach((element: Element) => {
+            const htmlElement = element as HTMLElement
+            const isButton = htmlElement.tagName === 'BUTTON' && 
+                            (htmlElement.classList.contains('cl-formButtonPrimary') ||
+                             htmlElement.textContent?.includes('Continue') ||
+                             htmlElement.textContent?.includes('Continuar') ||
+                             (htmlElement as HTMLButtonElement).type === 'submit')
+            const isInput = htmlElement.tagName === 'INPUT'
+            const isLink = htmlElement.tagName === 'A' || htmlElement.classList.contains('cl-footerActionLink')
+            const isImage = htmlElement.tagName === 'IMG' || htmlElement.tagName === 'SVG'
+            const isSocialButton = htmlElement.classList.contains('cl-socialButtonsBlockButton')
+            
+            if (htmlElement.style) {
+              if (isButton && !isSocialButton) {
+                // Ya manejado arriba
+              } else if (isInput) {
+                htmlElement.style.setProperty('background', '#374151', 'important')
+                htmlElement.style.setProperty('background-color', '#374151', 'important')
+                htmlElement.style.setProperty('color', '#f9fafb', 'important')
+                htmlElement.style.setProperty('border', '1px solid #4b5563', 'important')
+              } else if (isSocialButton) {
+                htmlElement.style.setProperty('background', '#374151', 'important')
+                htmlElement.style.setProperty('background-color', '#374151', 'important')
+                htmlElement.style.setProperty('color', '#d1d5db', 'important')
+                htmlElement.style.setProperty('border', '1px solid #4b5563', 'important')
+              } else if (isLink) {
+                htmlElement.style.setProperty('color', '#fbbf24', 'important')
+                htmlElement.style.setProperty('background', 'transparent', 'important')
+                htmlElement.style.setProperty('background-color', 'transparent', 'important')
+              } else if (!isImage) {
+                htmlElement.style.setProperty('background', '#1f2937', 'important')
+                htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+                htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+                htmlElement.style.setProperty('border-color', '#374151', 'important')
+              }
             }
+          })
+        })
+
+        // Forzar el backdrop final
+        const modalBackdrops = document.querySelectorAll('.cl-modalBackdrop, [data-clerk-modal-backdrop]')
+        modalBackdrops.forEach((backdrop: Element) => {
+          const htmlBackdrop = backdrop as HTMLElement
+          if (htmlBackdrop.style) {
+            htmlBackdrop.style.setProperty('background', 'rgba(0, 0, 0, 0.95)', 'important')
+            htmlBackdrop.style.setProperty('background-color', 'rgba(0, 0, 0, 0.95)', 'important')
           }
         })
       }
