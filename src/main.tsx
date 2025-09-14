@@ -17,6 +17,12 @@ import ProtectedRoute from './components/Auth/ProtectedRoute'
 import ErrorBoundary from './components/ErrorBoundary'
 import AuthSync from './components/AuthSync'; // Importa el nuevo componente AuthSync
 
+// Páginas adicionales
+import TermsPage from './pages/TermsPage'
+import PrivacyPage from './pages/PrivacyPage'
+import ShippingPage from './pages/ShippingPage'
+import ContactPage from './pages/ContactPage'
+
 // Paginas de autenticacion de Clerk
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
@@ -55,6 +61,11 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      // Páginas adicionales
+      { path: "terminos", element: <TermsPage /> },
+      { path: "privacidad", element: <PrivacyPage /> },
+      { path: "envios", element: <ShippingPage /> },
+      { path: "contacto", element: <ContactPage /> },
     ],
   },
   {
