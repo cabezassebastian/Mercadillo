@@ -56,7 +56,7 @@
   }
 }
 
-/* Estilos globales para componentes de Clerk con responsividad mejorada */
+/* Estilos globales para componentes de Clerk con responsividad mejorada y modo oscuro */
 .cl-userButtonPopoverCard {
   max-width: 280px !important;
   width: calc(100vw - 2rem) !important;
@@ -65,6 +65,14 @@
   box-sizing: border-box !important;
   border-radius: 12px !important;
   box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.dark .cl-userButtonPopoverCard {
+  background-color: #1f2937 !important;
+  border-color: #374151 !important;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4) !important;
 }
 
 .cl-userButtonPopoverActionButton {
@@ -72,10 +80,41 @@
   font-size: 14px !important;
   border-radius: 8px !important;
   transition: background-color 0.15s ease !important;
+  color: #374151 !important;
+}
+
+.dark .cl-userButtonPopoverActionButton {
+  color: #d1d5db !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.dark .cl-userButtonPopoverActionButton:hover {
+  background-color: #374151 !important;
 }
 
 .cl-userButtonPopoverListItem {
   transition: background-color 0.15s ease !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  color: #374151 !important;
+}
+
+.dark .cl-userButtonPopoverActionButtonText {
+  color: #d1d5db !important;
+}
+
+.cl-userButtonPopoverFooter {
+  background-color: white !important;
+  border-top: 1px solid #e5e7eb !important;
+}
+
+.dark .cl-userButtonPopoverFooter {
+  background-color: #1f2937 !important;
+  border-top-color: #374151 !important;
 }
 
 /* Estilos responsivos para modales de Clerk */
@@ -90,6 +129,116 @@
 .cl-card {
   border-radius: 16px !important;
   box-shadow: 0 10px 40px rgba(0,0,0,0.15) !important;
+  background-color: white !important;
+}
+
+.dark .cl-card {
+  background-color: #1f2937 !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.4) !important;
+}
+
+/* Estilos específicos para el modal background */
+.cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.5) !important;
+}
+
+.dark .cl-modalBackdrop {
+  background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+/* Títulos y subtítulos en modales */
+.cl-headerTitle {
+  color: #374151 !important;
+}
+
+.dark .cl-headerTitle {
+  color: #f3f4f6 !important;
+}
+
+.cl-headerSubtitle {
+  color: #6b7280 !important;
+}
+
+.dark .cl-headerSubtitle {
+  color: #9ca3af !important;
+}
+
+/* Campos de formulario en modales */
+.cl-formFieldInput {
+  background-color: white !important;
+  border-color: #d1d5db !important;
+  color: #111827 !important;
+}
+
+.dark .cl-formFieldInput {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+.cl-formFieldLabel {
+  color: #374151 !important;
+}
+
+.dark .cl-formFieldLabel {
+  color: #d1d5db !important;
+}
+
+/* Botones sociales */
+.cl-socialButtonsBlockButton {
+  background-color: #f9fafb !important;
+  border-color: #d1d5db !important;
+  color: #374151 !important;
+}
+
+.dark .cl-socialButtonsBlockButton {
+  background-color: #374151 !important;
+  border-color: #4b5563 !important;
+  color: #d1d5db !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  background-color: #f3f4f6 !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover {
+  background-color: #4b5563 !important;
+}
+
+/* Divisores */
+.cl-dividerLine {
+  background-color: #d1d5db !important;
+}
+
+.dark .cl-dividerLine {
+  background-color: #4b5563 !important;
+}
+
+.cl-dividerText {
+  color: #6b7280 !important;
+  background-color: white !important;
+}
+
+.dark .cl-dividerText {
+  color: #9ca3af !important;
+  background-color: #1f2937 !important;
+}
+
+/* Enlaces en footer */
+.cl-footerActionLink {
+  color: #d97706 !important;
+}
+
+.dark .cl-footerActionLink {
+  color: #fbbf24 !important;
+}
+
+.cl-footerAction {
+  color: #6b7280 !important;
+}
+
+.dark .cl-footerAction {
+  color: #9ca3af !important;
 }
 
 /* Mejoras específicas para formularios de autenticación */

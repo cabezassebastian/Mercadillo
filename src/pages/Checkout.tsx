@@ -88,9 +88,9 @@ const Checkout: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-hueso py-8">
+    <div className="min-h-screen bg-hueso dark:bg-gray-900 py-8 transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-8">
           Finalizar Compra
         </h1>
 
@@ -98,38 +98,38 @@ const Checkout: React.FC = () => {
           {/* Formulario de envio */}
           <div className="space-y-6">
             <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro mb-6 flex items-center">
-                <User className="w-6 h-6 mr-2 text-amarillo" />
+              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6 flex items-center">
+                <User className="w-6 h-6 mr-2 text-amarillo dark:text-yellow-400" />
                 Informacion de Envio
               </h2>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gris-oscuro mb-2">
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Nombre Completo
                   </label>
                   <input
                     type="text"
                     value={`${user?.nombre || ''} ${user?.apellido || ''}`}
                     disabled
-                    className="input-field bg-gray-100"
+                    className="input-field bg-gray-100 dark:bg-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gris-oscuro mb-2">
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Email
                   </label>
                   <input
                     type="email"
                     value={user?.email || ''}
                     disabled
-                    className="input-field bg-gray-100"
+                    className="input-field bg-gray-100 dark:bg-gray-700"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gris-oscuro mb-2">
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Telefono
                   </label>
                   <input
@@ -144,7 +144,7 @@ const Checkout: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gris-oscuro mb-2">
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Direccion de Envio
                   </label>
                   <textarea
@@ -162,13 +162,13 @@ const Checkout: React.FC = () => {
 
             {/* Metodo de pago */}
             <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro mb-6 flex items-center">
-                <CreditCard className="w-6 h-6 mr-2 text-amarillo" />
+              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6 flex items-center">
+                <CreditCard className="w-6 h-6 mr-2 text-amarillo dark:text-yellow-400" />
                 Metodo de Pago
               </h2>
 
               <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg">
+                <div className="flex items-center space-x-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
                   <input
                     type="radio"
                     id="stripe"
@@ -176,15 +176,15 @@ const Checkout: React.FC = () => {
                     value="stripe"
                     checked={formData.metodoPago === 'stripe'}
                     onChange={handleInputChange}
-                    className="text-amarillo"
+                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
                   />
                   <label htmlFor="stripe" className="flex-1">
-                    <div className="font-medium text-gris-oscuro">Tarjeta de Credito/Debito</div>
-                    <div className="text-sm text-gray-600">Visa, Mastercard, American Express</div>
+                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Tarjeta de Credito/Debito</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Visa, Mastercard, American Express</div>
                   </label>
                 </div>
 
-                <div className="flex items-center space-x-3 p-4 border border-gray-300 rounded-lg">
+                <div className="flex items-center space-x-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
                   <input
                     type="radio"
                     id="mercadopago"
@@ -192,11 +192,11 @@ const Checkout: React.FC = () => {
                     value="mercadopago"
                     checked={formData.metodoPago === 'mercadopago'}
                     onChange={handleInputChange}
-                    className="text-amarillo"
+                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
                   />
                   <label htmlFor="mercadopago" className="flex-1">
-                    <div className="font-medium text-gris-oscuro">Mercado Pago</div>
-                    <div className="text-sm text-gray-600">Pago con cuenta Mercado Pago</div>
+                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Mercado Pago</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Pago con cuenta Mercado Pago</div>
                   </label>
                 </div>
               </div>
@@ -212,15 +212,15 @@ const Checkout: React.FC = () => {
                   checked={formData.terminos}
                   onChange={handleInputChange}
                   required
-                  className="mt-1 text-amarillo"
+                  className="mt-1 text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
                 />
-                <label htmlFor="terminos" className="text-sm text-gray-600">
+                <label htmlFor="terminos" className="text-sm text-gray-600 dark:text-gray-400">
                   Acepto los{' '}
-                  <a href="/terminos" className="text-amarillo hover:underline">
+                  <a href="/terminos" className="text-amarillo dark:text-yellow-400 hover:underline">
                     terminos y condiciones
                   </a>{' '}
                   y la{' '}
-                  <a href="/privacidad" className="text-amarillo hover:underline">
+                  <a href="/privacidad" className="text-amarillo dark:text-yellow-400 hover:underline">
                     politica de privacidad
                   </a>
                 </label>
@@ -231,14 +231,14 @@ const Checkout: React.FC = () => {
           {/* Resumen del pedido */}
           <div className="space-y-6">
             <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro mb-6">
+              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6">
                 Resumen del Pedido
               </h2>
 
               <div className="space-y-4">
                 {items.map((item) => (
                   <div key={item.producto.id} className="flex items-center space-x-3">
-                    <div className="w-12 h-12 overflow-hidden rounded-lg bg-gray-100">
+                    <div className="w-12 h-12 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
                       <img
                         src={item.producto.imagen}
                         alt={item.producto.nombre}
@@ -246,32 +246,32 @@ const Checkout: React.FC = () => {
                       />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-gris-oscuro text-sm">
+                      <h4 className="font-medium text-gris-oscuro dark:text-gray-100 text-sm">
                         {item.producto.nombre}
                       </h4>
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
                         Cantidad: {item.cantidad}
                       </p>
                     </div>
-                    <span className="font-medium text-dorado">
+                    <span className="font-medium text-dorado dark:text-yellow-400">
                       {formatPrice(item.producto.precio * item.cantidad)}
                     </span>
                   </div>
                 ))}
               </div>
 
-              <div className="border-t border-gray-200 pt-4 mt-6 space-y-2">
+              <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mt-6 space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-medium">{formatPrice(getSubtotal())}</span>
+                  <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+                  <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getSubtotal())}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">IGV (18%):</span>
-                  <span className="font-medium">{formatPrice(getIGV())}</span>
+                  <span className="text-gray-600 dark:text-gray-400">IGV (18%):</span>
+                  <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getIGV())}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold">
-                  <span className="text-gris-oscuro">Total:</span>
-                  <span className="text-dorado">{formatPrice(getTotal())}</span>
+                  <span className="text-gris-oscuro dark:text-gray-100">Total:</span>
+                  <span className="text-dorado dark:text-yellow-400">{formatPrice(getTotal())}</span>
                 </div>
               </div>
 
