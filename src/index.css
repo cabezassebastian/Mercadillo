@@ -770,6 +770,246 @@
   color: #f9fafb !important;
 }
 
+/* Forzar el modal backdrop y contenedor completo */
+.dark .cl-modalBackdrop,
+.dark [data-clerk-modal-backdrop] {
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* El contenedor principal del modal que aparece blanco */
+.dark .cl-modalContent,
+.dark .cl-componentModal,
+.dark [data-clerk-modal] {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+}
+
+/* Elementos específicos del card que aparecen blancos */
+.dark .cl-signIn-start,
+.dark .cl-signUp-start,
+.dark .cl-card {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Header del modal */
+.dark .cl-header,
+.dark .cl-signIn-header,
+.dark .cl-signUp-header {
+  background: #1f2937 !important;
+  border-bottom: 1px solid #374151 !important;
+}
+
+/* Main content area */
+.dark .cl-main,
+.dark .cl-signIn-main,
+.dark .cl-signUp-main {
+  background: #1f2937 !important;
+}
+
+/* Footer del modal */
+.dark .cl-footer,
+.dark .cl-signIn-footer,
+.dark .cl-signUp-footer {
+  background: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+}
+
+/* Botón Continue específico con hover corregido */
+.dark .cl-formButtonPrimary {
+  background: #FFD700 !important;
+  color: #333333 !important;
+  border: none !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.dark .cl-formButtonPrimary:hover {
+  background: #b8860b !important;
+  color: #333333 !important;
+}
+
+.dark .cl-formButtonPrimary:focus {
+  background: #b8860b !important;
+  color: #333333 !important;
+  outline: 2px solid #FFD700 !important;
+  outline-offset: 2px !important;
+}
+
+/* Botones sociales */
+.dark .cl-socialButtonsBlockButton {
+  background: #374151 !important;
+  color: #d1d5db !important;
+  border: 1px solid #4b5563 !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover {
+  background: #4b5563 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Input fields */
+.dark .cl-formFieldInput {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+.dark .cl-formFieldInput:focus {
+  border-color: #FFD700 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2) !important;
+}
+
+/* Labels */
+.dark .cl-formFieldLabel {
+  color: #d1d5db !important;
+}
+
+/* Divider */
+.dark .cl-dividerLine {
+  background: #4b5563 !important;
+  border: none !important;
+}
+
+.dark .cl-dividerText {
+  background: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+/* Links */
+.dark .cl-footerActionLink {
+  color: #fbbf24 !important;
+  background: transparent !important;
+}
+
+.dark .cl-footerActionLink:hover {
+  color: #d97706 !important;
+}
+
+/* Forzar todos los elementos internos del modal */
+.dark [data-clerk-modal] *:not(.cl-formButtonPrimary):not(.cl-footerActionLink):not(img):not(svg) {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Asegurar que el contenedor root del modal sea oscuro */
+.dark .cl-rootBox {
+  background: #1f2937 !important;
+}
+
+/* Form container */
+.dark .cl-form {
+  background: #1f2937 !important;
+}
+
+/* Loading states */
+.dark .cl-spinner {
+  border-color: #4b5563 #4b5563 #FFD700 #FFD700 !important;
+}
+
+/* Estilos ultra-específicos para el modal de autenticación */
+.dark .cl-internal-b3fm6y {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Contenedor principal del card */
+.dark .cl-card,
+.dark .cl-signIn-start,
+.dark .cl-signUp-start {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 12px !important;
+}
+
+/* Contenido principal */
+.dark .cl-main {
+  background: #1f2937 !important;
+  padding: 2rem !important;
+}
+
+/* Header */
+.dark .cl-header {
+  background: #1f2937 !important;
+  border-bottom: none !important;
+}
+
+/* Footer */
+.dark .cl-footer {
+  background: #1f2937 !important;
+  border-top: 1px solid #374151 !important;
+  padding: 1rem 2rem !important;
+}
+
+/* Modal backdrop completamente oscuro */
+.dark .cl-modalBackdrop {
+  background: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Cualquier elemento con clases internas de Clerk */
+.dark [class*="cl-internal-"] {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Forzar absolutamente todos los elementos del modal */
+.dark [data-clerk-modal],
+.dark [data-clerk-modal] *:not(input):not(button):not(a):not(img):not(svg) {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+}
+
+/* Inputs específicos */
+.dark [data-clerk-modal] input {
+  background: #374151 !important;
+  border: 1px solid #4b5563 !important;
+  color: #f9fafb !important;
+}
+
+/* Botones específicos */
+.dark [data-clerk-modal] button.cl-formButtonPrimary {
+  background: #FFD700 !important;
+  color: #333333 !important;
+}
+
+.dark [data-clerk-modal] button.cl-socialButtonsBlockButton {
+  background: #374151 !important;
+  color: #d1d5db !important;
+  border: 1px solid #4b5563 !important;
+}
+
+/* Enlaces específicos */
+.dark [data-clerk-modal] a.cl-footerActionLink {
+  color: #fbbf24 !important;
+  background: transparent !important;
+}
+
+/* Títulos y textos */
+.dark .cl-headerTitle {
+  color: #f3f4f6 !important;
+}
+
+.dark .cl-headerSubtitle {
+  color: #9ca3af !important;
+}
+
+/* Form fields labels */
+.dark .cl-formFieldLabel {
+  color: #d1d5db !important;
+}
+
+/* Error messages */
+.dark .cl-formFieldError {
+  color: #ef4444 !important;
+}
+
+/* Success messages */
+.dark .cl-formFieldSuccess {
+  color: #10b981 !important;
+}
+
 /* Mejoras específicas para formularios de autenticación */
 .cl-formFieldInput {
   font-size: 16px !important;
