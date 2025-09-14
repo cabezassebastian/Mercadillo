@@ -34,7 +34,7 @@ const SignUpPage = () => {
                 socialButtonsBlockButtonText: "font-medium text-gris-oscuro dark:text-gray-200",
                 dividerLine: "bg-gray-300 dark:bg-gray-600 my-6",
                 dividerText: "text-gris-claro dark:text-gray-400 text-sm px-4 bg-white dark:bg-gray-800",
-                formButtonPrimary: "!bg-amarillo hover:!bg-dorado !text-gris-oscuro font-semibold rounded-lg py-3 px-4 w-full transition-colors duration-200 no-underline decoration-none border-none outline-none shadow-none",
+                formButtonPrimary: "!bg-amarillo hover:!bg-dorado !text-gris-oscuro font-semibold rounded-lg py-3 px-4 w-full transition-colors duration-200 !no-underline !decoration-none !border-none !outline-none !shadow-none",
                 formFieldInput: "border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
                 formFieldLabel: "text-gris-oscuro dark:text-gray-200 font-medium mb-2 block text-left",
                 footerActionLink: "text-amarillo hover:text-dorado font-medium transition-colors duration-200",
