@@ -1,10 +1,11 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { supabase as globalSupabase } from "@/lib/supabaseClient";
 
 const AuthSync: React.FC = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
   const { user } = useUser();
+  const syncedRef = useRef<string | null>(null); // Para evitar sincronización duplicada
 
   useEffect(() => {
     const syncClerkWithSupabase = async () => {
@@ -13,16 +14,19 @@ const AuthSync: React.FC = () => {
 
       if (!isLoaded) {
         console.log("AuthSync: Clerk aún no está listo. Sincronizacion pospuesta.");
-        return; // Esperar a que Clerk cargue
+        return;
       }
 
       if (isSignedIn && user) {
+        // Evitar sincronización duplicada para el mismo usuario
+        if (syncedRef.current === user.id) {
+          return;
+        }
+
         console.log("AuthSync: Usuario autenticado en Clerk. Intentando obtener JWT para Supabase.");
         try {
-          // Usar tu template actual (que funciona)
           let clerkToken = await getToken({ template: "supabase" });
           
-          // Si no hay template configurado, usar el token por defecto
           if (!clerkToken) {
             console.log("AuthSync: No se encontró template 'supabase', usando token por defecto.");
             clerkToken = await getToken();
@@ -31,16 +35,10 @@ const AuthSync: React.FC = () => {
           if (clerkToken) {
             console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}, Inicio: ${clerkToken.substring(0, 20)}, Fin: ${clerkToken.substring(clerkToken.length - 20)}`);
             
-            // Dado que tu template no tiene el sub correcto, vamos a saltar la autenticación JWT
-            // y crear/actualizar el usuario directamente usando el service role
             console.log("AuthSync: Saltando autenticación JWT y creando usuario directamente.");
             
-            // Crear usuario directamente en la tabla usando tu token simplificado
             try {
-              // Usar la instancia global existente en lugar de crear una nueva
-              const { supabaseAdmin } = await import('@/lib/supabase');
-
-              const { error: upsertError } = await supabaseAdmin
+              const { error: upsertError } = await globalSupabase
                 .from('usuarios')
                 .upsert({
                   id: user.id,
@@ -58,9 +56,7 @@ const AuthSync: React.FC = () => {
                 console.error("AuthSync: Error al crear usuario:", upsertError.message);
               } else {
                 console.log("AuthSync: Usuario creado/actualizado exitosamente en Supabase.");
-                
-                // Ahora establecer una sesión mock para que Supabase funcione
-                // Esto es un workaround mientras solucionamos el JWT
+                syncedRef.current = user.id; // Marcar como sincronizado
                 console.log("AuthSync: Estableciendo contexto de usuario para Supabase.");
               }
             } catch (manualError) {
@@ -76,6 +72,7 @@ const AuthSync: React.FC = () => {
         }
       } else {
         console.log("AuthSync: Usuario no autenticado en Clerk. Cerrando sesion de Supabase.");
+        syncedRef.current = null; // Reset sincronización
         try {
           const { error: signOutError } = await globalSupabase.auth.signOut();
           if (signOutError) {
@@ -90,9 +87,9 @@ const AuthSync: React.FC = () => {
     };
 
     syncClerkWithSupabase();
-  }, [isLoaded, isSignedIn, getToken, user]);
+  }, [isLoaded, isSignedIn, user?.id]); // Solo sincronizar cuando cambie el ID del usuario
 
-  return null; // Este componente no renderiza nada visible
+  return null;
 };
 
 export default AuthSync;
