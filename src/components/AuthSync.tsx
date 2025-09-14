@@ -37,14 +37,10 @@ const AuthSync: React.FC = () => {
             
             // Crear usuario directamente en la tabla usando tu token simplificado
             try {
-              // Primero, crear el cliente con service role para bypass RLS
-              const { createClient } = await import('@supabase/supabase-js');
-              const supabaseService = createClient(
-                import.meta.env.VITE_SUPABASE_URL!,
-                import.meta.env.VITE_SUPABASE_ANON_KEY!
-              );
+              // Usar la instancia global existente en lugar de crear una nueva
+              const { supabaseAdmin } = await import('@/lib/supabase');
 
-              const { error: upsertError } = await supabaseService
+              const { error: upsertError } = await supabaseAdmin
                 .from('usuarios')
                 .upsert({
                   id: user.id,
