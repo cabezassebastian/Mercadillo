@@ -46,6 +46,7 @@ const Checkout: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-user-id': user?.id || '', // Agregar el ID del usuario
         },
         body: JSON.stringify({
           items: items.map(item => ({
@@ -57,7 +58,8 @@ const Checkout: React.FC = () => {
           })),
           total: getTotal(),
           direccion: formData.direccion,
-          metodo_pago: formData.metodoPago
+          metodo_pago: formData.metodoPago,
+          usuario_id: user?.id // También enviarlo en el body como backup
         })
       })
 
