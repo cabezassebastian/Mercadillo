@@ -270,7 +270,7 @@ const ClerkDarkMode = () => {
 
           if (htmlChild.style) {
             if (isPrimaryButton) {
-              // Mantener botón primario dorado
+              // Forzar botón primario con colores fijos (no usar modo oscuro)
               htmlChild.style.setProperty('background-color', '#FFD700', 'important')
               htmlChild.style.setProperty('background', '#FFD700', 'important')
               htmlChild.style.setProperty('color', '#333333', 'important')
@@ -281,6 +281,17 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('box-shadow', 'none', 'important')
               htmlChild.style.setProperty('outline', 'none', 'important')
               htmlChild.style.setProperty('border', 'none', 'important')
+              
+              // Agregar event listeners para hover
+              htmlChild.addEventListener('mouseenter', () => {
+                htmlChild.style.setProperty('background-color', '#FFC000', 'important')
+                htmlChild.style.setProperty('color', '#333333', 'important')
+              })
+              
+              htmlChild.addEventListener('mouseleave', () => {
+                htmlChild.style.setProperty('background-color', '#FFD700', 'important')
+                htmlChild.style.setProperty('color', '#333333', 'important')
+              })
             } else if (isInput) {
               // Inputs oscuros
               htmlChild.style.setProperty('background-color', '#374151', 'important')
@@ -382,8 +393,12 @@ const ClerkDarkMode = () => {
         // Remover clase dark
         htmlElement.classList.remove('dark')
         
-        // Limpiar estilos inline forzados
-        if (htmlElement.style) {
+        // Limpiar estilos inline forzados (excepto botones primarios)
+        const isPrimaryButton = htmlElement.classList.contains('cl-formButtonPrimary') ||
+                               htmlElement.textContent?.includes('Continue') ||
+                               htmlElement.textContent?.includes('Continuar')
+        
+        if (htmlElement.style && !isPrimaryButton) {
           htmlElement.style.removeProperty('background-color')
           htmlElement.style.removeProperty('color')
           htmlElement.style.removeProperty('border-color')
@@ -393,7 +408,23 @@ const ClerkDarkMode = () => {
         }
       })
 
-      // Limpiar elementos específicos
+      // Mantener estilos del botón primario incluso en modo claro
+      const primaryButtons = document.querySelectorAll('button[type="submit"], .cl-formButtonPrimary')
+      primaryButtons.forEach((button: Element) => {
+        const htmlButton = button as HTMLElement
+        const isPrimaryButton = htmlButton.textContent?.includes('Continue') ||
+                               htmlButton.textContent?.includes('Continuar') ||
+                               htmlButton.classList.contains('cl-formButtonPrimary')
+        
+        if (isPrimaryButton && htmlButton.style) {
+          htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+          htmlButton.style.setProperty('color', '#333333', 'important')
+          htmlButton.style.setProperty('text-decoration', 'none', 'important')
+          htmlButton.style.setProperty('border', 'none', 'important')
+        }
+      })
+
+      // Limpiar elementos específicos (excepto botones primarios)
       const allSelectors = [
         '.cl-card',
         '.cl-signIn-start',
@@ -439,11 +470,15 @@ const ClerkDarkMode = () => {
             htmlElement.style.removeProperty('background')
           }
           
-          // También limpiar todos los hijos
+          // También limpiar todos los hijos (excepto botones primarios)
           const children = element.querySelectorAll('*')
           children.forEach((child: Element) => {
             const htmlChild = child as HTMLElement
-            if (htmlChild.style) {
+            const isPrimaryButton = htmlChild.classList.contains('cl-formButtonPrimary') ||
+                                   htmlChild.textContent?.includes('Continue') ||
+                                   htmlChild.textContent?.includes('Continuar')
+            
+            if (htmlChild.style && !isPrimaryButton) {
               htmlChild.style.removeProperty('background-color')
               htmlChild.style.removeProperty('color')
               htmlChild.style.removeProperty('border-color')
