@@ -89,11 +89,12 @@ const ClerkDarkMode = () => {
         })
 
         // Forzar todos los modales y sus contenidos
-        const modals = document.querySelectorAll('[data-clerk-modal], .cl-modal, [role="dialog"]')
+        const modals = document.querySelectorAll('[data-clerk-modal], .cl-modal, [role="dialog"], .cl-modalContent, .cl-componentModal')
         modals.forEach((modal: Element) => {
           const htmlModal = modal as HTMLElement
           if (htmlModal.style) {
             htmlModal.style.setProperty('background-color', '#1f2937', 'important')
+            htmlModal.style.setProperty('border', '1px solid #374151', 'important')
           }
           
           // También forzar todos los hijos del modal
@@ -105,12 +106,62 @@ const ClerkDarkMode = () => {
             const isLink = htmlChild.classList.contains('cl-footerActionLink') ||
                          htmlChild.hasAttribute('data-clerk-link')
             const isImage = htmlChild.tagName === 'IMG' || htmlChild.tagName === 'SVG'
+            const isInput = htmlChild.tagName === 'INPUT' || htmlChild.classList.contains('cl-formFieldInput')
             
             if (!isButton && !isLink && !isImage && htmlChild.style) {
               htmlChild.style.setProperty('background-color', '#1f2937', 'important')
               htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+              htmlChild.style.setProperty('border-color', '#374151', 'important')
+            }
+            
+            // Inputs específicos
+            if (isInput && htmlChild.style) {
+              htmlChild.style.setProperty('background-color', '#374151', 'important')
+              htmlChild.style.setProperty('color', '#f9fafb', 'important')
+              htmlChild.style.setProperty('border-color', '#4b5563', 'important')
             }
           })
+        })
+
+        // Forzar específicamente elementos de sign-in y sign-up
+        const authElements = document.querySelectorAll('.cl-signIn, .cl-signUp, .cl-signIn-start, .cl-signUp-start')
+        authElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          if (htmlElement.style) {
+            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+            htmlElement.style.setProperty('border', '1px solid #374151', 'important')
+          }
+        })
+
+        // Forzar el backdrop del modal
+        const backdrops = document.querySelectorAll('.cl-modalBackdrop, [data-clerk-modal-backdrop]')
+        backdrops.forEach((backdrop: Element) => {
+          const htmlBackdrop = backdrop as HTMLElement
+          if (htmlBackdrop.style) {
+            htmlBackdrop.style.setProperty('background-color', 'rgba(0, 0, 0, 0.8)', 'important')
+          }
+        })
+
+        // Forzar botones primarios para mantener el color correcto
+        const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary')
+        primaryButtons.forEach((button: Element) => {
+          const htmlButton = button as HTMLElement
+          if (htmlButton.style) {
+            htmlButton.style.setProperty('background-color', '#FFD700', 'important')
+            htmlButton.style.setProperty('color', '#333333', 'important')
+            htmlButton.style.setProperty('border', 'none', 'important')
+          }
+        })
+
+        // Forzar botones sociales
+        const socialButtons = document.querySelectorAll('.cl-socialButtonsBlockButton')
+        socialButtons.forEach((button: Element) => {
+          const htmlButton = button as HTMLElement
+          if (htmlButton.style) {
+            htmlButton.style.setProperty('background-color', '#374151', 'important')
+            htmlButton.style.setProperty('color', '#d1d5db', 'important')
+            htmlButton.style.setProperty('border', '1px solid #4b5563', 'important')
+          }
         })
       }
     }
