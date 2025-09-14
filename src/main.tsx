@@ -92,45 +92,57 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
         publishableKey={clerkPubKey}
         signInFallbackRedirectUrl="/"
         signUpFallbackRedirectUrl="/"
+        localization={{
+          locale: "es-ES"
+        }}
         appearance={{
           elements: {
-            rootBox: "",
-            headerTitle: "text-gris-oscuro",
-            headerSubtitle: "text-gris-claro",
-            socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200",
-            formButtonPrimary: "bg-yellow-400 hover:bg-yellow-500 text-black font-semibold rounded-lg py-2",
-            formFieldInput: "border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-yellow-400",
-            footerActionLink: "text-amarillo hover:text-dorado",
-            closeButton: "z-50 text-gris-oscuro top-4 right-4 focus:ring-amarillo focus:border-amarillo",
+            rootBox: "w-full max-w-md mx-auto px-4",
+            card: "w-full max-w-md mx-auto bg-white rounded-lg shadow-lg border border-gray-200 p-6 sm:p-8",
+            headerTitle: "text-gris-oscuro text-xl sm:text-2xl font-bold text-center mb-2",
+            headerSubtitle: "text-gris-claro text-sm sm:text-base text-center mb-6",
+            socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200 w-full py-3 rounded-lg font-medium transition-colors duration-200 mb-3",
+            socialButtonsBlockButtonText: "text-sm sm:text-base",
+            dividerLine: "bg-gray-300",
+            dividerText: "text-gris-claro text-sm",
+            formButtonPrimary: "bg-amarillo hover:bg-dorado text-gris-oscuro font-semibold rounded-lg py-3 w-full text-sm sm:text-base transition-colors duration-200",
+            formFieldInput: "border border-gray-300 rounded-lg px-3 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo text-sm sm:text-base",
+            formFieldLabel: "text-gris-oscuro font-medium mb-2 block text-sm sm:text-base",
+            footerActionLink: "text-amarillo hover:text-dorado font-medium",
+            closeButton: "z-50 text-gris-oscuro hover:text-gray-600 focus:ring-amarillo focus:border-amarillo",
             userButtonPopoverCard: {
-              width: "220px",
-              borderRadius: "10px",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+              width: "280px",
+              maxWidth: "calc(100vw - 2rem)",
+              borderRadius: "12px",
+              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
               fontSize: "14px",
-              padding: "6px",
+              padding: "8px",
               backgroundColor: "white", 
               border: "1px solid rgb(229 231 235)",
             },
-            userButtonPopoverListItem: {},
-            userButtonPopoverListItemText: "text-sm",
-            userButtonPopoverListItemHover: "bg-gray-100",
+            userButtonPopoverListItem: "hover:bg-hueso transition-colors duration-150",
+            userButtonPopoverListItemText: "text-sm font-medium",
             userButtonPopoverActionButton: {
-              padding: "4px 8px",
+              padding: "6px 12px",
               fontSize: "14px",
+              borderRadius: "8px",
             },
             userButtonPopoverFooter: {
-              fontSize: "11px",
-              marginTop: "4px",
+              fontSize: "12px",
+              marginTop: "8px",
+              color: "#666",
             },
           },
           variables: {
             colorPrimary: "#FFD700",
             colorText: "#333333",
-            colorBackground: "#f5f1e9",
-            colorInputBackground: "#f5f1e9",
+            colorBackground: "#f8f9fa",
+            colorInputBackground: "#f8f9fa",
             colorInputText: "#333333",
-            borderRadius: "0.5rem",
+            colorNeutral: "#666666",
+            borderRadius: "0.75rem",
             fontFamily: "Inter, sans-serif",
+            spacingUnit: "1rem",
           }
         }}
       >
