@@ -274,6 +274,13 @@ const ClerkDarkMode = () => {
               htmlChild.style.setProperty('background-color', '#FFD700', 'important')
               htmlChild.style.setProperty('background', '#FFD700', 'important')
               htmlChild.style.setProperty('color', '#333333', 'important')
+              htmlChild.style.setProperty('text-decoration', 'none', 'important')
+              htmlChild.style.setProperty('text-decoration-line', 'none', 'important')
+              htmlChild.style.setProperty('text-underline-offset', 'unset', 'important')
+              htmlChild.style.setProperty('border-bottom', 'none', 'important')
+              htmlChild.style.setProperty('box-shadow', 'none', 'important')
+              htmlChild.style.setProperty('outline', 'none', 'important')
+              htmlChild.style.setProperty('border', 'none', 'important')
             } else if (isInput) {
               // Inputs oscuros
               htmlChild.style.setProperty('background-color', '#374151', 'important')
