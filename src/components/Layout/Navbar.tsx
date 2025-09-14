@@ -4,6 +4,7 @@ import { useUser, UserButton } from '@clerk/clerk-react'
 import { ShoppingCart, Menu, X, Search } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
+import ThemeToggle from '@/components/ThemeToggle'
 
 const Navbar: React.FC = () => {
   const { user } = useUser()
@@ -45,12 +46,13 @@ const Navbar: React.FC = () => {
   }
 
   return (
-    <nav className="bg-blanco shadow-md sticky top-0 z-50">
+    <nav className="bg-blanco dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2">
-            <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-16 w-auto" />
+          <Link to="/" className="flex items-center space-x-2 relative overflow-hidden rounded-lg">
+            <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-16 w-auto transition-all duration-300" />
+            <div className="absolute inset-0 bg-black bg-opacity-0 hover:bg-opacity-20 dark:bg-opacity-10 dark:hover:bg-opacity-30 transition-all duration-300 rounded-lg"></div>
           </Link>
 
           {/* Desktop Navigation with Conditional Search */}
@@ -65,7 +67,7 @@ const Navbar: React.FC = () => {
                     placeholder="Buscar productos..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm"
+                    className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                   />
                 </div>
               </form>
@@ -76,7 +78,7 @@ const Navbar: React.FC = () => {
               <Link
                 key={item.name}
                 to={item.path}
-                className="text-gris-oscuro hover:text-dorado transition-colors duration-200 font-medium"
+                className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
               >
                 {item.name}
               </Link>
@@ -85,10 +87,13 @@ const Navbar: React.FC = () => {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
+            {/* Theme Toggle */}
+            <ThemeToggle />
+            
             {/* Cart */}
             <Link
               to="/carrito"
-              className="relative p-2 text-gris-oscuro hover:text-dorado transition-colors duration-200"
+              className="relative p-2 text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200"
             >
               <ShoppingCart className="w-6 h-6" />
               {getTotalItems() > 0 && (
@@ -107,7 +112,7 @@ const Navbar: React.FC = () => {
               <div className="hidden md:flex items-center space-x-2">
                 <Link
                   to="/sign-in"
-                  className="text-gris-oscuro hover:text-dorado transition-colors duration-200 font-medium"
+                  className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
                 >
                   Iniciar Sesión
                 </Link>
@@ -123,7 +128,7 @@ const Navbar: React.FC = () => {
             {/* Mobile menu button */}
             <button
               onClick={toggleMenu}
-              className="md:hidden p-2 text-gris-oscuro hover:text-dorado transition-colors duration-200"
+              className="md:hidden p-2 text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200"
             >
               {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -132,7 +137,7 @@ const Navbar: React.FC = () => {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200">
+          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
             <div className="flex flex-col space-y-4">
               {/* Mobile Search Bar - Solo en página de inicio */}
               {isHomePage && (
@@ -144,7 +149,7 @@ const Navbar: React.FC = () => {
                       placeholder="Buscar productos..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm"
+                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
                     />
                   </div>
                 </form>
@@ -154,7 +159,7 @@ const Navbar: React.FC = () => {
                 <Link
                   key={item.name}
                   to={item.path}
-                  className="text-gris-oscuro hover:text-dorado transition-colors duration-200 font-medium"
+                  className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   {item.name}
@@ -165,7 +170,7 @@ const Navbar: React.FC = () => {
                 <>
                   <Link
                     to="/sign-in"
-                    className="text-gris-oscuro hover:text-dorado transition-colors duration-200 font-medium"
+                    className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Iniciar Sesión

@@ -5,6 +5,9 @@ import { ClerkProvider } from '@clerk/clerk-react'
 import App from './App.tsx'
 import './index.css'
 
+// Importaciones de contextos
+import { ThemeProvider } from './contexts/ThemeContext'
+
 // Importaciones de paginas y rutas protegidas
 import Home from './pages/Home'
 import Catalog from './pages/Catalog'
@@ -88,68 +91,70 @@ if (!clerkPubKey) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <ErrorBoundary>
-      <ClerkProvider
-        publishableKey={clerkPubKey}
-        signInFallbackRedirectUrl="/"
-        signUpFallbackRedirectUrl="/"
-        localization={{
-          locale: "es-ES"
-        }}
-        appearance={{
-          elements: {
-            rootBox: "w-full max-w-md mx-auto",
-            card: "w-full bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden",
-            headerTitle: "text-gris-oscuro text-2xl font-bold text-center mb-2",
-            headerSubtitle: "text-gris-claro text-center mb-6",
-            socialButtonsBlockButton: "bg-hueso text-gris-oscuro hover:bg-gray-200 w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 mb-4 border border-gray-300",
-            socialButtonsBlockButtonText: "font-medium",
-            dividerLine: "bg-gray-300 my-6",
-            dividerText: "text-gris-claro text-sm px-4 bg-white",
-            formButtonPrimary: "bg-amarillo hover:bg-dorado text-gris-oscuro font-semibold rounded-lg py-3 px-4 w-full transition-colors duration-200",
-            formFieldInput: "border border-gray-300 rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 placeholder-gray-400",
-            formFieldLabel: "text-gris-oscuro font-medium mb-2 block text-left",
-            footerActionLink: "text-amarillo hover:text-dorado font-medium transition-colors duration-200",
-            footerAction: "text-center mt-6 text-sm",
-            closeButton: "text-gris-oscuro hover:text-gray-600 focus:ring-amarillo focus:border-amarillo",
-            userButtonPopoverCard: {
-              width: "280px",
-              maxWidth: "calc(100vw - 2rem)",
-              borderRadius: "12px",
-              boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
-              fontSize: "14px",
-              padding: "8px",
-              backgroundColor: "white", 
-              border: "1px solid rgb(229 231 235)",
+      <ThemeProvider>
+        <ClerkProvider
+          publishableKey={clerkPubKey}
+          signInFallbackRedirectUrl="/"
+          signUpFallbackRedirectUrl="/"
+          localization={{
+            locale: "es-ES"
+          }}
+          appearance={{
+            elements: {
+              rootBox: "w-full max-w-md mx-auto",
+              card: "w-full bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 overflow-hidden",
+              headerTitle: "text-gris-oscuro dark:text-gray-100 text-2xl font-bold text-center mb-2",
+              headerSubtitle: "text-gris-claro dark:text-gray-400 text-center mb-6",
+              socialButtonsBlockButton: "bg-hueso dark:bg-gray-700 text-gris-oscuro dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-600 w-full py-3 px-4 rounded-lg font-medium transition-colors duration-200 mb-4 border border-gray-300 dark:border-gray-600",
+              socialButtonsBlockButtonText: "font-medium",
+              dividerLine: "bg-gray-300 dark:bg-gray-600 my-6",
+              dividerText: "text-gris-claro dark:text-gray-400 text-sm px-4 bg-white dark:bg-gray-800",
+              formButtonPrimary: "bg-amarillo hover:bg-dorado text-gris-oscuro font-semibold rounded-lg py-3 px-4 w-full transition-colors duration-200",
+              formFieldInput: "border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-3 w-full focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 placeholder-gray-400 dark:placeholder-gray-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100",
+              formFieldLabel: "text-gris-oscuro dark:text-gray-200 font-medium mb-2 block text-left",
+              footerActionLink: "text-amarillo hover:text-dorado font-medium transition-colors duration-200",
+              footerAction: "text-center mt-6 text-sm",
+              closeButton: "text-gris-oscuro dark:text-gray-200 hover:text-gray-600 dark:hover:text-gray-400 focus:ring-amarillo focus:border-amarillo",
+              userButtonPopoverCard: {
+                width: "280px",
+                maxWidth: "calc(100vw - 2rem)",
+                borderRadius: "12px",
+                boxShadow: "0 8px 25px rgba(0,0,0,0.15)",
+                fontSize: "14px",
+                padding: "8px",
+                backgroundColor: "white", 
+                border: "1px solid rgb(229 231 235)",
+              },
+              userButtonPopoverListItem: "hover:bg-hueso dark:hover:bg-gray-700 transition-colors duration-150",
+              userButtonPopoverListItemText: "text-sm font-medium text-gray-900 dark:text-gray-100",
+              userButtonPopoverActionButton: {
+                padding: "6px 12px",
+                fontSize: "14px",
+                borderRadius: "8px",
+              },
+              userButtonPopoverFooter: {
+                fontSize: "12px",
+                marginTop: "8px",
+                color: "#666",
+              },
             },
-            userButtonPopoverListItem: "hover:bg-hueso transition-colors duration-150",
-            userButtonPopoverListItemText: "text-sm font-medium",
-            userButtonPopoverActionButton: {
-              padding: "6px 12px",
-              fontSize: "14px",
-              borderRadius: "8px",
-            },
-            userButtonPopoverFooter: {
-              fontSize: "12px",
-              marginTop: "8px",
-              color: "#666",
-            },
-          },
-          variables: {
-            colorPrimary: "#FFD700",
-            colorText: "#333333",
-            colorBackground: "#ffffff",
-            colorInputBackground: "#ffffff",
-            colorInputText: "#333333",
-            colorNeutral: "#666666",
-            borderRadius: "0.75rem",
-            fontFamily: "Inter, sans-serif",
-            spacingUnit: "1rem",
-          }
-        }}
-      >
-        <AuthSync /> {/* Renderiza AuthSync aqui */}
-        <RouterProvider router={router} future={{ v7_startTransition: true }} />
-      </ClerkProvider>
+            variables: {
+              colorPrimary: "#FFD700",
+              colorText: "#333333",
+              colorBackground: "#ffffff",
+              colorInputBackground: "#ffffff",
+              colorInputText: "#333333",
+              colorNeutral: "#666666",
+              borderRadius: "0.75rem",
+              fontFamily: "Inter, sans-serif",
+              spacingUnit: "1rem",
+            }
+          }}
+        >
+          <AuthSync /> {/* Renderiza AuthSync aqui */}
+          <RouterProvider router={router} future={{ v7_startTransition: true }} />
+        </ClerkProvider>
+      </ThemeProvider>
     </ErrorBoundary>
   </React.StrictMode>,
 )

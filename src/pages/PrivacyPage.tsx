@@ -3,19 +3,19 @@ import { Shield, Eye, Lock, Database, UserCheck } from 'lucide-react'
 
 const PrivacyPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-hueso py-12">
+    <div className="min-h-screen bg-hueso dark:bg-gray-900 py-12 transition-colors duration-200">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex justify-center mb-4">
-            <div className="w-16 h-16 bg-amarillo rounded-full flex items-center justify-center">
-              <Shield className="w-8 h-8 text-gris-oscuro" />
+            <div className="w-16 h-16 bg-amarillo dark:bg-yellow-500 rounded-full flex items-center justify-center">
+              <Shield className="w-8 h-8 text-gris-oscuro dark:text-gray-900" />
             </div>
           </div>
-          <h1 className="text-4xl font-bold text-gris-oscuro mb-4">
+          <h1 className="text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
             Política de Privacidad
           </h1>
-          <p className="text-lg text-gris-claro max-w-2xl mx-auto">
+          <p className="text-lg text-gris-claro dark:text-gray-400 max-w-2xl mx-auto">
             En Mercadillo Lima Perú valoramos tu privacidad y nos comprometemos a 
             proteger tu información personal.
           </p>
@@ -26,10 +26,10 @@ const PrivacyPage: React.FC = () => {
           {/* Sección 1 */}
           <div>
             <div className="flex items-center mb-4">
-              <Eye className="w-6 h-6 text-amarillo mr-3" />
-              <h2 className="text-2xl font-bold text-gris-oscuro">1. Información que Recopilamos</h2>
+              <Eye className="w-6 h-6 text-amarillo dark:text-yellow-400 mr-3" />
+              <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">1. Información que Recopilamos</h2>
             </div>
-            <div className="text-gray-600 space-y-4">
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Recopilamos información que usted nos proporciona directamente, como cuando:
               </p>
@@ -50,10 +50,10 @@ const PrivacyPage: React.FC = () => {
           {/* Sección 2 */}
           <div>
             <div className="flex items-center mb-4">
-              <Database className="w-6 h-6 text-amarillo mr-3" />
-              <h2 className="text-2xl font-bold text-gris-oscuro">2. Cómo Utilizamos su Información</h2>
+              <Database className="w-6 h-6 text-amarillo dark:text-yellow-400 mr-3" />
+              <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">2. Cómo Utilizamos su Información</h2>
             </div>
-            <div className="text-gray-600 space-y-4">
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Utilizamos la información que recopilamos para:
               </p>
@@ -71,10 +71,10 @@ const PrivacyPage: React.FC = () => {
           {/* Sección 3 */}
           <div>
             <div className="flex items-center mb-4">
-              <UserCheck className="w-6 h-6 text-amarillo mr-3" />
-              <h2 className="text-2xl font-bold text-gris-oscuro">3. Compartir Información</h2>
+              <UserCheck className="w-6 h-6 text-amarillo dark:text-yellow-400 mr-3" />
+              <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">3. Compartir Información</h2>
             </div>
-            <div className="text-gray-600 space-y-4">
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 No vendemos, comercializamos o transferimos su información personal a terceros, 
                 excepto en las siguientes circunstancias:
@@ -91,10 +91,10 @@ const PrivacyPage: React.FC = () => {
           {/* Sección 4 */}
           <div>
             <div className="flex items-center mb-4">
-              <Lock className="w-6 h-6 text-amarillo mr-3" />
-              <h2 className="text-2xl font-bold text-gris-oscuro">4. Seguridad de los Datos</h2>
+              <Lock className="w-6 h-6 text-amarillo dark:text-yellow-400 mr-3" />
+              <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">4. Seguridad de los Datos</h2>
             </div>
-            <div className="text-gray-600 space-y-4">
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Implementamos medidas de seguridad técnicas y organizativas apropiadas para 
                 proteger su información personal contra:
@@ -114,8 +114,8 @@ const PrivacyPage: React.FC = () => {
 
           {/* Sección 5 */}
           <div>
-            <h2 className="text-2xl font-bold text-gris-oscuro mb-4">5. Sus Derechos</h2>
-            <div className="text-gray-600 space-y-4">
+            <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">5. Sus Derechos</h2>
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Usted tiene derecho a:
               </p>
@@ -135,8 +135,8 @@ const PrivacyPage: React.FC = () => {
 
           {/* Sección 6 */}
           <div>
-            <h2 className="text-2xl font-bold text-gris-oscuro mb-4">6. Cookies y Tecnologías Similares</h2>
-            <div className="text-gray-600 space-y-4">
+            <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">6. Cookies y Tecnologías Similares</h2>
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Utilizamos cookies y tecnologías similares para:
               </p>
@@ -154,8 +154,8 @@ const PrivacyPage: React.FC = () => {
 
           {/* Sección 7 */}
           <div>
-            <h2 className="text-2xl font-bold text-gris-oscuro mb-4">7. Retención de Datos</h2>
-            <div className="text-gray-600 space-y-4">
+            <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">7. Retención de Datos</h2>
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Conservamos su información personal solo mientras sea necesario para cumplir 
                 con los fines para los cuales fue recopilada, incluidos los requisitos legales, 
@@ -166,8 +166,8 @@ const PrivacyPage: React.FC = () => {
 
           {/* Sección 8 */}
           <div>
-            <h2 className="text-2xl font-bold text-gris-oscuro mb-4">8. Cambios a esta Política</h2>
-            <div className="text-gray-600 space-y-4">
+            <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">8. Cambios a esta Política</h2>
+            <div className="text-gray-600 dark:text-gray-400 space-y-4">
               <p>
                 Podemos actualizar esta Política de Privacidad ocasionalmente. Le notificaremos 
                 sobre cualquier cambio publicando la nueva Política de Privacidad en esta página 
@@ -177,11 +177,11 @@ const PrivacyPage: React.FC = () => {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-200 pt-6 mt-8">
-            <p className="text-sm text-gris-claro">
+          <div className="border-t border-gray-200 dark:border-gray-600 pt-6 mt-8">
+            <p className="text-sm text-gris-claro dark:text-gray-400">
               <strong>Última actualización:</strong> Enero 2024
             </p>
-            <p className="text-sm text-gris-claro mt-2">
+            <p className="text-sm text-gris-claro dark:text-gray-400 mt-2">
               Si tiene alguna pregunta sobre esta Política de Privacidad, 
               póngase en contacto con nosotros en contactomercadillo@gmail.com
             </p>
