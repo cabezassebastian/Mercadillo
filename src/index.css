@@ -1183,6 +1183,159 @@ html.dark [data-clerk-modal] .cl-footerActionLink {
   background-color: transparent !important;
 }
 
+/* Forzar ABSOLUTAMENTE todo el contenedor del modal */
+.dark .cl-modalBackdrop,
+.dark [data-clerk-modal-backdrop] {
+  background: rgba(0, 0, 0, 0.95) !important;
+}
+
+.dark .cl-modalContent,
+.dark .cl-componentModal,
+.dark [data-clerk-modal] {
+  background: #1f2937 !important;
+  border: none !important;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Forzar TODOS los elementos dentro del modal */
+.dark [data-clerk-modal] *,
+.dark .cl-modal *,
+.dark .cl-componentModal *,
+.dark [role="dialog"] * {
+  background: #1f2937 !important;
+  color: #f3f4f6 !important;
+  border-color: #374151 !important;
+}
+
+/* Botón Continue específico sin overlay extraño */
+.dark .cl-formButtonPrimary,
+.dark button[type="submit"],
+.dark button[class*="formButton"] {
+  background: #FFD700 !important;
+  color: #333333 !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+  transition: all 0.2s ease !important;
+}
+
+.dark .cl-formButtonPrimary::before,
+.dark button[type="submit"]::before,
+.dark button[class*="formButton"]::before {
+  display: none !important;
+}
+
+.dark .cl-formButtonPrimary::after,
+.dark button[type="submit"]::after,
+.dark button[class*="formButton"]::after {
+  display: none !important;
+}
+
+.dark .cl-formButtonPrimary:hover,
+.dark button[type="submit"]:hover,
+.dark button[class*="formButton"]:hover {
+  background: #b8860b !important;
+  color: #333333 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3) !important;
+}
+
+.dark .cl-formButtonPrimary:focus,
+.dark button[type="submit"]:focus,
+.dark button[class*="formButton"]:focus {
+  background: #FFD700 !important;
+  outline: 2px solid #b8860b !important;
+  outline-offset: 2px !important;
+}
+
+.dark .cl-formButtonPrimary:active,
+.dark button[type="submit"]:active,
+.dark button[class*="formButton"]:active {
+  background: #d4af37 !important;
+  transform: translateY(0) !important;
+}
+
+/* Eliminar cualquier overlay o pseudo-elemento problemático */
+.dark .cl-formButtonPrimary > *,
+.dark button[type="submit"] > *,
+.dark button[class*="formButton"] > * {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+/* Input fields */
+.dark [data-clerk-modal] input,
+.dark .cl-formFieldInput,
+.dark input[type="email"],
+.dark input[type="password"] {
+  background: #374151 !important;
+  color: #f9fafb !important;
+  border: 1px solid #4b5563 !important;
+  outline: none !important;
+}
+
+.dark [data-clerk-modal] input:focus,
+.dark .cl-formFieldInput:focus {
+  border-color: #FFD700 !important;
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2) !important;
+}
+
+/* Botones sociales */
+.dark .cl-socialButtonsBlockButton {
+  background: #374151 !important;
+  color: #d1d5db !important;
+  border: 1px solid #4b5563 !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover {
+  background: #4b5563 !important;
+}
+
+/* Enlaces */
+.dark .cl-footerActionLink,
+.dark a[href*="sign"] {
+  color: #fbbf24 !important;
+  background: transparent !important;
+}
+
+/* Asegurar que no hay overlays extraños */
+.dark [data-clerk-modal] [class*="overlay"],
+.dark [data-clerk-modal] [class*="ripple"],
+.dark [data-clerk-modal] [class*="focus"] {
+  display: none !important;
+}
+
+/* Forzar el card principal */
+.dark .cl-card,
+.dark .cl-signIn-start,
+.dark .cl-signUp-start {
+  background: #1f2937 !important;
+  border: 1px solid #374151 !important;
+  border-radius: 12px !important;
+}
+
+/* Forzar header, main y footer */
+.dark .cl-header,
+.dark .cl-main,
+.dark .cl-footer {
+  background: #1f2937 !important;
+}
+
+/* Eliminar cualquier transición o animación problemática en botones */
+.dark .cl-formButtonPrimary * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Asegurar que los iconos no interfieran */
+.dark .cl-formButtonPrimary svg,
+.dark .cl-formButtonPrimary img {
+  background: transparent !important;
+  fill: currentColor !important;
+}
+
 /* Mejoras específicas para formularios de autenticación */
 .cl-formFieldInput {
   font-size: 16px !important;
