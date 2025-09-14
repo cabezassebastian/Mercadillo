@@ -63,16 +63,16 @@ const Home: React.FC = () => {
   ]
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-hueso dark:bg-gray-900 transition-colors duration-200">
       {/* Seccion Hero */}
       <section className="relative w-full h-96 overflow-hidden">
         <img src="/banner.png" alt="Mercadillo Lima Peru Banner" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 flex items-center justify-center text-center p-4">
+        <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 dark:bg-black dark:bg-opacity-60 flex items-center justify-center text-center p-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">
               Bienvenido a Mercadillo Lima
             </h1>
-            <p className="text-xl md:text-2xl text-hueso mb-8">
+            <p className="text-xl md:text-2xl text-hueso dark:text-gray-200 mb-8">
               Descubre los mejores productos de Lima, Peru. Calidad garantizada y envio rapido a todo el pais.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -85,7 +85,7 @@ const Home: React.FC = () => {
               </Link>
               <Link
                 to="/carrito"
-                className="bg-blanco text-gris-oscuro hover:bg-hueso font-semibold py-3 px-8 rounded-lg transition-colors duration-200 text-lg"
+                className="bg-blanco dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 hover:bg-hueso dark:hover:bg-gray-700 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 text-lg"
               >
                 Mi Carrito
               </Link>
@@ -95,18 +95,18 @@ const Home: React.FC = () => {
       </section>
 
       {/* Seccion de Caracteristicas */}
-      <section className="py-16 bg-blanco">
+      <section className="py-16 bg-blanco dark:bg-gray-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="text-center">
-                <div className="w-16 h-16 bg-amarillo rounded-full flex items-center justify-center mx-auto mb-4 text-gris-oscuro">
+                <div className="w-16 h-16 bg-amarillo dark:bg-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 text-gris-oscuro dark:text-gray-900">
                   {feature.icon}
                 </div>
-                <h3 className="text-xl font-semibold text-gris-oscuro mb-2">
+                <h3 className="text-xl font-semibold text-gris-oscuro dark:text-gray-100 mb-2">
                   {feature.title}
                 </h3>
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-gray-400">
                   {feature.description}
                 </p>
               </div>
@@ -116,26 +116,26 @@ const Home: React.FC = () => {
       </section>
 
       {/* Productos Destacados */}
-      <section className="py-16 bg-hueso">
+      <section className="py-16 bg-hueso dark:bg-gray-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
               Productos Destacados
             </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Descubre nuestra seleccion de productos mas populares y mejor valorados
             </p>
           </div>
 
           {isLoading ? (
             <div className="flex justify-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amarillo"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amarillo dark:border-yellow-500"></div>
             </div>
           ) : error ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center bg-rojo-claro rounded-lg shadow-md max-w-md mx-auto">
-              <p className="text-xl font-semibold text-rojo-oscuro mb-4">⚠️ Error al cargar productos</p>
-              <p className="text-gray-700">{error}</p>
-              <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexion a internet o intentalo de nuevo mas tarde.</p>
+            <div className="flex flex-col items-center justify-center p-8 text-center bg-red-100 dark:bg-red-900 rounded-lg shadow-md max-w-md mx-auto">
+              <p className="text-xl font-semibold text-red-800 dark:text-red-200 mb-4">⚠️ Error al cargar productos</p>
+              <p className="text-gray-700 dark:text-gray-300">{error}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Por favor, verifica tu conexion a internet o intentalo de nuevo mas tarde.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -158,10 +158,10 @@ const Home: React.FC = () => {
       </section>
 
       {/* Seccion de Testimonios */}
-      <section className="py-16 bg-blanco">
+      <section className="py-16 bg-blanco dark:bg-gray-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
               Lo que dicen nuestros clientes
             </h2>
           </div>
@@ -190,15 +190,15 @@ const Home: React.FC = () => {
               <div key={index} className="card p-6">
                 <div className="flex items-center mb-4">
                   {[...Array(testimonial.rating)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-amarillo fill-current" />
+                    <Star key={i} className="w-5 h-5 text-amarillo dark:text-yellow-500 fill-current" />
                   ))}
                 </div>
-                <p className="text-gray-600 mb-4 italic">
+                <p className="text-gray-600 dark:text-gray-400 mb-4 italic">
                   "{testimonial.comment}"
                 </p>
                 <div>
-                  <p className="font-semibold text-gris-oscuro">{testimonial.name}</p>
-                  <p className="text-sm text-gray-500">{testimonial.location}</p>
+                  <p className="font-semibold text-gris-oscuro dark:text-gray-100">{testimonial.name}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{testimonial.location}</p>
                 </div>
               </div>
             ))}

@@ -24,7 +24,7 @@ const ProductCard = ({ producto }: ProductCardProps) => {
   }
 
   return (
-    <div className="card group hover:shadow-lg transition-shadow duration-300">
+    <div className="card group hover:shadow-lg dark:hover:shadow-gray-700/50 transition-shadow duration-300">
       <Link to={`/producto/${producto.id}`}>
         <div className="aspect-square overflow-hidden rounded-t-lg">
           <img
@@ -35,19 +35,19 @@ const ProductCard = ({ producto }: ProductCardProps) => {
         </div>
         
         <div className="p-4">
-          <h3 className="font-semibold text-gris-oscuro mb-2 line-clamp-2">
+          <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-2 line-clamp-2">
             {producto.nombre}
           </h3>
           
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
             {producto.descripcion}
           </p>
           
           <div className="flex items-center justify-between mb-3">
-            <span className="text-lg font-bold text-dorado">
+            <span className="text-lg font-bold text-dorado dark:text-yellow-400">
               {formatPrice(producto.precio)}
             </span>
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-gray-400">
               Stock: {producto.stock}
             </span>
           </div>

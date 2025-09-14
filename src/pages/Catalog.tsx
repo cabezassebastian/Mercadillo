@@ -102,40 +102,40 @@ const Catalog: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amarillo"></div>
+      <div className="min-h-screen bg-hueso dark:bg-gray-900 flex items-center justify-center transition-colors duration-200">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amarillo dark:border-yellow-500"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-hueso py-8">
+    <div className="min-h-screen bg-hueso dark:bg-gray-900 py-8 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-4">
+          <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
             Catálogo de Productos
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-gray-600 dark:text-gray-400">
             Encuentra los mejores productos de Lima, Perú
           </p>
         </div>
 
         {/* Display error message if there is one */}
         {error && (
-          <div className="flex flex-col items-center justify-center p-8 text-center bg-rojo-claro rounded-lg shadow-md max-w-md mx-auto my-4">
-            <p className="text-xl font-semibold text-rojo-oscuro mb-4">⚠️ Error al cargar el catálogo</p>
-            <p className="text-gray-700">{error}</p>
-            <p className="text-sm text-gray-500 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
+          <div className="flex flex-col items-center justify-center p-8 text-center bg-red-100 dark:bg-red-900 rounded-lg shadow-md max-w-md mx-auto my-4">
+            <p className="text-xl font-semibold text-red-800 dark:text-red-200 mb-4">⚠️ Error al cargar el catálogo</p>
+            <p className="text-gray-700 dark:text-gray-300">{error}</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
           </div>
         )}
 
         {/* Filters and Search */}
-        <div className="bg-blanco rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-blanco dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8 transition-colors duration-200">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             {/* Search */}
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Buscar productos..."
@@ -183,13 +183,13 @@ const Catalog: React.FC = () => {
             <div className="flex items-center space-x-2">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`p-2 rounded ${viewMode === 'grid' ? 'bg-amarillo text-gris-oscuro' : 'bg-gray-200 text-gray-600'}`}
+                className={`p-2 rounded transition-colors duration-200 ${viewMode === 'grid' ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}
               >
                 <Grid className="w-5 h-5" />
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`p-2 rounded ${viewMode === 'list' ? 'bg-amarillo text-gris-oscuro' : 'bg-gray-200 text-gray-600'}`}
+                className={`p-2 rounded transition-colors duration-200 ${viewMode === 'list' ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900' : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'}`}
               >
                 <List className="w-5 h-5" />
               </button>
@@ -199,7 +199,7 @@ const Catalog: React.FC = () => {
 
         {/* Results */}
         <div className="mb-4">
-          <p className="text-gray-600">
+          <p className="text-gray-600 dark:text-gray-400">
             Mostrando {filteredProductos.length} de {productos.length} productos
           </p>
         </div>
@@ -208,10 +208,10 @@ const Catalog: React.FC = () => {
         {filteredProductos.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4">🔍</div>
-            <h3 className="text-xl font-semibold text-gris-oscuro mb-2">
+            <h3 className="text-xl font-semibold text-gris-oscuro dark:text-gray-100 mb-2">
               No se encontraron productos
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-600 dark:text-gray-400">
               Intenta ajustar los filtros de búsqueda
             </p>
           </div>
