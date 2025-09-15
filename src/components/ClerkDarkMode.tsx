@@ -1,10 +1,39 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTheme } from '@/contexts/ThemeContext'
 
 const ClerkDarkMode = () => {
   const { theme } = useTheme()
+  const isDarkMode = theme === 'dark'
+  
+  // Referencias para limpiar efectos anteriores y evitar glitches
+  const timeoutsRef = useRef<NodeJS.Timeout[]>([])
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
+  const observerRef = useRef<MutationObserver | null>(null)
 
   useEffect(() => {
+    // Limpiar todos los efectos anteriores para evitar glitches
+    timeoutsRef.current.forEach(timeout => clearTimeout(timeout))
+    timeoutsRef.current = []
+    
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
+    
+    if (observerRef.current) {
+      observerRef.current.disconnect()
+      observerRef.current = null
+    }
+
+    // Aplicar tema de manera síncrona primero
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+      document.body.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+      document.body.classList.remove('dark')
+    }
+
     // Interceptar requests de network para bloquear commerce/statements
     const originalFetch = window.fetch;
     window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -347,15 +376,17 @@ const ClerkDarkMode = () => {
       fixUserButtonElements()
       fixUserProfilePage()
       fixUserButtonCorners()
-      setTimeout(fixUserButtonElements, 100)
-      setTimeout(fixUserProfilePage, 100)
-      setTimeout(fixUserButtonCorners, 100)
-      setTimeout(fixUserProfilePage, 300)
-      setTimeout(fixUserButtonCorners, 300)
-      setTimeout(fixUserProfilePage, 500)
-      setTimeout(fixUserButtonCorners, 500)
-      setTimeout(fixUserProfilePage, 1000)
-      setTimeout(fixUserButtonCorners, 1000)
+      
+      // Usar referencias para poder cancelar timeouts
+      timeoutsRef.current.push(setTimeout(fixUserButtonElements, 100))
+      timeoutsRef.current.push(setTimeout(fixUserProfilePage, 100))
+      timeoutsRef.current.push(setTimeout(fixUserButtonCorners, 100))
+      timeoutsRef.current.push(setTimeout(fixUserProfilePage, 300))
+      timeoutsRef.current.push(setTimeout(fixUserButtonCorners, 300))
+      timeoutsRef.current.push(setTimeout(fixUserProfilePage, 500))
+      timeoutsRef.current.push(setTimeout(fixUserButtonCorners, 500))
+      timeoutsRef.current.push(setTimeout(fixUserProfilePage, 1000))
+      timeoutsRef.current.push(setTimeout(fixUserButtonCorners, 1000))
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
@@ -429,8 +460,32 @@ const ClerkDarkMode = () => {
       })
     }
 
+    const clearPreviousThemeStyles = () => {
+      // Limpiar todas las clases y estilos de tema anterior
+      const allElements = document.querySelectorAll('*')
+      allElements.forEach((element: Element) => {
+        const htmlElement = element as HTMLElement
+        
+        // Remover clases dark solo si vamos a modo claro
+        if (!isDarkMode) {
+          htmlElement.classList.remove('dark')
+        }
+        
+        // Limpiar estilos inline que pudieran causar conflictos
+        if (htmlElement.getAttribute('style')?.includes('background-color: #1f2937') ||
+            htmlElement.getAttribute('style')?.includes('background-color: #111827')) {
+          htmlElement.style.removeProperty('background-color')
+          htmlElement.style.removeProperty('color')
+          htmlElement.style.removeProperty('border-color')
+        }
+      })
+    }
+
     const applyTheme = () => {
-      if (theme === 'dark') {
+      // Limpiar estilos anteriores primero
+      clearPreviousThemeStyles()
+      
+      if (isDarkMode) {
         forceClerkDarkMode()
       } else {
         clearClerkDarkMode()
@@ -439,22 +494,36 @@ const ClerkDarkMode = () => {
 
     applyTheme()
 
-    const observer = new MutationObserver(() => {
-      setTimeout(applyTheme, 10)
+    observerRef.current = new MutationObserver(() => {
+      // Usar timeout de referencia para poder cancelarlo
+      const timeout = setTimeout(applyTheme, 10)
+      timeoutsRef.current.push(timeout)
     })
 
-    observer.observe(document.body, {
+    observerRef.current.observe(document.body, {
       childList: true,
       subtree: true,
       attributes: true,
       attributeFilter: ['class', 'style']
     })
 
-    const interval = setInterval(applyTheme, 300)
+    intervalRef.current = setInterval(applyTheme, 500) // Reducido de 300ms a 500ms para menos glitches
 
     return () => {
-      observer.disconnect()
-      clearInterval(interval)
+      // Limpiar todas las referencias al desmontar
+      timeoutsRef.current.forEach(timeout => clearTimeout(timeout))
+      timeoutsRef.current = []
+      
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+      
+      if (observerRef.current) {
+        observerRef.current.disconnect()
+        observerRef.current = null
+      }
+      
       // Restaurar fetch original
       window.fetch = originalFetch
     }
