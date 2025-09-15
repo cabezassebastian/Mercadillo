@@ -135,6 +135,34 @@ const ClerkDarkMode = () => {
           border-color: #374151 !important;
           opacity: 0.3 !important;
         }
+        
+        /* Corregir específicamente las esquinas del botón Sign out */
+        .cl-menuItem[data-localization-key="userButton.action__signOut"],
+        .cl-menuItem:last-child,
+        button[data-localization-key="userButton.action__signOut"] {
+          background-color: #1f2937 !important;
+          border-radius: 0 0 8px 8px !important;
+          border: none !important;
+          overflow: hidden !important;
+          position: relative !important;
+        }
+        
+        /* Pseudo-elementos específicos para Sign out */
+        .cl-menuItem[data-localization-key="userButton.action__signOut"]::before,
+        .cl-menuItem[data-localization-key="userButton.action__signOut"]::after,
+        .cl-menuItem:last-child::before,
+        .cl-menuItem:last-child::after {
+          content: none !important;
+          display: none !important;
+        }
+        
+        /* Forzar esquinas redondeadas sin fondos blancos */
+        .cl-userButtonPopoverCard .cl-menuItem:last-child {
+          border-bottom-left-radius: 8px !important;
+          border-bottom-right-radius: 8px !important;
+          background-color: #1f2937 !important;
+          background-clip: padding-box !important;
+        }
       `
 
       // Función más específica para el UserButton
@@ -171,6 +199,18 @@ const ClerkDarkMode = () => {
             htmlSeparator.style.setProperty('border-color', '#374151', 'important')
             htmlSeparator.style.setProperty('opacity', '0.3', 'important')
           })
+          
+          // Corregir específicamente el botón Sign out
+          const signOutButton = userButtonPopover.querySelector('[data-localization-key="userButton.action__signOut"]') ||
+                               userButtonPopover.querySelector('.cl-menuItem:last-child')
+          if (signOutButton) {
+            const htmlSignOut = signOutButton as HTMLElement
+            htmlSignOut.style.setProperty('background-color', '#1f2937', 'important')
+            htmlSignOut.style.setProperty('border-radius', '0 0 8px 8px', 'important')
+            htmlSignOut.style.setProperty('border', 'none', 'important')
+            htmlSignOut.style.setProperty('overflow', 'hidden', 'important')
+            htmlSignOut.style.setProperty('background-clip', 'padding-box', 'important')
+          }
         }
       }
 
