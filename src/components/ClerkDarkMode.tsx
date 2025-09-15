@@ -134,6 +134,67 @@ const ClerkDarkMode = () => {
           background-color: #374151 !important;
           border: none !important;
         }
+        
+        /* Estilos para la página de gestión de cuenta (Manage account) */
+        .cl-userProfile,
+        .cl-profilePage,
+        .cl-profileSection,
+        .cl-profileSectionContent {
+          background-color: #1f2937 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Contenedor principal de la página de cuenta */
+        .cl-userProfile .cl-card,
+        .cl-profilePage .cl-card {
+          background-color: #1f2937 !important;
+          border: none !important;
+        }
+        
+        /* Títulos y subtítulos de la página de cuenta */
+        .cl-profileSectionTitle,
+        .cl-profileSectionSubtitle,
+        .cl-userProfile h1,
+        .cl-userProfile h2,
+        .cl-userProfile h3 {
+          color: #f3f4f6 !important;
+        }
+        
+        /* Área de contenido principal */
+        .cl-profileSectionContent,
+        .cl-userProfile .cl-profileSection {
+          background-color: #1f2937 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Navbar de la página de cuenta */
+        .cl-navbar,
+        .cl-userProfile .cl-navbar {
+          background-color: #1f2937 !important;
+          border-color: #374151 !important;
+        }
+        
+        /* Botones de navegación */
+        .cl-navbarButton {
+          color: #f3f4f6 !important;
+          background-color: transparent !important;
+        }
+        
+        .cl-navbarButton:hover {
+          background-color: #374151 !important;
+        }
+        
+        /* Campos de entrada y formularios */
+        .cl-userProfile .cl-formFieldInput {
+          background-color: #374151 !important;
+          border-color: #4b5563 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Etiquetas de formulario */
+        .cl-userProfile .cl-formFieldLabel {
+          color: #f3f4f6 !important;
+        }
       `
 
       // Función específica para corregir elementos problemáticos
@@ -163,10 +224,30 @@ const ClerkDarkMode = () => {
           })
         }
       }
+      
+      // Función específica para la página de gestión de cuenta
+      const fixUserProfilePage = () => {
+        const userProfileElements = document.querySelectorAll('.cl-userProfile, .cl-profilePage, .cl-profileSection, .cl-profileSectionContent')
+        userProfileElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+          htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+        })
+        
+        // Aplicar a tarjetas dentro de la página de perfil
+        const profileCards = document.querySelectorAll('.cl-userProfile .cl-card, .cl-profilePage .cl-card')
+        profileCards.forEach((card: Element) => {
+          const htmlCard = card as HTMLElement
+          htmlCard.style.setProperty('background-color', '#1f2937', 'important')
+          htmlCard.style.setProperty('border', 'none', 'important')
+        })
+      }
 
-      // Ejecutar la corrección
+      // Ejecutar las correcciones
       fixUserButtonElements()
+      fixUserProfilePage()
       setTimeout(fixUserButtonElements, 200)
+      setTimeout(fixUserProfilePage, 200)
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
