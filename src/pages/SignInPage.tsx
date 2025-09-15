@@ -43,6 +43,10 @@ const SignInPage = () => {
                 footer: "bg-white dark:bg-gray-800",
                 footerPages: "bg-white dark:bg-gray-800",
                 footerText: "text-gris-claro dark:text-gray-400 bg-white dark:bg-gray-800",
+                footerActionText: "text-gris-claro dark:text-gray-400 bg-white dark:bg-gray-800",
+                footerActionLinkText: "text-amarillo hover:text-dorado bg-white dark:bg-gray-800",
+                modalContent: "bg-white dark:bg-gray-800",
+                modalCloseButton: "text-gris-claro dark:text-gray-400",
                 closeButton: "hidden",
               },
               variables: {
