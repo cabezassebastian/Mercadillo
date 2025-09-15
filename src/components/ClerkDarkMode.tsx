@@ -5,6 +5,23 @@ const ClerkDarkMode = () => {
   const { theme } = useTheme()
 
   useEffect(() => {
+    // Suprimir errores de red específicos de Clerk que no afectan funcionalidad
+    const originalConsoleError = console.error
+    console.error = (...args) => {
+      // Filtrar errores específicos de commerce/statements de Clerk
+      const errorMessage = args.join(' ')
+      if (
+        errorMessage.includes('commerce/statements') ||
+        (errorMessage.includes('403') && errorMessage.includes('clerk')) ||
+        (errorMessage.includes('Failed to load resource') && errorMessage.includes('clerk'))
+      ) {
+        // Silenciar estos errores específicos
+        return
+      }
+      // Mostrar otros errores normalmente
+      originalConsoleError.apply(console, args)
+    }
+
     const forceClerkDarkMode = () => {
       // Aplicar dark mode a contenedores principales en páginas de auth
       const pageContainers = document.querySelectorAll('.min-h-screen, [class*="bg-hueso"]')
@@ -437,6 +454,8 @@ const ClerkDarkMode = () => {
     return () => {
       observer.disconnect()
       clearInterval(interval)
+      // Restaurar console.error original al desmontar
+      console.error = originalConsoleError
     }
   }, [theme])
 
