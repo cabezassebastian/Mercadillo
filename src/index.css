@@ -160,4 +160,42 @@
   }
 }
 
+/* Clerk footer styles for consistent theming */
+.cl-footer,
+.cl-footerAction,
+.cl-footerPages,
+.cl-footerText,
+.cl-footerActionText {
+  background-color: white !important;
+  color: #6b7280 !important;
+}
+
+.dark .cl-footer,
+.dark .cl-footerAction,
+.dark .cl-footerPages,
+.dark .cl-footerText,
+.dark .cl-footerActionText {
+  background-color: #1f2937 !important;
+  color: #9ca3af !important;
+}
+
+.cl-footerActionLink {
+  color: #fbbf24 !important;
+  background-color: white !important;
+}
+
+.dark .cl-footerActionLink {
+  color: #fbbf24 !important;
+  background-color: #1f2937 !important;
+}
+
+/* Ensure Secured by section has consistent background */
+.cl-footer [data-testid="powered-by"] {
+  background-color: white !important;
+}
+
+.dark .cl-footer [data-testid="powered-by"] {
+  background-color: #1f2937 !important;
+}
+
 
