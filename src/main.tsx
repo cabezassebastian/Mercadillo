@@ -25,6 +25,7 @@ import TermsPage from './pages/TermsPage'
 import PrivacyPage from './pages/PrivacyPage'
 import ShippingPage from './pages/ShippingPage'
 import ContactPage from './pages/ContactPage'
+import AboutPage from './pages/AboutPage'
 
 // Paginas de autenticacion de Clerk
 import SignInPage from './pages/SignInPage'
@@ -69,6 +70,7 @@ const router = createBrowserRouter([
       { path: "privacidad", element: <PrivacyPage /> },
       { path: "envios", element: <ShippingPage /> },
       { path: "contacto", element: <ContactPage /> },
+      { path: "sobre-nosotros", element: <AboutPage /> },
     ],
   },
   {
