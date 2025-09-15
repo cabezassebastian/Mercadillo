@@ -99,6 +99,42 @@ const ClerkDarkMode = () => {
         .cl-menuItemDivider {
           background-color: #374151 !important;
         }
+        
+        /* Eliminar bordes blancos y líneas */
+        .cl-userButtonPopoverCard::after,
+        .cl-userButtonPopoverCard::before,
+        .cl-menuItem::after,
+        .cl-menuItem::before,
+        .cl-userButtonPopoverFooter,
+        .cl-userButtonPopoverActions {
+          background-color: #1f2937 !important;
+          border-color: #374151 !important;
+          border-bottom: none !important;
+          border-top: none !important;
+        }
+        
+        /* Eliminar líneas blancas específicamente */
+        .cl-userButtonPopoverCard *::after,
+        .cl-userButtonPopoverCard *::before {
+          background-color: #1f2937 !important;
+          border-color: #374151 !important;
+        }
+        
+        /* Footer y elementos finales del popover */
+        .cl-userButtonPopoverCard > *:last-child,
+        .cl-menuItem:last-child {
+          border-bottom: none !important;
+          border-bottom-color: transparent !important;
+        }
+        
+        /* Forzar transparencia en elementos que puedan crear líneas */
+        .cl-userButtonPopoverCard hr,
+        .cl-userButtonPopoverCard .cl-divider,
+        .cl-userButtonPopoverCard [role="separator"] {
+          background-color: #374151 !important;
+          border-color: #374151 !important;
+          opacity: 0.3 !important;
+        }
       `
 
       // Función más específica para el UserButton
@@ -116,6 +152,24 @@ const ClerkDarkMode = () => {
                 computedStyle.backgroundColor === 'white') {
               htmlElement.style.setProperty('background-color', 'transparent', 'important')
             }
+            
+            // Eliminar bordes blancos específicamente
+            if (computedStyle.borderBottomColor === 'rgb(255, 255, 255)' ||
+                computedStyle.borderTopColor === 'rgb(255, 255, 255)' ||
+                computedStyle.borderBottomColor === 'white' ||
+                computedStyle.borderTopColor === 'white') {
+              htmlElement.style.setProperty('border-bottom-color', '#374151', 'important')
+              htmlElement.style.setProperty('border-top-color', '#374151', 'important')
+            }
+          })
+          
+          // Buscar específicamente elementos hr o separadores
+          const separators = userButtonPopover.querySelectorAll('hr, [role="separator"], .cl-divider')
+          separators.forEach((separator: Element) => {
+            const htmlSeparator = separator as HTMLElement
+            htmlSeparator.style.setProperty('background-color', '#374151', 'important')
+            htmlSeparator.style.setProperty('border-color', '#374151', 'important')
+            htmlSeparator.style.setProperty('opacity', '0.3', 'important')
           })
         }
       }
