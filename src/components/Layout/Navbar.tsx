@@ -34,6 +34,8 @@ const Navbar: React.FC = () => {
 
   const navItems = [
     { name: 'Catálogo', path: '/catalogo' },
+    { name: 'Sobre nosotros', path: '/sobre-nosotros' },
+    { name: 'Contáctanos', path: '/contacto' },
   ]
 
   // Solo agregar "Inicio" si NO estamos en la página principal
