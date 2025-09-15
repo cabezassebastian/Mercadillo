@@ -70,34 +70,95 @@ const ClerkDarkMode = () => {
       }
       
       darkModeStyle.textContent = `
-        /* Forzar modo oscuro en todos los elementos de Clerk */
+        /* Forzar modo oscuro en TODOS los elementos de Clerk */
+        [class*="cl-"] {
+          background-color: #1f2937 !important;
+          color: #f3f4f6 !important;
+          border-color: #374151 !important;
+        }
+        
+        /* Elementos específicos del UserButton */
         [class*="cl-popover"], 
         [class*="cl-card"], 
         [class*="cl-dropdown"],
         [class*="cl-popoverBox"],
         [class*="cl-userPreview"],
         [class*="cl-menuList"],
-        [class*="cl-menuItem"] {
+        [class*="cl-menuItem"],
+        [class*="cl-userButton"],
+        [class*="cl-avatarBox"] {
           background-color: #1f2937 !important;
           color: #f3f4f6 !important;
           border-color: #374151 !important;
           border-radius: 8px !important;
+          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
         }
         
-        /* Esquinas específicas del menú desplegable */
-        [class*="cl-popover"]::before,
-        [class*="cl-popover"]::after,
-        [class*="cl-card"]::before,
-        [class*="cl-card"]::after {
+        /* Pseudo-elementos para eliminar esquinas blancas */
+        [class*="cl-"]::before,
+        [class*="cl-"]::after {
           background-color: #1f2937 !important;
           border-color: #374151 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Contenedores y divs internos */
+        [class*="cl-"] div,
+        [class*="cl-"] span,
+        [class*="cl-"] p {
+          background-color: transparent !important;
+          color: #f3f4f6 !important;
         }
         
         /* UserButton hover effects */
-        [class*="cl-menuItem"]:hover {
+        [class*="cl-menuItem"]:hover,
+        [class*="cl-"] button:hover {
           background-color: #374151 !important;
         }
+        
+        /* Forzar todos los elementos dentro del portal */
+        #clerk-components div,
+        [data-portal] div,
+        [data-clerk] div {
+          background-color: #1f2937 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Eliminar cualquier fondo blanco residual */
+        [class*="cl-"] * {
+          background-color: inherit !important;
+        }
       `
+
+      // Función adicional para detectar y corregir elementos blancos
+      const fixWhiteElements = () => {
+        // Buscar todos los elementos dentro de componentes de Clerk
+        const allClerkElements = document.querySelectorAll('[class*="cl-"] *')
+        allClerkElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          const computedStyle = window.getComputedStyle(htmlElement)
+          
+          // Si el elemento tiene fondo blanco, cambiarlo a oscuro
+          if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+              computedStyle.backgroundColor === 'white' ||
+              computedStyle.backgroundColor === '#ffffff' ||
+              computedStyle.backgroundColor === '#fff') {
+            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+          }
+          
+          // Si el texto es negro, cambiarlo a blanco
+          if (computedStyle.color === 'rgb(0, 0, 0)' || 
+              computedStyle.color === 'black' ||
+              computedStyle.color === '#000000' ||
+              computedStyle.color === '#000') {
+            htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+          }
+        })
+      }
+
+      // Ejecutar la función de corrección inmediatamente y después de un breve delay
+      fixWhiteElements()
+      setTimeout(fixWhiteElements, 100)
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
@@ -202,7 +263,7 @@ const ClerkDarkMode = () => {
       attributeFilter: ['class', 'style']
     })
 
-    const interval = setInterval(applyTheme, 500)
+    const interval = setInterval(applyTheme, 100)
 
     return () => {
       observer.disconnect()
