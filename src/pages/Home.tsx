@@ -19,13 +19,10 @@ const Home: React.FC = () => {
         let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false }).limit(8)
 
         if (supabaseError) {
-          console.warn('Error al obtener productos por created_at:', supabaseError.message)
-          // Si falla la ordenacion por created_at, intentar sin ordenacion
-          console.log('Intentando obtener productos sin ordenacion por created_at...')
+          // Si falla la ordenación por created_at, intentar sin ordenación
           const { data: fallbackData, error: fallbackError } = await productsQuery.limit(8)
 
           if (fallbackError) {
-            console.error('Error al obtener productos (fallback): ', fallbackError)
             setError('No se pudo cargar la informacion, intentalo mas tarde')
             return
           }
@@ -34,7 +31,6 @@ const Home: React.FC = () => {
 
         setFeaturedProducts(data || [])
       } catch (err) {
-        console.error('Error en fetchFeaturedProducts:', err)
         setError('Ocurrio un error inesperado al cargar los productos.')
       } finally {
         setIsLoading(false)

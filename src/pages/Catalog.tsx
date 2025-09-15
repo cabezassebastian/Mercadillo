@@ -33,15 +33,12 @@ const Catalog: React.FC = () => {
         let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false })
 
         if (supabaseError) {
-          console.warn('Error inicial al obtener productos en catálogo (posible columna created_at faltante): ', supabaseError.message)
           // Si falla la ordenación por created_at, intentar sin ordenación
-          console.log('Intentando obtener productos en catálogo sin ordenación por created_at...')
           const { data: fallbackData, error: fallbackError } = await productsQuery
 
           if (fallbackError) {
-            console.error('Error fetching products in catalog (fallback): ', fallbackError)
             setError('No se pudo cargar la información del catálogo, inténtalo más tarde')
-            setProductos([]) // Asegura que los productos estén vacíos en caso de error
+            setProductos([])
             setFilteredProductos([])
             return
           }

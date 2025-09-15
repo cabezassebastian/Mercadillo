@@ -40,5 +40,3 @@ export interface PedidoItem {
   nombre: string
   imagen: string
 }
-
-
