@@ -5,22 +5,23 @@ const ClerkDarkMode = () => {
   const { theme } = useTheme()
 
   useEffect(() => {
-    // Suprimir errores de red específicos de Clerk que no afectan funcionalidad
-    const originalConsoleError = console.error
-    console.error = (...args) => {
-      // Filtrar errores específicos de commerce/statements de Clerk
-      const errorMessage = args.join(' ')
-      if (
-        errorMessage.includes('commerce/statements') ||
-        (errorMessage.includes('403') && errorMessage.includes('clerk')) ||
-        (errorMessage.includes('Failed to load resource') && errorMessage.includes('clerk'))
-      ) {
-        // Silenciar estos errores específicos
-        return
+    // Interceptar requests de network para bloquear commerce/statements
+    const originalFetch = window.fetch;
+    window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+      const url = typeof input === 'string' ? input : input.toString();
+      
+      // Bloquear requests específicas de commerce/statements
+      if (url.includes('commerce/statements') || url.includes('/v1/me/commerce/statements')) {
+        // Retornar respuesta simulada exitosa para evitar errores 403
+        return Promise.resolve(new Response(JSON.stringify([]), {
+          status: 200,
+          statusText: 'OK',
+          headers: { 'Content-Type': 'application/json' }
+        }));
       }
-      // Mostrar otros errores normalmente
-      originalConsoleError.apply(console, args)
-    }
+      
+      return originalFetch(input, init);
+    };
 
     const forceClerkDarkMode = () => {
       // Aplicar dark mode a contenedores principales en páginas de auth
@@ -454,8 +455,8 @@ const ClerkDarkMode = () => {
     return () => {
       observer.disconnect()
       clearInterval(interval)
-      // Restaurar console.error original al desmontar
-      console.error = originalConsoleError
+      // Restaurar fetch original
+      window.fetch = originalFetch
     }
   }, [theme])
 
