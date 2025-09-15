@@ -136,8 +136,11 @@ const ClerkDarkMode = () => {
         }
         
         /* Estilos para la página de gestión de cuenta (Manage account) */
+        /* Forzar TODOS los elementos del UserProfile a ser oscuros */
         .cl-userProfile,
+        .cl-userProfile *,
         .cl-profilePage,
+        .cl-profilePage *,
         .cl-profileSection,
         .cl-profileSectionContent {
           background-color: #1f2937 !important;
@@ -151,40 +154,27 @@ const ClerkDarkMode = () => {
           border: none !important;
         }
         
-        /* Sidebar/barra lateral izquierda donde están Profile y Security */
+        /* FORZAR el sidebar/barra lateral izquierda a ser oscura */
+        .cl-userProfile > div,
+        .cl-userProfile > div > div,
         .cl-userProfile .cl-navbar,
         .cl-userProfile .cl-profileSectionPrimaryButton,
         .cl-navbarMobileMenuRow,
         .cl-navbarMobileMenuButton {
           background-color: #1f2937 !important;
+          background: #1f2937 !important;
           color: #f3f4f6 !important;
         }
         
-        /* Contenedor completo del sidebar */
-        .cl-userProfile > div:first-child,
-        .cl-userProfile .cl-profileSection:first-child {
+        /* Eliminar cualquier fondo blanco en el modal/container principal */
+        [data-clerk-modal],
+        [data-clerk-modal] *,
+        .cl-modalContent,
+        .cl-modalContent *,
+        .cl-rootBox,
+        .cl-rootBox * {
           background-color: #1f2937 !important;
-        }
-        
-        /* Botones del sidebar (Profile, Security) */
-        .cl-navbarButton,
-        .cl-profileSectionPrimaryButton {
-          background-color: transparent !important;
-          color: #f3f4f6 !important;
-          border: none !important;
-        }
-        
-        /* Hover state para botones del sidebar */
-        .cl-navbarButton:hover,
-        .cl-profileSectionPrimaryButton:hover {
-          background-color: #374151 !important;
-        }
-        
-        /* Botón activo del sidebar */
-        .cl-navbarButton[aria-current="page"],
-        .cl-navbarButton.cl-active {
-          background-color: #374151 !important;
-          color: #f3f4f6 !important;
+          background: #1f2937 !important;
         }
         
         /* Títulos y subtítulos de la página de cuenta */
@@ -263,50 +253,52 @@ const ClerkDarkMode = () => {
       
       // Función específica para la página de gestión de cuenta
       const fixUserProfilePage = () => {
-        const userProfileElements = document.querySelectorAll('.cl-userProfile, .cl-profilePage, .cl-profileSection, .cl-profileSectionContent')
-        userProfileElements.forEach((element: Element) => {
+        // Aplicar fondo oscuro a TODOS los elementos relacionados con UserProfile
+        const allClerkElements = document.querySelectorAll('[class*="cl-userProfile"], [class*="cl-profilePage"], [class*="cl-modal"], [data-clerk-modal], .cl-rootBox')
+        allClerkElements.forEach((element: Element) => {
           const htmlElement = element as HTMLElement
           htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+          htmlElement.style.setProperty('background', '#1f2937', 'important')
           htmlElement.style.setProperty('color', '#f3f4f6', 'important')
+          
+          // También aplicar a todos los hijos
+          const children = htmlElement.querySelectorAll('*')
+          children.forEach((child: Element) => {
+            const htmlChild = child as HTMLElement
+            htmlChild.style.setProperty('background-color', '#1f2937', 'important')
+            htmlChild.style.setProperty('background', '#1f2937', 'important')
+            htmlChild.style.setProperty('color', '#f3f4f6', 'important')
+          })
         })
         
-        // Aplicar a tarjetas dentro de la página de perfil
-        const profileCards = document.querySelectorAll('.cl-userProfile .cl-card, .cl-profilePage .cl-card')
-        profileCards.forEach((card: Element) => {
-          const htmlCard = card as HTMLElement
-          htmlCard.style.setProperty('background-color', '#1f2937', 'important')
-          htmlCard.style.setProperty('border', 'none', 'important')
-        })
-        
-        // Corregir específicamente el sidebar izquierdo
-        const sidebarElements = document.querySelectorAll('.cl-userProfile > div:first-child, .cl-navbar, .cl-navbarButton')
-        sidebarElements.forEach((sidebar: Element) => {
-          const htmlSidebar = sidebar as HTMLElement
-          htmlSidebar.style.setProperty('background-color', '#1f2937', 'important')
-          htmlSidebar.style.setProperty('color', '#f3f4f6', 'important')
-        })
-        
-        // Aplicar a todos los elementos dentro del UserProfile
-        const allProfileElements = document.querySelectorAll('.cl-userProfile *')
-        allProfileElements.forEach((element: Element) => {
+        // Buscar cualquier elemento con fondo blanco y forzarlo a oscuro
+        const allElements = document.querySelectorAll('*')
+        allElements.forEach((element: Element) => {
           const htmlElement = element as HTMLElement
           const computedStyle = window.getComputedStyle(htmlElement)
           
-          // Si tiene fondo blanco, cambiarlo
           if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
               computedStyle.backgroundColor === 'white' ||
-              computedStyle.backgroundColor === '#ffffff') {
-            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              computedStyle.backgroundColor === '#ffffff' ||
+              computedStyle.backgroundColor === '#fff') {
+            // Solo aplicar si el elemento está dentro del modal de Clerk
+            const isInClerkModal = htmlElement.closest('[class*="cl-"], [data-clerk-modal]')
+            if (isInClerkModal) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('background', '#1f2937', 'important')
+            }
           }
         })
       }
 
-      // Ejecutar las correcciones
+      // Ejecutar las correcciones múltiples veces para elementos dinámicos
       fixUserButtonElements()
       fixUserProfilePage()
-      setTimeout(fixUserButtonElements, 200)
-      setTimeout(fixUserProfilePage, 200)
-      setTimeout(fixUserProfilePage, 500) // Ejecución adicional para elementos dinámicos
+      setTimeout(fixUserButtonElements, 100)
+      setTimeout(fixUserProfilePage, 100)
+      setTimeout(fixUserProfilePage, 300)
+      setTimeout(fixUserProfilePage, 500)
+      setTimeout(fixUserProfilePage, 1000)
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
