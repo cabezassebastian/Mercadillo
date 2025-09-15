@@ -94,12 +94,21 @@ const ClerkDarkMode = () => {
           border-radius: 6px !important;
         }
         
-        /* Eliminar completamente las esquinas blancas del Sign out */
+        /* Hacer que el Sign out tenga esquinas sutiles como Manage account */
         .cl-menuItem:last-child {
           background-color: transparent !important;
           border: none !important;
-          border-radius: 0 0 8px 8px !important;
+          border-radius: 6px !important;
           position: relative !important;
+        }
+        
+        /* Eliminar el contenedor principal que causa esquinas pronunciadas */
+        .cl-userButtonPopoverCard {
+          background-color: #1f2937 !important;
+          border: none !important;
+          border-radius: 6px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+          overflow: visible !important;
         }
         
         /* Eliminar todos los pseudo-elementos que causen esquinas blancas */
@@ -132,10 +141,11 @@ const ClerkDarkMode = () => {
         const userButtonPopover = document.querySelector('.cl-userButtonPopoverCard')
         if (userButtonPopover) {
           const htmlPopover = userButtonPopover as HTMLElement
-          // Solo aplicar estilos básicos de contenedor
+          // Solo aplicar estilos básicos de contenedor con esquinas sutiles
           htmlPopover.style.setProperty('background-color', '#1f2937', 'important')
           htmlPopover.style.setProperty('border', 'none', 'important')
-          htmlPopover.style.setProperty('border-radius', '8px', 'important')
+          htmlPopover.style.setProperty('border-radius', '6px', 'important')
+          htmlPopover.style.setProperty('overflow', 'visible', 'important')
           
           // Eliminar bordes del área de usuario
           const userPreview = userButtonPopover.querySelector('.cl-userPreview')
@@ -144,6 +154,13 @@ const ClerkDarkMode = () => {
             htmlPreview.style.setProperty('border', 'none', 'important')
             htmlPreview.style.setProperty('border-bottom', 'none', 'important')
           }
+          
+          // Hacer que todos los elementos del menú tengan el mismo border-radius sutil
+          const menuItems = userButtonPopover.querySelectorAll('.cl-menuItem')
+          menuItems.forEach((item: Element) => {
+            const htmlItem = item as HTMLElement
+            htmlItem.style.setProperty('border-radius', '6px', 'important')
+          })
         }
       }
 
