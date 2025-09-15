@@ -59,6 +59,9 @@ const SignInPage = () => {
                 borderRadius: "0.75rem",
                 fontFamily: "Inter, sans-serif",
                 spacingUnit: "1rem",
+                colorDanger: "#ef4444",
+                colorSuccess: "#10b981",
+                colorWarning: "#f59e0b",
               },
               layout: {
                 unsafe_disableDevelopmentModeWarnings: true,

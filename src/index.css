@@ -198,4 +198,130 @@
   background-color: #1f2937 !important;
 }
 
+/* More aggressive footer styling */
+.clerk-continue-wrapper .cl-footer,
+.clerk-continue-wrapper .cl-footerAction,
+.clerk-continue-wrapper [data-testid="powered-by"],
+.clerk-continue-wrapper .cl-footerText,
+.clerk-continue-wrapper .cl-footerActionText {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper .cl-footer,
+.dark .clerk-continue-wrapper .cl-footerAction,
+.dark .clerk-continue-wrapper [data-testid="powered-by"],
+.dark .clerk-continue-wrapper .cl-footerText,
+.dark .clerk-continue-wrapper .cl-footerActionText {
+  background-color: #1f2937 !important;
+}
+
+/* Target all potential footer containers */
+[data-clerk-footer] {
+  background-color: white !important;
+}
+
+.dark [data-clerk-footer] {
+  background-color: #1f2937 !important;
+}
+
+/* Universal footer fix with higher specificity */
+.min-h-screen .bg-white.dark\:bg-gray-800 .clerk-continue-wrapper * {
+  background-color: inherit !important;
+}
+
+.dark .min-h-screen .bg-white.dark\:bg-gray-800 .clerk-continue-wrapper * {
+  background-color: #1f2937 !important;
+}
+
+/* Final fallback - target any remaining white backgrounds */
+.clerk-continue-wrapper div[style*="background"] {
+  background: white !important;
+}
+
+.dark .clerk-continue-wrapper div[style*="background"] {
+  background: #1f2937 !important;
+}
+
+/* Override any inline styles */
+.clerk-continue-wrapper * {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper * {
+  background-color: #1f2937 !important;
+}
+
+/* Specific targets for common Clerk elements */
+.clerk-continue-wrapper .cl-internal-*,
+.clerk-continue-wrapper [class*="cl-"],
+.clerk-continue-wrapper [class*="clerk"] {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper .cl-internal-*,
+.dark .clerk-continue-wrapper [class*="cl-"],
+.dark .clerk-continue-wrapper [class*="clerk"] {
+  background-color: #1f2937 !important;
+}
+
+/* Ultra specific targeting for footer area */
+.clerk-continue-wrapper > div > div:last-child,
+.clerk-continue-wrapper > div > div:last-child > div,
+.clerk-continue-wrapper > div > div:last-child * {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper > div > div:last-child,
+.dark .clerk-continue-wrapper > div > div:last-child > div,
+.dark .clerk-continue-wrapper > div > div:last-child * {
+  background-color: #1f2937 !important;
+}
+
+/* Force background on any div that might contain footer content */
+.clerk-continue-wrapper div:has(a[href*="sign"]),
+.clerk-continue-wrapper div:has([data-testid="powered-by"]),
+.clerk-continue-wrapper div:has(span:contains("Secured by")) {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper div:has(a[href*="sign"]),
+.dark .clerk-continue-wrapper div:has([data-testid="powered-by"]),
+.dark .clerk-continue-wrapper div:has(span:contains("Secured by")) {
+  background-color: #1f2937 !important;
+}
+
+/* Target any remaining div elements in footer area */
+.clerk-continue-wrapper > * > * > *:nth-last-child(-n+3) {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper > * > * > *:nth-last-child(-n+3) {
+  background-color: #1f2937 !important;
+}
+
+/* Final nuclear option - override everything in clerk wrapper */
+.clerk-continue-wrapper {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper {
+  background-color: #1f2937 !important;
+}
+
+.clerk-continue-wrapper,
+.clerk-continue-wrapper > *,
+.clerk-continue-wrapper > * > *,
+.clerk-continue-wrapper > * > * > *,
+.clerk-continue-wrapper > * > * > * > * {
+  background-color: inherit !important;
+}
+
+.dark .clerk-continue-wrapper,
+.dark .clerk-continue-wrapper > *,
+.dark .clerk-continue-wrapper > * > *,
+.dark .clerk-continue-wrapper > * > * > *,
+.dark .clerk-continue-wrapper > * > * > * > * {
+  background-color: #1f2937 !important;
+}
+
 
