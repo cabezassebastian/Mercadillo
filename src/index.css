@@ -324,4 +324,69 @@
   background-color: #1f2937 !important;
 }
 
+/* Emergency override - force all backgrounds */
+.clerk-continue-wrapper * {
+  background: white !important;
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper * {
+  background: #1f2937 !important;
+  background-color: #1f2937 !important;
+}
+
+/* Absolute last resort - target ALL possible elements */
+.clerk-continue-wrapper *,
+.clerk-continue-wrapper *::before,
+.clerk-continue-wrapper *::after {
+  background: white !important;
+}
+
+.dark .clerk-continue-wrapper *,
+.dark .clerk-continue-wrapper *::before,
+.dark .clerk-continue-wrapper *::after {
+  background: #1f2937 !important;
+}
+
+/* Force apply to any element with any class or id */
+.clerk-continue-wrapper [class],
+.clerk-continue-wrapper [id],
+.clerk-continue-wrapper div,
+.clerk-continue-wrapper span,
+.clerk-continue-wrapper p,
+.clerk-continue-wrapper a {
+  background-color: white !important;
+}
+
+.dark .clerk-continue-wrapper [class],
+.dark .clerk-continue-wrapper [id],
+.dark .clerk-continue-wrapper div,
+.dark .clerk-continue-wrapper span,
+.dark .clerk-continue-wrapper p,
+.dark .clerk-continue-wrapper a {
+  background-color: #1f2937 !important;
+}
+
+/* Maximum specificity override */
+html.dark body .min-h-screen .clerk-continue-wrapper,
+html.dark body .min-h-screen .clerk-continue-wrapper * {
+  background-color: #1f2937 !important;
+  background: #1f2937 !important;
+}
+
+html body .min-h-screen .clerk-continue-wrapper,
+html body .min-h-screen .clerk-continue-wrapper * {
+  background-color: white !important;
+  background: white !important;
+}
+
+/* CSS variables override for any component using them */
+.clerk-continue-wrapper {
+  --clerk-color-background: white;
+}
+
+.dark .clerk-continue-wrapper {
+  --clerk-color-background: #1f2937;
+}
+
 

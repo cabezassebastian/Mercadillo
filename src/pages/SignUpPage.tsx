@@ -52,7 +52,7 @@ const SignUpPage = () => {
               variables: {
                 colorPrimary: "#fbbf24",
                 colorText: "#111827",
-                colorBackground: "#ffffff",
+                colorBackground: "inherit",
                 colorInputBackground: "#ffffff",
                 colorInputText: "#111827",
                 colorNeutral: "#6b7280",
