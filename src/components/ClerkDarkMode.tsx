@@ -49,15 +49,27 @@ const ClerkDarkMode = () => {
       
       darkModeStyle.textContent = `
         /* Aplicar modo oscuro específicamente al UserButton y su menú */
-        .cl-userButtonPopoverCard,
+        .cl-userButtonPopoverCard {
+          background-color: #1f2937 !important;
+          border: none !important;
+          border-radius: 8px !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+          overflow: hidden !important;
+        }
+        
         .cl-card,
         .cl-popoverBox,
-        .cl-userPreview,
-        .cl-userButtonPopoverRootBox,
-        .cl-popoverArrow {
+        .cl-userButtonPopoverRootBox {
           background-color: #1f2937 !important;
-          border: 1px solid #374151 !important;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
+          border: none !important;
+          border-radius: 8px !important;
+        }
+        
+        /* Eliminar borde del área de información del usuario */
+        .cl-userPreview {
+          background-color: #1f2937 !important;
+          border: none !important;
+          border-bottom: none !important;
         }
         
         /* Elementos de texto del menú */
@@ -69,152 +81,73 @@ const ClerkDarkMode = () => {
           background-color: transparent !important;
         }
         
+        /* Botones del menú sin bordes extraños */
+        .cl-menuItem {
+          background-color: transparent !important;
+          border: none !important;
+          border-radius: 6px !important;
+        }
+        
         /* Hover effects más naturales */
         .cl-menuItem:hover {
           background-color: #374151 !important;
           border-radius: 6px !important;
         }
         
-        /* Flecha del popover */
-        .cl-popoverArrow::before,
-        .cl-popoverArrow::after {
-          background-color: #1f2937 !important;
-          border-color: #374151 !important;
+        /* Eliminar completamente las esquinas blancas del Sign out */
+        .cl-menuItem:last-child {
+          background-color: transparent !important;
+          border: none !important;
+          border-radius: 0 0 8px 8px !important;
+          position: relative !important;
         }
         
-        /* Asegurar que el contenedor principal tenga buen aspecto */
-        .cl-userButtonPopoverRootBox {
-          border-radius: 8px !important;
-          overflow: hidden !important;
+        /* Eliminar todos los pseudo-elementos que causen esquinas blancas */
+        .cl-userButtonPopoverCard::before,
+        .cl-userButtonPopoverCard::after,
+        .cl-userPreview::before,
+        .cl-userPreview::after,
+        .cl-menuItem::before,
+        .cl-menuItem::after {
+          display: none !important;
+          content: none !important;
         }
         
-        /* Corregir sombra del avatar del usuario */
+        /* Corregir sombra del avatar del usuario sin bordes extraños */
         .cl-userButtonAvatarBox,
         .cl-avatarBox {
           box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2) !important;
-          border: 1px solid #374151 !important;
+          border: none !important;
         }
         
         /* Separadores del menú */
         .cl-menuItemDivider {
           background-color: #374151 !important;
-        }
-        
-        /* Eliminar bordes blancos y líneas */
-        .cl-userButtonPopoverCard::after,
-        .cl-userButtonPopoverCard::before,
-        .cl-menuItem::after,
-        .cl-menuItem::before,
-        .cl-userButtonPopoverFooter,
-        .cl-userButtonPopoverActions {
-          background-color: #1f2937 !important;
-          border-color: #374151 !important;
-          border-bottom: none !important;
-          border-top: none !important;
-        }
-        
-        /* Eliminar líneas blancas específicamente */
-        .cl-userButtonPopoverCard *::after,
-        .cl-userButtonPopoverCard *::before {
-          background-color: #1f2937 !important;
-          border-color: #374151 !important;
-        }
-        
-        /* Footer y elementos finales del popover */
-        .cl-userButtonPopoverCard > *:last-child,
-        .cl-menuItem:last-child {
-          border-bottom: none !important;
-          border-bottom-color: transparent !important;
-        }
-        
-        /* Forzar transparencia en elementos que puedan crear líneas */
-        .cl-userButtonPopoverCard hr,
-        .cl-userButtonPopoverCard .cl-divider,
-        .cl-userButtonPopoverCard [role="separator"] {
-          background-color: #374151 !important;
-          border-color: #374151 !important;
-          opacity: 0.3 !important;
-        }
-        
-        /* Corregir específicamente las esquinas del botón Sign out */
-        .cl-menuItem[data-localization-key="userButton.action__signOut"],
-        .cl-menuItem:last-child,
-        button[data-localization-key="userButton.action__signOut"] {
-          background-color: #1f2937 !important;
-          border-radius: 0 0 8px 8px !important;
           border: none !important;
-          overflow: hidden !important;
-          position: relative !important;
-        }
-        
-        /* Pseudo-elementos específicos para Sign out */
-        .cl-menuItem[data-localization-key="userButton.action__signOut"]::before,
-        .cl-menuItem[data-localization-key="userButton.action__signOut"]::after,
-        .cl-menuItem:last-child::before,
-        .cl-menuItem:last-child::after {
-          content: none !important;
-          display: none !important;
-        }
-        
-        /* Forzar esquinas redondeadas sin fondos blancos */
-        .cl-userButtonPopoverCard .cl-menuItem:last-child {
-          border-bottom-left-radius: 8px !important;
-          border-bottom-right-radius: 8px !important;
-          background-color: #1f2937 !important;
-          background-clip: padding-box !important;
         }
       `
 
-      // Función más específica para el UserButton
+      // Función específica para corregir elementos problemáticos
       const fixUserButtonElements = () => {
-        // Solo aplicar a elementos específicos del UserButton popover
         const userButtonPopover = document.querySelector('.cl-userButtonPopoverCard')
         if (userButtonPopover) {
-          const popoverElements = userButtonPopover.querySelectorAll('*')
-          popoverElements.forEach((element: Element) => {
-            const htmlElement = element as HTMLElement
-            const computedStyle = window.getComputedStyle(htmlElement)
-            
-            // Solo corregir fondos blancos en el popover del UserButton
-            if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
-                computedStyle.backgroundColor === 'white') {
-              htmlElement.style.setProperty('background-color', 'transparent', 'important')
-            }
-            
-            // Eliminar bordes blancos específicamente
-            if (computedStyle.borderBottomColor === 'rgb(255, 255, 255)' ||
-                computedStyle.borderTopColor === 'rgb(255, 255, 255)' ||
-                computedStyle.borderBottomColor === 'white' ||
-                computedStyle.borderTopColor === 'white') {
-              htmlElement.style.setProperty('border-bottom-color', '#374151', 'important')
-              htmlElement.style.setProperty('border-top-color', '#374151', 'important')
-            }
-          })
+          const htmlPopover = userButtonPopover as HTMLElement
+          // Solo aplicar estilos básicos de contenedor
+          htmlPopover.style.setProperty('background-color', '#1f2937', 'important')
+          htmlPopover.style.setProperty('border', 'none', 'important')
+          htmlPopover.style.setProperty('border-radius', '8px', 'important')
           
-          // Buscar específicamente elementos hr o separadores
-          const separators = userButtonPopover.querySelectorAll('hr, [role="separator"], .cl-divider')
-          separators.forEach((separator: Element) => {
-            const htmlSeparator = separator as HTMLElement
-            htmlSeparator.style.setProperty('background-color', '#374151', 'important')
-            htmlSeparator.style.setProperty('border-color', '#374151', 'important')
-            htmlSeparator.style.setProperty('opacity', '0.3', 'important')
-          })
-          
-          // Corregir específicamente el botón Sign out
-          const signOutButton = userButtonPopover.querySelector('[data-localization-key="userButton.action__signOut"]') ||
-                               userButtonPopover.querySelector('.cl-menuItem:last-child')
-          if (signOutButton) {
-            const htmlSignOut = signOutButton as HTMLElement
-            htmlSignOut.style.setProperty('background-color', '#1f2937', 'important')
-            htmlSignOut.style.setProperty('border-radius', '0 0 8px 8px', 'important')
-            htmlSignOut.style.setProperty('border', 'none', 'important')
-            htmlSignOut.style.setProperty('overflow', 'hidden', 'important')
-            htmlSignOut.style.setProperty('background-clip', 'padding-box', 'important')
+          // Eliminar bordes del área de usuario
+          const userPreview = userButtonPopover.querySelector('.cl-userPreview')
+          if (userPreview) {
+            const htmlPreview = userPreview as HTMLElement
+            htmlPreview.style.setProperty('border', 'none', 'important')
+            htmlPreview.style.setProperty('border-bottom', 'none', 'important')
           }
         }
       }
 
-      // Ejecutar solo cuando sea necesario
+      // Ejecutar la corrección
       fixUserButtonElements()
       setTimeout(fixUserButtonElements, 200)
 
