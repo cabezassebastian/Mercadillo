@@ -151,6 +151,42 @@ const ClerkDarkMode = () => {
           border: none !important;
         }
         
+        /* Sidebar/barra lateral izquierda donde están Profile y Security */
+        .cl-userProfile .cl-navbar,
+        .cl-userProfile .cl-profileSectionPrimaryButton,
+        .cl-navbarMobileMenuRow,
+        .cl-navbarMobileMenuButton {
+          background-color: #1f2937 !important;
+          color: #f3f4f6 !important;
+        }
+        
+        /* Contenedor completo del sidebar */
+        .cl-userProfile > div:first-child,
+        .cl-userProfile .cl-profileSection:first-child {
+          background-color: #1f2937 !important;
+        }
+        
+        /* Botones del sidebar (Profile, Security) */
+        .cl-navbarButton,
+        .cl-profileSectionPrimaryButton {
+          background-color: transparent !important;
+          color: #f3f4f6 !important;
+          border: none !important;
+        }
+        
+        /* Hover state para botones del sidebar */
+        .cl-navbarButton:hover,
+        .cl-profileSectionPrimaryButton:hover {
+          background-color: #374151 !important;
+        }
+        
+        /* Botón activo del sidebar */
+        .cl-navbarButton[aria-current="page"],
+        .cl-navbarButton.cl-active {
+          background-color: #374151 !important;
+          color: #f3f4f6 !important;
+        }
+        
         /* Títulos y subtítulos de la página de cuenta */
         .cl-profileSectionTitle,
         .cl-profileSectionSubtitle,
@@ -241,6 +277,28 @@ const ClerkDarkMode = () => {
           htmlCard.style.setProperty('background-color', '#1f2937', 'important')
           htmlCard.style.setProperty('border', 'none', 'important')
         })
+        
+        // Corregir específicamente el sidebar izquierdo
+        const sidebarElements = document.querySelectorAll('.cl-userProfile > div:first-child, .cl-navbar, .cl-navbarButton')
+        sidebarElements.forEach((sidebar: Element) => {
+          const htmlSidebar = sidebar as HTMLElement
+          htmlSidebar.style.setProperty('background-color', '#1f2937', 'important')
+          htmlSidebar.style.setProperty('color', '#f3f4f6', 'important')
+        })
+        
+        // Aplicar a todos los elementos dentro del UserProfile
+        const allProfileElements = document.querySelectorAll('.cl-userProfile *')
+        allProfileElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          const computedStyle = window.getComputedStyle(htmlElement)
+          
+          // Si tiene fondo blanco, cambiarlo
+          if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+              computedStyle.backgroundColor === 'white' ||
+              computedStyle.backgroundColor === '#ffffff') {
+            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+          }
+        })
       }
 
       // Ejecutar las correcciones
@@ -248,6 +306,7 @@ const ClerkDarkMode = () => {
       fixUserProfilePage()
       setTimeout(fixUserButtonElements, 200)
       setTimeout(fixUserProfilePage, 200)
+      setTimeout(fixUserProfilePage, 500) // Ejecución adicional para elementos dinámicos
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
