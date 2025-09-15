@@ -31,34 +31,12 @@ const ClerkDarkMode = () => {
       })
 
       // Aplicar dark mode específicamente al UserButton y su menú desplegable
-      const userButtonElements = document.querySelectorAll('[class*="cl-userButton"], [class*="cl-popover"], [class*="cl-userPreview"], [class*="cl-card"], [class*="cl-menuItem"], [class*="cl-menuList"], [class*="cl-dropdown"], [class*="cl-avatarBox"], [class*="cl-popoverBox"], [data-testid*="user-button"], [role="button"][class*="cl-"], [role="menuitem"], [role="menu"]')
+      const userButtonElements = document.querySelectorAll('.cl-userButtonPopoverCard, .cl-card, .cl-popoverBox, .cl-userPreview, .cl-userButtonPopoverRootBox')
       userButtonElements.forEach((element: Element) => {
         const htmlElement = element as HTMLElement
         htmlElement.style.setProperty('background-color', '#1f2937', 'important')
         htmlElement.style.setProperty('color', '#f3f4f6', 'important')
         htmlElement.style.setProperty('border-color', '#374151', 'important')
-      })
-
-      // Forzar esquinas redondeadas oscuras específicamente
-      const cornerElements = document.querySelectorAll('[class*="cl-popover"], [class*="cl-card"], [class*="cl-dropdown"], [class*="cl-popoverBox"]')
-      cornerElements.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement
-        htmlElement.style.setProperty('background-color', '#1f2937', 'important')
-        htmlElement.style.setProperty('border-radius', '8px', 'important')
-        htmlElement.style.setProperty('border', '1px solid #374151', 'important')
-        htmlElement.style.setProperty('box-shadow', '0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3)', 'important')
-      })
-
-      // Aplicar dark mode a cualquier elemento que contenga el menú del usuario
-      const menuContainers = document.querySelectorAll('div[style*="position: absolute"], div[style*="z-index"], [data-portal="true"]')
-      menuContainers.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement
-        // Solo aplicar si parece ser un menú de Clerk
-        const hasClerkClasses = htmlElement.querySelector('[class*="cl-"]')
-        if (hasClerkClasses) {
-          htmlElement.style.setProperty('background-color', '#1f2937', 'important')
-          htmlElement.style.setProperty('border-radius', '8px', 'important')
-        }
       })
 
       // Inyectar CSS personalizado para forzar el modo oscuro en el UserButton
@@ -70,95 +48,81 @@ const ClerkDarkMode = () => {
       }
       
       darkModeStyle.textContent = `
-        /* Forzar modo oscuro en TODOS los elementos de Clerk */
-        [class*="cl-"] {
+        /* Aplicar modo oscuro específicamente al UserButton y su menú */
+        .cl-userButtonPopoverCard,
+        .cl-card,
+        .cl-popoverBox,
+        .cl-userPreview,
+        .cl-userButtonPopoverRootBox,
+        .cl-popoverArrow {
           background-color: #1f2937 !important;
-          color: #f3f4f6 !important;
-          border-color: #374151 !important;
+          border: 1px solid #374151 !important;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2) !important;
         }
         
-        /* Elementos específicos del UserButton */
-        [class*="cl-popover"], 
-        [class*="cl-card"], 
-        [class*="cl-dropdown"],
-        [class*="cl-popoverBox"],
-        [class*="cl-userPreview"],
-        [class*="cl-menuList"],
-        [class*="cl-menuItem"],
-        [class*="cl-userButton"],
-        [class*="cl-avatarBox"] {
-          background-color: #1f2937 !important;
+        /* Elementos de texto del menú */
+        .cl-userButtonPopoverCard .cl-userPreview,
+        .cl-userButtonPopoverCard .cl-menuItem,
+        .cl-userButtonPopoverCard .cl-menuItemTextPrimary,
+        .cl-userButtonPopoverCard .cl-menuItemTextSecondary {
           color: #f3f4f6 !important;
-          border-color: #374151 !important;
-          border-radius: 8px !important;
-          box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3) !important;
-        }
-        
-        /* Pseudo-elementos para eliminar esquinas blancas */
-        [class*="cl-"]::before,
-        [class*="cl-"]::after {
-          background-color: #1f2937 !important;
-          border-color: #374151 !important;
-          color: #f3f4f6 !important;
-        }
-        
-        /* Contenedores y divs internos */
-        [class*="cl-"] div,
-        [class*="cl-"] span,
-        [class*="cl-"] p {
           background-color: transparent !important;
-          color: #f3f4f6 !important;
         }
         
-        /* UserButton hover effects */
-        [class*="cl-menuItem"]:hover,
-        [class*="cl-"] button:hover {
+        /* Hover effects más naturales */
+        .cl-menuItem:hover {
           background-color: #374151 !important;
+          border-radius: 6px !important;
         }
         
-        /* Forzar todos los elementos dentro del portal */
-        #clerk-components div,
-        [data-portal] div,
-        [data-clerk] div {
+        /* Flecha del popover */
+        .cl-popoverArrow::before,
+        .cl-popoverArrow::after {
           background-color: #1f2937 !important;
-          color: #f3f4f6 !important;
+          border-color: #374151 !important;
         }
         
-        /* Eliminar cualquier fondo blanco residual */
-        [class*="cl-"] * {
-          background-color: inherit !important;
+        /* Asegurar que el contenedor principal tenga buen aspecto */
+        .cl-userButtonPopoverRootBox {
+          border-radius: 8px !important;
+          overflow: hidden !important;
+        }
+        
+        /* Corregir sombra del avatar del usuario */
+        .cl-userButtonAvatarBox,
+        .cl-avatarBox {
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.2) !important;
+          border: 1px solid #374151 !important;
+        }
+        
+        /* Separadores del menú */
+        .cl-menuItemDivider {
+          background-color: #374151 !important;
         }
       `
 
-      // Función adicional para detectar y corregir elementos blancos
-      const fixWhiteElements = () => {
-        // Buscar todos los elementos dentro de componentes de Clerk
-        const allClerkElements = document.querySelectorAll('[class*="cl-"] *')
-        allClerkElements.forEach((element: Element) => {
-          const htmlElement = element as HTMLElement
-          const computedStyle = window.getComputedStyle(htmlElement)
-          
-          // Si el elemento tiene fondo blanco, cambiarlo a oscuro
-          if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
-              computedStyle.backgroundColor === 'white' ||
-              computedStyle.backgroundColor === '#ffffff' ||
-              computedStyle.backgroundColor === '#fff') {
-            htmlElement.style.setProperty('background-color', '#1f2937', 'important')
-          }
-          
-          // Si el texto es negro, cambiarlo a blanco
-          if (computedStyle.color === 'rgb(0, 0, 0)' || 
-              computedStyle.color === 'black' ||
-              computedStyle.color === '#000000' ||
-              computedStyle.color === '#000') {
-            htmlElement.style.setProperty('color', '#f3f4f6', 'important')
-          }
-        })
+      // Función más específica para el UserButton
+      const fixUserButtonElements = () => {
+        // Solo aplicar a elementos específicos del UserButton popover
+        const userButtonPopover = document.querySelector('.cl-userButtonPopoverCard')
+        if (userButtonPopover) {
+          const popoverElements = userButtonPopover.querySelectorAll('*')
+          popoverElements.forEach((element: Element) => {
+            const htmlElement = element as HTMLElement
+            const computedStyle = window.getComputedStyle(htmlElement)
+            
+            // Solo corregir fondos blancos en el popover del UserButton
+            if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+                computedStyle.backgroundColor === 'white') {
+              htmlElement.style.setProperty('background-color', 'transparent', 'important')
+            }
+          })
+        }
       }
 
-      // Ejecutar la función de corrección inmediatamente y después de un breve delay
-      fixWhiteElements()
-      setTimeout(fixWhiteElements, 100)
+      // Ejecutar solo cuando sea necesario
+      fixUserButtonElements()
+      setTimeout(fixUserButtonElements, 200)
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
@@ -198,7 +162,7 @@ const ClerkDarkMode = () => {
       })
 
       // Limpiar estilos específicos del UserButton
-      const userButtonElements = document.querySelectorAll('[class*="cl-userButton"], [class*="cl-popover"], [class*="cl-userPreview"], [class*="cl-card"], [class*="cl-menuItem"], [class*="cl-menuList"], [class*="cl-dropdown"], [class*="cl-avatarBox"], [class*="cl-popoverBox"], [data-testid*="user-button"], [role="button"][class*="cl-"], [role="menuitem"], [role="menu"]')
+      const userButtonElements = document.querySelectorAll('.cl-userButtonPopoverCard, .cl-card, .cl-popoverBox, .cl-userPreview, .cl-userButtonPopoverRootBox, .cl-popoverArrow, .cl-userButtonAvatarBox, .cl-avatarBox, .cl-menuItem, .cl-menuItemDivider')
       userButtonElements.forEach((element: Element) => {
         const htmlElement = element as HTMLElement
         htmlElement.style.removeProperty('background-color')
@@ -207,17 +171,7 @@ const ClerkDarkMode = () => {
         htmlElement.style.removeProperty('border-radius')
         htmlElement.style.removeProperty('border')
         htmlElement.style.removeProperty('box-shadow')
-      })
-
-      // Limpiar contenedores de menú
-      const menuContainers = document.querySelectorAll('div[style*="position: absolute"], div[style*="z-index"], [data-portal="true"]')
-      menuContainers.forEach((element: Element) => {
-        const htmlElement = element as HTMLElement
-        const hasClerkClasses = htmlElement.querySelector('[class*="cl-"]')
-        if (hasClerkClasses) {
-          htmlElement.style.removeProperty('background-color')
-          htmlElement.style.removeProperty('border-radius')
-        }
+        htmlElement.style.removeProperty('overflow')
       })
 
       // Remover CSS personalizado inyectado
@@ -263,7 +217,7 @@ const ClerkDarkMode = () => {
       attributeFilter: ['class', 'style']
     })
 
-    const interval = setInterval(applyTheme, 100)
+    const interval = setInterval(applyTheme, 300)
 
     return () => {
       observer.disconnect()
