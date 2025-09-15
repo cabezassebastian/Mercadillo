@@ -291,14 +291,53 @@ const ClerkDarkMode = () => {
         })
       }
 
+      // Función AGRESIVA específica para las esquinas blancas del UserButton
+      const fixUserButtonCorners = () => {
+        // Buscar específicamente los elementos del UserButton
+        const userButtonElements = document.querySelectorAll('.cl-userButtonPopoverCard, .cl-userButtonPopoverCard *, .cl-menuItem, .cl-menuItem *, .cl-userPreview, .cl-userPreview *')
+        userButtonElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+          htmlElement.style.setProperty('background', '#1f2937', 'important')
+          htmlElement.style.setProperty('border', 'none', 'important')
+          htmlElement.style.setProperty('border-radius', '6px', 'important')
+        })
+        
+        // Buscar CUALQUIER elemento con fondo blanco dentro del dropdown del UserButton
+        const allElements = document.querySelectorAll('*')
+        allElements.forEach((element: Element) => {
+          const htmlElement = element as HTMLElement
+          const computedStyle = window.getComputedStyle(htmlElement)
+          
+          if (computedStyle.backgroundColor === 'rgb(255, 255, 255)' || 
+              computedStyle.backgroundColor === 'white' ||
+              computedStyle.backgroundColor === '#ffffff' ||
+              computedStyle.backgroundColor === '#fff') {
+            // Solo aplicar si el elemento está dentro del UserButton
+            const isInUserButton = htmlElement.closest('.cl-userButtonPopoverCard, .cl-userButtonPopoverRootBox, .cl-popoverBox')
+            if (isInUserButton) {
+              htmlElement.style.setProperty('background-color', '#1f2937', 'important')
+              htmlElement.style.setProperty('background', '#1f2937', 'important')
+              htmlElement.style.setProperty('border', 'none', 'important')
+              htmlElement.style.setProperty('border-radius', '6px', 'important')
+            }
+          }
+        })
+      }
+
       // Ejecutar las correcciones múltiples veces para elementos dinámicos
       fixUserButtonElements()
       fixUserProfilePage()
+      fixUserButtonCorners()
       setTimeout(fixUserButtonElements, 100)
       setTimeout(fixUserProfilePage, 100)
+      setTimeout(fixUserButtonCorners, 100)
       setTimeout(fixUserProfilePage, 300)
+      setTimeout(fixUserButtonCorners, 300)
       setTimeout(fixUserProfilePage, 500)
+      setTimeout(fixUserButtonCorners, 500)
       setTimeout(fixUserProfilePage, 1000)
+      setTimeout(fixUserButtonCorners, 1000)
 
       // Forzar estilos específicos para botones Continue en dark mode
       const primaryButtons = document.querySelectorAll('.cl-formButtonPrimary, button[type="submit"]')
