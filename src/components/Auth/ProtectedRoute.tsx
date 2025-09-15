@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Navigate, useLocation } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import { useAuth } from '@/contexts/AuthContext'
@@ -16,18 +16,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { isAdmin, isLoading } = useAuth()
   const location = useLocation()
 
+  // Efecto para redirigir después del login exitoso
+  useEffect(() => {
+    if (isLoaded && user && location.state?.from) {
+      // Si el usuario se autentica y hay una URL de origen, podríamos redirigir
+      // Pero React Router ya maneja esto automáticamente
+    }
+  }, [isLoaded, user, location.state])
+
   // Mostrar loading mientras se cargan los datos
   if (!isLoaded || isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-amarillo"></div>
+      <div className="min-h-screen flex items-center justify-center bg-hueso dark:bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-amarillo dark:border-yellow-400 mx-auto mb-4"></div>
+          <p className="text-gris-claro dark:text-gray-400">Verificando autenticación...</p>
+        </div>
       </div>
     )
   }
 
   // Si no está autenticado, redirigir al login
   if (!user) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />
+    const redirectPath = location.pathname === '/checkout' ? '/sign-in' : '/sign-in'
+    const message = location.pathname === '/checkout' 
+      ? 'Debes iniciar sesión para proceder con el pago'
+      : 'Debes iniciar sesión para acceder a esta página'
+      
+    return <Navigate to={redirectPath} state={{ from: location.pathname, message }} replace />
   }
 
   // Si requiere admin y no es admin, mostrar error

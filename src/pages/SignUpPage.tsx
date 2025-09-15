@@ -1,6 +1,11 @@
 import { SignUp } from "@clerk/clerk-react";
+import { useLocation } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 
 const SignUpPage = () => {
+  const location = useLocation();
+  const message = location.state?.message;
+
   return (
     <div className="min-h-screen bg-hueso dark:bg-gray-900 flex items-center justify-center p-2 sm:p-4">
       <div className="w-full max-w-sm sm:max-w-md mx-auto">
@@ -17,6 +22,15 @@ const SignUpPage = () => {
             <p className="text-sm sm:text-base text-gris-claro dark:text-gray-400">
               Únete a nuestro mercadillo
             </p>
+            
+            {message && (
+              <div className="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <div className="flex items-center justify-center space-x-2 text-yellow-800 dark:text-yellow-300">
+                  <AlertCircle className="w-4 h-4" />
+                  <span className="text-sm font-medium">{message}</span>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="clerk-continue-wrapper">

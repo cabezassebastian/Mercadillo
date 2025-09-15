@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
+import CheckoutButton from '@/components/Cart/CheckoutButton'
 
 const Cart = () => {
   const { 
@@ -136,12 +137,7 @@ const Cart = () => {
               </div>
 
               <div className="space-y-3">
-                <Link
-                  to="/checkout"
-                  className="w-full btn-primary text-center py-3 text-lg block"
-                >
-                  Proceder al Pago
-                </Link>
+                <CheckoutButton />
                 <Link
                   to="/catalogo"
                   className="w-full btn-secondary text-center py-3 block"
