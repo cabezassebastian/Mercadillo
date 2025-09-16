@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Mail, Phone, MapPin, Clock, Send, MessageSquare } from 'lucide-react'
+import emailjs from '@emailjs/browser'
 
 const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -26,8 +27,29 @@ const ContactPage: React.FC = () => {
     setSubmitStatus('idle')
 
     try {
-      // Simular envío de formulario
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      // Verificar que las variables de entorno estén configuradas
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID
+
+      if (!publicKey || !serviceId || !templateId) {
+        throw new Error('Variables de entorno de EmailJS no configuradas')
+      }
+
+      // Enviar email usando EmailJS
+      await emailjs.send(
+        serviceId,
+        templateId,
+        {
+          nombre: formData.nombre,
+          email: formData.email,
+          telefono: formData.telefono,
+          asunto: formData.asunto,
+          mensaje: formData.mensaje,
+          to_email: 'contactomercadillo@gmail.com' // Email de destino
+        },
+        publicKey
+      )
       
       setSubmitStatus('success')
       setFormData({
@@ -38,6 +60,7 @@ const ContactPage: React.FC = () => {
         mensaje: ''
       })
     } catch (error) {
+      console.error('Error enviando email:', error)
       setSubmitStatus('error')
     } finally {
       setIsSubmitting(false)
