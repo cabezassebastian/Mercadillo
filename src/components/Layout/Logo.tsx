@@ -26,7 +26,7 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
       <div className="relative overflow-hidden rounded-lg shadow-sm">
         {!imageError ? (
           <img 
-            src="/logo.jpg" 
+            src="/logo.png" 
             alt="Mercadillo Lima Perú Logo" 
             className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 hover:scale-105`}
             onError={() => setImageError(true)}
