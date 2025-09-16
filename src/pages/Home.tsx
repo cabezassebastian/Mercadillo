@@ -62,7 +62,25 @@ const Home: React.FC = () => {
     <div className="min-h-screen bg-hueso dark:bg-gray-900 transition-colors duration-200">
       {/* Seccion Hero */}
       <section className="relative w-full h-96 overflow-hidden">
-        <img src="/banner.png" alt="Mercadillo Lima Peru Banner" className="w-full h-full object-cover" />
+        <img 
+          src="/banner.png" 
+          alt="Mercadillo Lima Peru Banner" 
+          className="w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+            if (fallback) fallback.style.display = 'flex';
+          }}
+        />
+        <div 
+          style={{ display: 'none' }} 
+          className="absolute inset-0 bg-gradient-to-r from-amarillo to-dorado dark:from-yellow-600 dark:to-yellow-400 flex items-center justify-center"
+        >
+          <div className="text-center text-gris-oscuro">
+            <div className="text-6xl font-bold mb-4">🏪</div>
+            <h2 className="text-2xl font-bold">Mercadillo Lima Perú</h2>
+          </div>
+        </div>
         <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 dark:bg-black dark:bg-opacity-60 flex items-center justify-center text-center p-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">

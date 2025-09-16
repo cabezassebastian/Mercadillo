@@ -5,6 +5,7 @@ import { ShoppingCart, Menu, X, Search } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import ThemeToggle from '@/components/ThemeToggle'
+import Logo from '@/components/Layout/Logo'
 
 const Navbar: React.FC = () => {
   const { user } = useUser()
@@ -52,12 +53,7 @@ const Navbar: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2 relative group">
-            <div className="relative overflow-hidden rounded-lg">
-              <img src="/logo.jpg" alt="Mercadillo Lima Perú Logo" className="h-16 w-auto transition-all duration-300" />
-              <div className="absolute inset-0 bg-gradient-to-r from-black/30 to-transparent opacity-0 group-hover:opacity-100 dark:from-black/50 dark:to-black/20 dark:opacity-20 dark:group-hover:opacity-60 transition-all duration-300 rounded-lg"></div>
-            </div>
-          </Link>
+          <Logo size="medium" />
 
           {/* Desktop Navigation with Conditional Search */}
           <div className="hidden md:flex items-center space-x-6">
