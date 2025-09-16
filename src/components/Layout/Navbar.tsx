@@ -51,9 +51,9 @@ const Navbar: React.FC = () => {
   return (
     <nav className="bg-blanco dark:bg-gray-800 shadow-md sticky top-0 z-50 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-20">
           {/* Logo */}
-          <Logo size="medium" />
+          <Logo size="navbar" className="flex-shrink-0" />
 
           {/* Desktop Navigation with Conditional Search */}
           <div className="hidden md:flex items-center space-x-6">

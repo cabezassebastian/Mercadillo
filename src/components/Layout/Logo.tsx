@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 
 interface LogoProps {
   className?: string
-  size?: 'small' | 'medium' | 'large'
+  size?: 'small' | 'medium' | 'large' | 'navbar'
 }
 
 const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
@@ -12,32 +12,33 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
   const sizeClasses = {
     small: 'h-8',
     medium: 'h-12',
-    large: 'h-16'
+    large: 'h-16',
+    navbar: 'h-14'
   }
 
   const fallbackSizeClasses = {
     small: 'h-8 text-lg px-2',
     medium: 'h-12 text-xl px-3',
-    large: 'h-16 text-2xl px-4'
+    large: 'h-16 text-2xl px-4',
+    navbar: 'h-14 text-xl px-3'
   }
 
   return (
-    <Link to="/" className={`flex items-center space-x-2 relative group ${className}`}>
-      <div className="relative overflow-hidden rounded-lg shadow-sm">
+    <Link to="/" className={`flex items-center space-x-2 ${className}`}>
+      <div className="relative">
         {!imageError ? (
           <img 
             src="/logo.png" 
             alt="Mercadillo Lima Perú Logo" 
-            className={`${sizeClasses[size]} w-auto object-contain transition-all duration-300 hover:scale-105`}
+            className={`${sizeClasses[size]} w-auto object-contain transition-transform duration-200 hover:scale-105 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm`}
             onError={() => setImageError(true)}
             onLoad={() => setImageError(false)}
           />
         ) : (
-          <div className={`${fallbackSizeClasses[size]} flex items-center justify-center bg-amarillo dark:bg-yellow-500 rounded-lg text-gris-oscuro dark:text-gray-900 font-bold transition-all duration-300 hover:scale-105`}>
+          <div className={`${fallbackSizeClasses[size]} flex items-center justify-center bg-amarillo dark:bg-yellow-500 rounded-lg text-gris-oscuro dark:text-gray-900 font-bold transition-transform duration-200 hover:scale-105 border border-gray-200 dark:border-gray-600 shadow-sm`}>
             Mercadillo
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/20 to-transparent opacity-0 group-hover:opacity-100 dark:from-black/40 dark:to-black/10 dark:opacity-10 dark:group-hover:opacity-50 transition-all duration-300 rounded-lg"></div>
       </div>
     </Link>
   )
