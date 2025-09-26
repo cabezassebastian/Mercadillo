@@ -125,8 +125,8 @@ const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-1">Dirección</h3>
-                    <p className="text-gray-600 dark:text-gray-400">Av. Javier Prado Este 123</p>
-                    <p className="text-gray-600 dark:text-gray-400">San Isidro, Lima 15036</p>
+                    <p className="text-gray-600 dark:text-gray-400">El Agustino</p>
+                    <p className="text-gray-600 dark:text-gray-400">Lima Este 15007</p>
                     <p className="text-gray-600 dark:text-gray-400">Perú</p>
                   </div>
                 </div>
@@ -154,7 +154,7 @@ const ContactPage: React.FC = () => {
               <div className="space-y-4">
                 <div>
                   <h4 className="font-medium text-gris-oscuro dark:text-gray-100 mb-1">¿Cuánto tiempo tarda mi pedido?</h4>
-                  <p className="text-sm text-gray-600 dark:text-gray-400">Los envíos a Lima Metropolitana tardan 24-48 horas, y a provincias de 3-7 días hábiles.</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Los envíos en El Agustino, Santa Anita y SJL tardan 24 horas, Lima Metropolitana 24-48 horas, y a provincias de 3-7 días hábiles.</p>
                 </div>
                 <div>
                   <h4 className="font-medium text-gris-oscuro dark:text-gray-100 mb-1">¿Puedo cambiar mi pedido?</h4>

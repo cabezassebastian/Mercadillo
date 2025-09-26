@@ -15,13 +15,13 @@ const Footer = () => {
               <span className="text-xl font-bold">Mercadillo Lima Perú</span>
             </div>
             <p className="text-gris-claro mb-4 max-w-md">
-              Tu tienda online de confianza en Lima, Perú. Productos de calidad 
-              con envío rápido y seguro a todo el país.
+              Tu tienda online de confianza en El Agustino, Lima Este. Productos de calidad 
+              con envío rápido y seguro a toda Lima y el Perú.
             </p>
             <div className="space-y-2">
               <div className="flex items-center space-x-2 text-gris-claro">
                 <MapPin className="w-4 h-4" />
-                <span>Lima, Perú</span>
+                <span>El Agustino, Lima Este 15007</span>
               </div>
               <div className="flex items-center space-x-2 text-gris-claro">
                 <Phone className="w-4 h-4" />
@@ -86,7 +86,7 @@ const Footer = () => {
 
         <div className="border-t border-gray-600 mt-8 pt-8 text-center">
           <p className="text-gris-claro">
-            © 2024 Mercadillo Lima Perú. Todos los derechos reservados.
+            © 2025 Mercadillo Lima Perú. Todos los derechos reservados.
           </p>
         </div>
       </div>

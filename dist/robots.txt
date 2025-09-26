@@ -1,0 +1,56 @@
+# Robots.txt para Mercadillo Lima Peru
+# Optimizado para SEO y posicionamiento en Google
+
+User-agent: *
+Allow: /
+
+# Permitir a todos los bots principales
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+User-agent: DuckDuckBot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: YandexBot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+# Bloquear archivos innecesarios
+Disallow: /api/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /dist/
+Disallow: /.env
+Disallow: /package.json
+Disallow: /pnpm-lock.yaml
+
+# Permitir específicamente páginas importantes
+Allow: /catalog
+Allow: /about
+Allow: /contact
+Allow: /terms
+Allow: /privacy
+Allow: /shipping
+
+# Sitemap
+Sitemap: https://mercadillo.app/sitemap.xml
+
+# Crawl-delay para ser amigable con los servidores
+Crawl-delay: 1
+
+# Host principal (ayuda con canonicalización)
+Host: https://mercadillo.app

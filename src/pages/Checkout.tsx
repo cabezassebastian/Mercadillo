@@ -26,7 +26,7 @@ const Checkout: React.FC = () => {
     e.preventDefault()
     
     if (!formData.terminos) {
-      alert('Debes aceptar los terminos y condiciones')
+      alert('Debes aceptar los términos y condiciones')
       return
     }
 
@@ -41,7 +41,7 @@ const Checkout: React.FC = () => {
         })
       }
 
-      // Crear sesion de pago
+      // Crear sesión de pago
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: {
@@ -74,7 +74,7 @@ const Checkout: React.FC = () => {
 
     } catch (error) {
       console.error('Error en checkout:', error)
-      alert('Error al procesar el pago. Intentalo de nuevo.')
+      alert('Error al procesar el pago. Inténtalo de nuevo.')
     } finally {
       setIsProcessing(false)
     }
@@ -179,7 +179,7 @@ const Checkout: React.FC = () => {
                     className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
                   />
                   <label htmlFor="stripe" className="flex-1">
-                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Tarjeta de Credito/Debito</div>
+                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Tarjeta de Crédito/Débito</div>
                     <div className="text-sm text-gray-600 dark:text-gray-400">Visa, Mastercard, American Express</div>
                   </label>
                 </div>
