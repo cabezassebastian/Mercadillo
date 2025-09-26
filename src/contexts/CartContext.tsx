@@ -51,6 +51,21 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const addToCart = (producto: Producto, cantidad: number = 1) => {
     setItems(prevItems => {
       const existingItem = prevItems.find(item => item.producto.id === producto.id)
+      const currentQuantity = existingItem ? existingItem.cantidad : 0
+      
+      // Verificar si hay stock suficiente
+      if (currentQuantity + cantidad > producto.stock) {
+        // Si ya hay stock en el carrito, no agregar más de lo disponible
+        const maxCanAdd = producto.stock - currentQuantity
+        if (maxCanAdd <= 0) {
+          console.warn(`No hay más stock disponible para ${producto.nombre}`)
+          return prevItems // No agregar nada
+        }
+        
+        // Agregar solo la cantidad disponible
+        console.warn(`Solo se pueden agregar ${maxCanAdd} unidades de ${producto.nombre}`)
+        cantidad = maxCanAdd
+      }
       
       if (existingItem) {
         return prevItems.map(item =>
@@ -75,11 +90,19 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setItems(prevItems =>
-      prevItems.map(item =>
-        item.producto.id === productoId
-          ? { ...item, cantidad }
-          : item
-      )
+      prevItems.map(item => {
+        if (item.producto.id === productoId) {
+          // Verificar que la nueva cantidad no exceda el stock
+          const newQuantity = Math.min(cantidad, item.producto.stock)
+          
+          if (newQuantity !== cantidad) {
+            console.warn(`Stock limitado: solo hay ${item.producto.stock} unidades disponibles de ${item.producto.nombre}`)
+          }
+          
+          return { ...item, cantidad: newQuantity }
+        }
+        return item
+      })
     )
   }
 

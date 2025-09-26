@@ -7,10 +7,12 @@ import { useCart } from '@/contexts/CartContext'
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const { addToCart } = useCart()
+  const { addToCart, items } = useCart()
   const [producto, setProducto] = useState<Producto | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
+  const [addingToCart, setAddingToCart] = useState(false)
+  const [message, setMessage] = useState<string | null>(null)
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -41,9 +43,38 @@ const Product: React.FC = () => {
     fetchProducto()
   }, [id, navigate])
 
-  const handleAddToCart = () => {
-    if (producto) {
+  const handleAddToCart = async () => {
+    if (!producto) return
+    
+    setAddingToCart(true)
+    setMessage(null)
+    
+    try {
+      // Verificar stock disponible considerando lo que ya está en el carrito
+      const existingItem = items.find(item => item.producto.id === producto.id)
+      const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
+      const availableStock = producto.stock - currentQuantityInCart
+      
+      if (quantity > availableStock) {
+        setMessage(`Solo ${availableStock} unidades disponibles`)
+        setTimeout(() => setMessage(null), 3000)
+        return
+      }
+      
       addToCart(producto, quantity)
+      setMessage(`¡${quantity} producto${quantity > 1 ? 's' : ''} agregado${quantity > 1 ? 's' : ''} al carrito!`)
+      setTimeout(() => setMessage(null), 2000)
+      
+      // Resetear cantidad si se agotó el stock
+      const newAvailableStock = availableStock - quantity
+      if (quantity >= newAvailableStock) {
+        setQuantity(1)
+      }
+    } catch (error) {
+      setMessage('Error al agregar al carrito')
+      setTimeout(() => setMessage(null), 3000)
+    } finally {
+      setAddingToCart(false)
     }
   }
 
@@ -53,6 +84,11 @@ const Product: React.FC = () => {
       currency: 'PEN',
     }).format(price)
   }
+
+  // Calcular stock disponible considerando lo que ya está en el carrito
+  const existingItem = producto ? items.find(item => item.producto.id === producto.id) : null
+  const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
+  const availableStock = producto ? producto.stock - currentQuantityInCart : 0
 
   if (isLoading) {
     return (
@@ -83,6 +119,17 @@ const Product: React.FC = () => {
   return (
     <div className="min-h-screen bg-hueso py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Message */}
+        {message && (
+          <div className={`mb-6 p-4 rounded-lg ${
+            message.includes('Error') || message.includes('Solo') 
+              ? 'bg-red-100 text-red-800 border border-red-200' 
+              : 'bg-green-100 text-green-800 border border-green-200'
+          }`}>
+            {message}
+          </div>
+        )}
+        
         {/* Breadcrumb */}
         <div className="mb-6">
           <button
@@ -130,13 +177,20 @@ const Product: React.FC = () => {
                 <span className="text-3xl font-bold text-dorado">
                   {formatPrice(producto.precio)}
                 </span>
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  producto.stock > 0 
-                    ? 'bg-green-100 text-green-800' 
-                    : 'bg-red-100 text-red-800'
-                }`}>
-                  {producto.stock > 0 ? `${producto.stock} disponibles` : 'Agotado'}
-                </span>
+                <div className="text-right">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    availableStock > 0 
+                      ? 'bg-green-100 text-green-800' 
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {availableStock > 0 ? `${availableStock} disponibles` : 'Agotado'}
+                  </span>
+                  {currentQuantityInCart > 0 && (
+                    <div className="text-xs text-blue-600 mt-1">
+                      Ya tienes {currentQuantityInCart} en tu carrito
+                    </div>
+                  )}
+                </div>
               </div>
               
               <p className="text-gray-700 leading-relaxed">
@@ -151,7 +205,7 @@ const Product: React.FC = () => {
                 <div className="flex items-center border border-gray-300 rounded-lg">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
+                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
                     disabled={quantity <= 1}
                   >
                     -
@@ -160,23 +214,31 @@ const Product: React.FC = () => {
                     {quantity}
                   </span>
                   <button
-                    onClick={() => setQuantity(Math.min(producto.stock, quantity + 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200"
-                    disabled={quantity >= producto.stock}
+                    onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
+                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
+                    disabled={quantity >= availableStock}
                   >
                     +
                   </button>
                 </div>
+                <span className="text-sm text-gray-500">
+                  Máximo: {availableStock}
+                </span>
               </div>
 
               <button
                 onClick={handleAddToCart}
-                disabled={producto.stock === 0}
+                disabled={availableStock === 0 || addingToCart}
                 className="w-full btn-primary flex items-center justify-center space-x-2 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ShoppingCart className="w-6 h-6" />
                 <span>
-                  {producto.stock > 0 ? 'Agregar al carrito' : 'Producto agotado'}
+                  {addingToCart 
+                    ? 'Agregando...' 
+                    : availableStock > 0 
+                      ? 'Agregar al carrito' 
+                      : 'Producto agotado'
+                  }
                 </span>
               </button>
             </div>
