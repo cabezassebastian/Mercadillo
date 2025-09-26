@@ -79,22 +79,22 @@ const Cart = () => {
                   </div>
 
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg">
+                    <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
                       <button
                         onClick={() => updateQuantity(item.producto.id, item.cantidad - 1)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro transition-all duration-200 rounded-l-lg"
                       >
-                        <Minus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                        <Minus className="w-4 h-4" />
                       </button>
-                      <span className="px-3 py-2 border-x border-gray-300 dark:border-gray-600 text-gris-oscuro dark:text-gray-200">
+                      <span className="px-3 py-2 border-x border-gray-300 dark:border-gray-600 text-gris-oscuro dark:text-gray-200 bg-gray-50 dark:bg-gray-600 min-w-[50px] text-center font-medium">
                         {item.cantidad}
                       </span>
                       <button
                         onClick={() => updateQuantity(item.producto.id, item.cantidad + 1)}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors duration-200"
+                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg"
                         disabled={item.cantidad >= item.producto.stock}
                       >
-                        <Plus className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                        <Plus className="w-4 h-4" />
                       </button>
                     </div>
 
