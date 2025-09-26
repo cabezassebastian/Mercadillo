@@ -39,6 +39,14 @@ const ShippingPage: React.FC = () => {
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">El Agustino y Santa Anita</span>
+                    <span className="font-medium text-gris-oscuro dark:text-gray-200">24 horas</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">Lima Este (SJL, ATE)</span>
+                    <span className="font-medium text-gris-oscuro dark:text-gray-200">24-48 horas</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
                     <span className="text-gray-600 dark:text-gray-400">Lima Metropolitana</span>
                     <span className="font-medium text-gris-oscuro dark:text-gray-200">24-48 horas</span>
                   </div>
@@ -64,6 +72,14 @@ const ShippingPage: React.FC = () => {
                   <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">Costos de Envío</h3>
                 </div>
                 <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">El Agustino y Santa Anita</span>
+                    <span className="font-medium text-gris-oscuro dark:text-gray-200">S/ 10.00</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
+                    <span className="text-gray-600 dark:text-gray-400">Lima Este (SJL, ATE)</span>
+                    <span className="font-medium text-gris-oscuro dark:text-gray-200">S/ 12.00</span>
+                  </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-200 dark:border-gray-600">
                     <span className="text-gray-600 dark:text-gray-400">Lima Metropolitana</span>
                     <span className="font-medium text-gris-oscuro dark:text-gray-200">S/ 15.00</span>
@@ -192,8 +208,8 @@ const ShippingPage: React.FC = () => {
                 <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-4">Dirección</h3>
                 <div className="space-y-2 text-gray-600 dark:text-gray-400">
                   <p>Mercadillo Lima Perú</p>
-                  <p>Av. Javier Prado Este 123</p>
-                  <p>San Isidro, Lima 15036</p>
+                  <p>El Agustino</p>
+                  <p>Lima Este 15007</p>
                   <p>Perú</p>
                 </div>
               </div>

@@ -15,12 +15,14 @@ const AboutPage: React.FC = () => {
                 ¿Quiénes Somos?
               </h2>
               <p className="text-lg leading-relaxed mb-4">
-                Mercadillo Lima Perú es tu destino confiable para productos de calidad a precios accesibles. 
-                Nos dedicamos a conectar a vendedores locales con compradores que buscan productos únicos y auténticos.
+                Mercadillo Lima Perú es tu destino confiable para productos de calidad en El Agustino y Lima Este. 
+                Ubicados estratégicamente en El Agustino, nos dedicamos a conectar a vendedores locales con compradores 
+                que buscan productos únicos y auténticos en nuestra comunidad.
               </p>
               <p className="text-lg leading-relaxed">
-                Desde nuestros inicios, hemos trabajado para crear una plataforma que refleje la diversidad 
-                y riqueza de los productos peruanos, ofreciendo una experiencia de compra segura y satisfactoria.
+                Desde nuestros inicios en El Agustino, hemos trabajado para crear una plataforma que refleje la diversidad 
+                y riqueza de los productos de Lima Este, ofreciendo una experiencia de compra segura y satisfactoria 
+                especialmente diseñada para nuestra zona.
               </p>
             </div>
 
@@ -29,9 +31,9 @@ const AboutPage: React.FC = () => {
                 Nuestra Misión
               </h2>
               <p className="text-lg leading-relaxed">
-                Facilitar el comercio local y promover productos de calidad, creando un puente entre 
-                vendedores y compradores que beneficie a toda la comunidad. Creemos en el poder del 
-                comercio justo y en apoyar a los emprendedores locales.
+                Facilitar el comercio local en El Agustino y Lima Este, promoviendo productos de calidad y creando 
+                un puente entre vendedores y compradores que beneficie a toda nuestra comunidad. Creemos en el poder 
+                del comercio justo y en apoyar especialmente a los emprendedores de nuestra zona.
               </p>
             </div>
 
@@ -40,9 +42,9 @@ const AboutPage: React.FC = () => {
                 Nuestra Visión
               </h2>
               <p className="text-lg leading-relaxed">
-                Ser la plataforma líder de comercio electrónico en Lima, reconocida por la calidad 
+                Ser la plataforma líder de comercio electrónico en El Agustino y Lima Este, reconocida por la calidad 
                 de nuestros productos, la excelencia en el servicio al cliente y nuestro compromiso 
-                con el desarrollo económico local.
+                con el desarrollo económico de nuestra comunidad local.
               </p>
             </div>
 
@@ -70,7 +72,7 @@ const AboutPage: React.FC = () => {
                 </li>
                 <li className="flex items-start">
                   <span className="text-amarillo mr-2">✓</span>
-                  <span>Envíos seguros y rápidos en toda Lima</span>
+                  <span>Envíos seguros y rápidos en El Agustino, Santa Anita, SJL y toda Lima</span>
                 </li>
                 <li className="flex items-start">
                   <span className="text-amarillo mr-2">✓</span>

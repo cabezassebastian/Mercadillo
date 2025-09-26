@@ -44,7 +44,7 @@ const Home: React.FC = () => {
     {
       icon: <Truck className="w-8 h-8" />,
       title: 'Envio Rapido',
-      description: 'Entrega en 24-48 horas en Lima'
+      description: 'Entrega en 24-48 horas en El Agustino y Lima Este'
     },
     {
       icon: <Shield className="w-8 h-8" />,
@@ -84,10 +84,10 @@ const Home: React.FC = () => {
         <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 dark:bg-black dark:bg-opacity-60 flex items-center justify-center text-center p-4">
           <div className="max-w-3xl mx-auto">
             <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">
-              Bienvenido a Mercadillo Lima
+              Bienvenido a Mercadillo El Agustino
             </h1>
             <p className="text-xl md:text-2xl text-hueso dark:text-gray-200 mb-8">
-              Descubre los mejores productos de Lima, Peru. Calidad garantizada y envio rapido a todo el pais.
+              Descubre los mejores productos de El Agustino, Lima Este. Calidad garantizada y envio rapido a toda Lima.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
@@ -184,21 +184,21 @@ const Home: React.FC = () => {
             {[ // Datos de testimonios
               {
                 name: 'Maria Gonzalez',
-                location: 'Miraflores, Lima',
+                location: 'El Agustino, Lima',
                 rating: 5,
-                comment: 'Excelente servicio y productos de calidad. El envio fue super rapido.'
+                comment: 'Excelente servicio y productos de calidad. El envio fue super rapido aqui en El Agustino.'
               },
               {
                 name: 'Carlos Mendoza',
-                location: 'San Isidro, Lima',
+                location: 'Santa Anita, Lima',
                 rating: 5,
-                comment: 'Muy buena experiencia de compra. Definitivamente volvere a comprar.'
+                comment: 'Muy buena experiencia de compra. Me llego rapidisimo desde El Agustino.'
               },
               {
                 name: 'Ana Rodriguez',
-                location: 'La Molina, Lima',
+                location: 'San Juan de Lurigancho, Lima',
                 rating: 5,
-                comment: 'Productos autenticos y precios justos. Recomendado al 100%.'
+                comment: 'Productos autenticos y precios justos. Perfecto para la zona de Lima Este.'
               }
             ].map((testimonial, index) => (
               <div key={index} className="card p-6">

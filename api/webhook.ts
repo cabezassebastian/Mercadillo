@@ -52,12 +52,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         if (pedido.data) {
           for (const item of pedido.data.items) {
-            await supabase
+            // Obtener el stock actual
+            const { data: producto } = await supabase
               .from('productos')
-              .update({ 
-                stock: supabase.raw(`stock - ${item.cantidad}`)
-              })
+              .select('stock')
               .eq('id', item.producto_id)
+              .single()
+
+            if (producto && producto.stock >= item.cantidad) {
+              // Actualizar el stock
+              await supabase
+                .from('productos')
+                .update({ 
+                  stock: producto.stock - item.cantidad
+                })
+                .eq('id', item.producto_id)
+            }
           }
         }
         break
