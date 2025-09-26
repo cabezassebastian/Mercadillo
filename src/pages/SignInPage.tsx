@@ -12,9 +12,9 @@ const SignInPage = () => {
         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-8">
           <div className="text-center mb-6 sm:mb-8">
             <img 
-              src="/logo.jpg" 
+              src="/logo.webp" 
               alt="Mercadillo Lima Perú" 
-              className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-xl mb-4 sm:mb-6 object-cover" 
+              className="mx-auto w-16 h-16 sm:w-20 sm:h-20 rounded-xl mb-4 sm:mb-6 object-cover border border-gray-200 dark:border-gray-600 shadow-sm" 
             />
             <h1 className="text-xl sm:text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-2">
               Bienvenido de vuelta

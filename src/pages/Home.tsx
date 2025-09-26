@@ -63,7 +63,7 @@ const Home: React.FC = () => {
       {/* Seccion Hero */}
       <section className="relative w-full h-96 overflow-hidden">
         <img 
-          src="/banner.png" 
+          src="/banner.webp" 
           alt="Mercadillo Lima Peru Banner" 
           className="w-full h-full object-cover"
           onError={(e) => {
