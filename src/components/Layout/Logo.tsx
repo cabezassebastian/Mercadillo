@@ -28,7 +28,7 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
       <div className="relative">
         {!imageError ? (
           <img 
-            src="/logo.png" 
+            src="/logo.webp" 
             alt="Mercadillo Lima Perú Logo" 
             className={`${sizeClasses[size]} w-auto object-contain transition-transform duration-200 hover:scale-105 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm`}
             onError={() => setImageError(true)}
