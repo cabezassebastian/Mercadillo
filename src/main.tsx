@@ -30,6 +30,7 @@ import AboutPage from './pages/AboutPage'
 // Paginas de autenticacion de Clerk
 import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
+import NotFound404 from './pages/NotFound404'
 
 // Configuracion del router principal
 const router = createBrowserRouter([
@@ -71,6 +72,8 @@ const router = createBrowserRouter([
       { path: "envios", element: <ShippingPage /> },
       { path: "contacto", element: <ContactPage /> },
       { path: "sobre-nosotros", element: <AboutPage /> },
+      // Página 404 - debe ir al final como catch-all
+      { path: "*", element: <NotFound404 /> },
     ],
   },
   {

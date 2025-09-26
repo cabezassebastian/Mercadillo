@@ -201,27 +201,27 @@ const Product: React.FC = () => {
             {/* Quantity and Add to Cart */}
             <div className="space-y-4">
               <div className="flex items-center space-x-4">
-                <label className="text-gris-oscuro font-medium">Cantidad:</label>
-                <div className="flex items-center border border-gray-300 rounded-lg">
+                <label className="text-gris-oscuro dark:text-gray-200 font-medium">Cantidad:</label>
+                <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
+                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-l-lg font-semibold text-lg"
                     disabled={quantity <= 1}
                   >
                     -
                   </button>
-                  <span className="px-4 py-2 border-x border-gray-300">
+                  <span className="px-4 py-2 border-x border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-600 text-gris-oscuro dark:text-gray-200 font-medium min-w-[50px] text-center">
                     {quantity}
                   </span>
                   <button
                     onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
-                    className="px-3 py-2 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50"
+                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg font-semibold text-lg"
                     disabled={quantity >= availableStock}
                   >
                     +
                   </button>
                 </div>
-                <span className="text-sm text-gray-500">
+                <span className="text-sm text-gray-500 dark:text-gray-400">
                   Máximo: {availableStock}
                 </span>
               </div>
