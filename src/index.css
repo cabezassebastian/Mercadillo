@@ -253,6 +253,95 @@
   color: #fbbf24 !important;
 }
 
+/* Enhanced styles for Clerk UserButton menu items in dark mode */
+.dark .cl-menuButton {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border: 2px solid #6b7280 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+  margin: 4px 0 !important;
+}
+
+.dark .cl-menuButton:hover {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-2px) !important;
+  transition: all 0.2s ease !important;
+  border-color: #9ca3af !important;
+}
+
+/* Enhanced styles for Clerk menu items */
+.dark .cl-menuItem {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border: 2px solid #6b7280 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  margin: 4px 0 !important;
+}
+
+.dark .cl-menuItem:hover {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-2px) !important;
+  transition: all 0.2s ease !important;
+  border-color: #9ca3af !important;
+}
+
+/* Enhanced styles for Clerk action menu items */
+.dark .cl-userButtonPopoverActionButton {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border: 2px solid #6b7280 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  padding: 12px 16px !important;
+  margin: 4px 0 !important;
+}
+
+.dark .cl-userButtonPopoverActionButton:hover {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-2px) !important;
+  transition: all 0.2s ease !important;
+  border-color: #9ca3af !important;
+}
+
+/* Enhanced styles for Clerk user profile menu actions */
+.dark .cl-userPreviewSecondaryIdentifier,
+.dark .cl-userButtonPopoverActionButtonText {
+  color: #f9fafb !important;
+  font-weight: 500 !important;
+}
+
+/* Enhanced dropdown menu styling */
+.dark .cl-dropdownMenuItem {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border: 2px solid #6b7280 !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3) !important;
+  border-radius: 8px !important;
+  font-weight: 500 !important;
+  margin: 4px 0 !important;
+}
+
+.dark .cl-dropdownMenuItem:hover {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4) !important;
+  transform: translateY(-2px) !important;
+  transition: all 0.2s ease !important;
+  border-color: #9ca3af !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 640px) {
   .cl-modalContent {
