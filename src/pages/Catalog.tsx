@@ -103,21 +103,37 @@ const Catalog: React.FC = () => {
     }
 
     // Ordenar
-    filtered.sort((a, b) => {
+    filtered = [...filtered].sort((a, b) => {
+      let result = 0
       switch (sortBy) {
         case 'precio-asc':
-          return a.precio - b.precio
+          // Menor precio primero
+          result = a.precio - b.precio
+          break
         case 'precio-desc':
-          return b.precio - a.precio
+          // Mayor precio primero
+          result = b.precio - a.precio
+          break
         case 'nombre':
-          return a.nombre.localeCompare(b.nombre)
+          // A-Z alfabético
+          result = a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+          break
         case 'stock':
-          return b.stock - a.stock
+          // Mayor stock primero
+          result = b.stock - a.stock
+          break
         case 'newest':
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+          // Más recientes primero
+          const dateA = new Date(a.created_at || '').getTime()
+          const dateB = new Date(b.created_at || '').getTime()
+          result = dateB - dateA
+          break
         default:
-          return 0
+          // Por defecto ordenar por nombre
+          result = a.nombre.localeCompare(b.nombre, 'es', { sensitivity: 'base' })
+          break
       }
+      return result
     })
 
     setFilteredProductos(filtered)
@@ -300,11 +316,11 @@ const Catalog: React.FC = () => {
                     onChange={(e) => setSortBy(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   >
-                    <option value="nombre">A-Z (Alfabético)</option>
-                    <option value="precio-asc">Precio: Menor a Mayor</option>
-                    <option value="precio-desc">Precio: Mayor a Menor</option>
-                    <option value="newest">Más Recientes</option>
-                    <option value="stock">Mayor Stock</option>
+                    <option value="nombre">📝 A-Z (Alfabético)</option>
+                    <option value="precio-asc">💰 Precio: Menor → Mayor</option>
+                    <option value="precio-desc">💎 Precio: Mayor → Menor</option>
+                    <option value="newest">🆕 Más Recientes Primero</option>
+                    <option value="stock">📦 Mayor Stock Disponible</option>
                   </select>
                 </div>
 
