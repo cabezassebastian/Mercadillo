@@ -203,30 +203,38 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
             <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(4.0)</span>
           </div>
           
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xl font-bold text-dorado dark:text-yellow-400">
-              {formatPrice(producto.precio)}
-            </span>
-            <div className="text-right">
-              <span className={`text-sm font-semibold px-2 py-1 rounded-md ${
-                availableStock > 0 
-                  ? availableStock > 10 
-                    ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30' 
-                    : 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
-                  : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
-              }`}>
-                {availableStock > 0 
-                  ? availableStock > 10 
-                    ? `${availableStock} disponibles` 
-                    : `¡Solo ${availableStock}!`
-                  : 'Sin stock'
-                }
+          <div className="mb-4">
+            {/* Price */}
+            <div className="text-center sm:text-left mb-2">
+              <span className="text-xl font-bold text-dorado dark:text-yellow-400">
+                {formatPrice(producto.precio)}
               </span>
-              {currentQuantityInCart > 0 && (
-                <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold mt-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
-                  {currentQuantityInCart} en carrito
-                </div>
-              )}
+            </div>
+            
+            {/* Stock - Below price on mobile, right side on larger screens */}
+            <div className="flex flex-col items-center sm:flex-row sm:justify-between">
+              <div className="sm:flex-1"></div>
+              <div className="text-center sm:text-right">
+                <span className={`text-sm font-semibold px-2 py-1 rounded-md ${
+                  availableStock > 0 
+                    ? availableStock > 10 
+                      ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30' 
+                      : 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
+                    : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
+                }`}>
+                  {availableStock > 0 
+                    ? availableStock > 10 
+                      ? `${availableStock} disponibles` 
+                      : `¡Solo ${availableStock}!`
+                    : 'Sin stock'
+                  }
+                </span>
+                {currentQuantityInCart > 0 && (
+                  <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold mt-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
+                    {currentQuantityInCart} en carrito
+                  </div>
+                )}
+              </div>
             </div>
           </div>
           
