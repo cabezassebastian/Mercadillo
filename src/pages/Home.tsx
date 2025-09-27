@@ -1,17 +1,13 @@
 import React, { useEffect, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ArrowRight, Star, Truck, Shield, Headphones } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import ProductCard from '@/components/Product/ProductCard'
-import SearchWithSuggestions from '@/components/Search/SearchWithSuggestions'
 
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Producto[]>([])
-  const [allProducts, setAllProducts] = useState<Producto[]>([]) // For search suggestions
-  const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null) 
-  const navigate = useNavigate() 
 
   useEffect(() => {
     const fetchFeaturedProducts = async () => {
@@ -19,21 +15,6 @@ const Home: React.FC = () => {
         setIsLoading(true)
         setError(null)
 
-        // Fetch all products first for search suggestions
-        let allProductsQuery = supabase.from('productos').select('*').gt('stock', 0)
-        let { data: allProductsData, error: allProductsError } = await allProductsQuery.order('created_at', { ascending: false })
-
-        if (allProductsError) {
-          // If sorting by created_at fails, try without sorting
-          const { data: fallbackAllData, error: fallbackAllError } = await allProductsQuery
-          if (!fallbackAllError) {
-            setAllProducts(fallbackAllData || [])
-          }
-        } else {
-          setAllProducts(allProductsData || [])
-        }
-
-        // Get featured products (first 8)
         let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
         let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false }).limit(8)
 
@@ -58,15 +39,6 @@ const Home: React.FC = () => {
 
     fetchFeaturedProducts()
   }, [])
-
-  // Handle search - redirect to catalog with search term
-  const handleSearch = (term: string) => {
-    if (term.trim()) {
-      navigate(`/catalogo?search=${encodeURIComponent(term.trim())}`)
-    } else {
-      navigate('/catalogo')
-    }
-  }
 
   const features = [
     {
@@ -117,20 +89,6 @@ const Home: React.FC = () => {
             <p className="text-xl md:text-2xl text-hueso dark:text-gray-200 mb-8">
               Descubre los mejores productos de El Agustino, Lima Este. Calidad garantizada y envio rapido a toda Lima.
             </p>
-            
-            {/* Search Section */}
-            <div className="max-w-2xl mx-auto mb-8">
-              <div className="bg-white dark:bg-gray-800 rounded-2xl p-2 shadow-2xl">
-                <SearchWithSuggestions
-                  value={searchTerm}
-                  onChange={setSearchTerm}
-                  onSearch={handleSearch}
-                  productos={allProducts}
-                  placeholder="¿Qué estás buscando hoy?"
-                />
-              </div>
-            </div>
-
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link
                 to="/catalogo"
