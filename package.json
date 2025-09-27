@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.46.1",
+    "@clerk/localizations": "^3.25.4",
     "@emailjs/browser": "^4.4.1",
     "@stripe/stripe-js": "^2.2.2",
     "@supabase/supabase-js": "^2.38.4",

@@ -82,7 +82,7 @@ const Cart = () => {
                     <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
                       <button
                         onClick={() => updateQuantity(item.producto.id, item.cantidad - 1)}
-                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro transition-all duration-200 rounded-l-lg"
+                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 transition-all duration-200 rounded-l-lg"
                       >
                         <Minus className="w-4 h-4" />
                       </button>
@@ -91,7 +91,7 @@ const Cart = () => {
                       </span>
                       <button
                         onClick={() => updateQuantity(item.producto.id, item.cantidad + 1)}
-                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg"
+                        className="p-2 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg"
                         disabled={item.cantidad >= item.producto.stock}
                       >
                         <Plus className="w-4 h-4" />

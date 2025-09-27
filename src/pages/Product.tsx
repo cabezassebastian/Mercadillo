@@ -205,7 +205,7 @@ const Product: React.FC = () => {
                 <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
                   <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-l-lg font-semibold text-lg"
+                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-l-lg font-semibold text-lg"
                     disabled={quantity <= 1}
                   >
                     -
@@ -215,7 +215,7 @@ const Product: React.FC = () => {
                   </span>
                   <button
                     onClick={() => setQuantity(Math.min(availableStock, quantity + 1))}
-                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg font-semibold text-lg"
+                    className="px-3 py-2 text-gray-600 dark:text-gray-400 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg font-semibold text-lg"
                     disabled={quantity >= availableStock}
                   >
                     +
