@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Eye, Star } from 'lucide-react'
+import { ShoppingCart, Star } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import { useState } from 'react'
@@ -136,28 +136,16 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
               </div>
               
               {/* Action Buttons */}
-              <div className="flex space-x-3">
+              <div>
                 <button
                   onClick={handleAddToCart}
                   disabled={isOutOfStock || isLoading}
-                  className="flex-1 btn-primary py-3 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-base font-semibold"
+                  className="w-full btn-primary py-3 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-base font-semibold"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span>
                     {isLoading ? 'Agregando...' : isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
                   </span>
-                </button>
-                
-                <button
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    window.location.href = `/producto/${producto.id}`;
-                  }}
-                  className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg border-2 border-slate-700 dark:border-slate-600 hover:border-slate-800 dark:hover:border-slate-700 transition-all duration-200 text-base flex items-center justify-center space-x-2"
-                >
-                  <Eye className="w-5 h-5 stroke-2" />
-                  <span>Ver detalles</span>
                 </button>
               </div>
             </div>
@@ -243,27 +231,16 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
           </div>
           
           {/* Action Buttons */}
-          <div className="flex space-x-2">
+          <div>
             <button
               onClick={handleAddToCart}
               disabled={isOutOfStock || isLoading}
-              className="flex-1 btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+              className="w-full btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>
                 {isLoading ? 'Agregando...' : isOutOfStock ? 'Sin Stock' : 'Agregar'}
               </span>
-            </button>
-            
-            <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                window.location.href = `/producto/${producto.id}`;
-              }}
-              className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-800 text-white font-bold flex items-center justify-center px-4 py-2.5 text-sm rounded-lg shadow-lg border-2 border-slate-700 dark:border-slate-600 hover:border-slate-800 dark:hover:border-slate-700 transition-all duration-200"
-            >
-              <Eye className="w-5 h-5 stroke-2" />
             </button>
           </div>
         </div>
