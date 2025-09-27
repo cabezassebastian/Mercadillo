@@ -1,11 +1,13 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useUser, UserButton } from '@clerk/clerk-react'
-import { ShoppingCart, Menu, X, Search } from 'lucide-react'
+import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
+import { supabase, Producto } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
 import Logo from '@/components/Layout/Logo'
+import SearchWithSuggestions from '@/components/Search/SearchWithSuggestions'
 
 const Navbar: React.FC = () => {
   const { user } = useUser()
@@ -13,18 +15,43 @@ const Navbar: React.FC = () => {
   const { getTotalItems } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [allProducts, setAllProducts] = useState<Producto[]>([])
   const navigate = useNavigate()
   const location = useLocation()
-
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
   // Detectar si estamos en la página de inicio
   const isHomePage = location.pathname === '/'
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (searchTerm.trim()) {
-      navigate(`/catalogo?search=${encodeURIComponent(searchTerm.trim())}`)
+  // Fetch all products for search suggestions
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
+        let { data, error } = await productsQuery.order('created_at', { ascending: false })
+
+        if (error) {
+          // If sorting by created_at fails, try without sorting
+          const { data: fallbackData, error: fallbackError } = await productsQuery
+          if (!fallbackError) {
+            setAllProducts(fallbackData || [])
+          }
+        } else {
+          setAllProducts(data || [])
+        }
+      } catch (err) {
+        console.error('Error loading products for search:', err)
+      }
+    }
+
+    fetchProducts()
+  }, [])
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+
+  // Handle search - redirect to catalog with search term
+  const handleSearch = (term: string) => {
+    if (term.trim()) {
+      navigate(`/catalogo?search=${encodeURIComponent(term.trim())}`)
       setSearchTerm('')
     } else {
       navigate('/catalogo')
@@ -59,18 +86,15 @@ const Navbar: React.FC = () => {
           <div className="hidden md:flex items-center space-x-6">
             {/* Search Bar - Solo en página de inicio */}
             {isHomePage && (
-              <form onSubmit={handleSearch} className="relative">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                  <input
-                    type="text"
-                    placeholder="Buscar productos..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-64 pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                  />
-                </div>
-              </form>
+              <div className="w-80">
+                <SearchWithSuggestions
+                  value={searchTerm}
+                  onChange={setSearchTerm}
+                  onSearch={handleSearch}
+                  productos={allProducts}
+                  placeholder="Buscar productos..."
+                />
+              </div>
             )}
             
             {/* Navigation Links */}
@@ -141,18 +165,15 @@ const Navbar: React.FC = () => {
             <div className="flex flex-col space-y-4">
               {/* Mobile Search Bar - Solo en página de inicio */}
               {isHomePage && (
-                <form onSubmit={handleSearch} className="relative">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                    <input
-                      type="text"
-                      placeholder="Buscar productos..."
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo focus:border-amarillo transition-all duration-200 text-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500"
-                    />
-                  </div>
-                </form>
+                <div className="w-full">
+                  <SearchWithSuggestions
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    onSearch={handleSearch}
+                    productos={allProducts}
+                    placeholder="Buscar productos..."
+                  />
+                </div>
               )}
               
               {navItems.map((item) => (
