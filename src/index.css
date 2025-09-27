@@ -127,9 +127,44 @@
   color: #f9fafb !important;
 }
 
+/* Improve form button primary in light mode */
+.cl-formButtonPrimary {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+}
+
+.cl-formButtonPrimary:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Improve social buttons in light mode */
+.cl-socialButtonsBlockButton {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid #e5e7eb !important;
+}
+
+.cl-socialButtonsBlockButton:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
 .dark .cl-formButtonPrimary {
   background-color: #FFD700 !important;
   color: #333333 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(255, 215, 0, 0.3) !important;
+}
+
+.dark .cl-formButtonPrimary:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Improve social buttons visibility in dark mode */
@@ -137,11 +172,17 @@
   background-color: #374151 !important;
   color: #f9fafb !important;
   border-color: #4b5563 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid #4b5563 !important;
 }
 
 .dark .cl-socialButtonsBlockButton:hover {
   background-color: #4b5563 !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
 }
 
 /* Improve form field inputs in dark mode */
@@ -149,11 +190,25 @@
   background-color: #374151 !important;
   color: #f9fafb !important;
   border-color: #4b5563 !important;
+  border-radius: 8px !important;
+  border: 1px solid #4b5563 !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 .dark .cl-formFieldInput:focus {
   border-color: #fbbf24 !important;
-  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Improve form field inputs in light mode */
+.cl-formFieldInput {
+  border-radius: 8px !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.cl-formFieldInput:focus {
+  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.2), 0 1px 3px rgba(0, 0, 0, 0.1) !important;
 }
 
 /* Improve secondary buttons in dark mode */
@@ -161,11 +216,30 @@
   background-color: #4b5563 !important;
   color: #f9fafb !important;
   border-color: #6b7280 !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid #6b7280 !important;
 }
 
 .dark .cl-formButtonSecondary:hover {
   background-color: #6b7280 !important;
   color: #ffffff !important;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
+}
+
+/* Improve secondary buttons in light mode */
+.cl-formButtonSecondary {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1) !important;
+  border-radius: 8px !important;
+  border: 1px solid #d1d5db !important;
+}
+
+.cl-formButtonSecondary:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15) !important;
+  transform: translateY(-1px) !important;
+  transition: all 0.2s ease !important;
 }
 
 .dark .cl-footerActionLink {
