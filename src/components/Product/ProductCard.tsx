@@ -154,9 +154,9 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
                     e.stopPropagation();
                     window.location.href = `/producto/${producto.id}`;
                   }}
-                  className="bg-gray-600 hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600 text-white font-semibold px-6 py-3 rounded-lg shadow-md border border-gray-500 dark:border-gray-400 transition-all duration-200 text-base flex items-center justify-center space-x-2"
+                  className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-800 text-white font-bold px-6 py-3 rounded-lg shadow-lg border-2 border-slate-700 dark:border-slate-600 hover:border-slate-800 dark:hover:border-slate-700 transition-all duration-200 text-base flex items-center justify-center space-x-2"
                 >
-                  <Eye className="w-5 h-5" />
+                  <Eye className="w-5 h-5 stroke-2" />
                   <span>Ver detalles</span>
                 </button>
               </div>
@@ -261,9 +261,9 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
                 e.stopPropagation();
                 window.location.href = `/producto/${producto.id}`;
               }}
-              className="bg-gray-600 hover:bg-gray-700 dark:bg-gray-500 dark:hover:bg-gray-600 text-white font-semibold flex items-center justify-center px-4 py-2.5 text-sm rounded-lg shadow-md border border-gray-500 dark:border-gray-400 transition-all duration-200"
+              className="bg-slate-800 hover:bg-slate-900 dark:bg-slate-700 dark:hover:bg-slate-800 text-white font-bold flex items-center justify-center px-4 py-2.5 text-sm rounded-lg shadow-lg border-2 border-slate-700 dark:border-slate-600 hover:border-slate-800 dark:hover:border-slate-700 transition-all duration-200"
             >
-              <Eye className="w-5 h-5" />
+              <Eye className="w-5 h-5 stroke-2" />
             </button>
           </div>
         </div>
