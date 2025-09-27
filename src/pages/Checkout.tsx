@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
 import { CreditCard, User } from 'lucide-react'
@@ -8,11 +8,28 @@ const Checkout: React.FC = () => {
   const { user, updateUser } = useAuth()
   const [isProcessing, setIsProcessing] = useState(false)
   const [formData, setFormData] = useState({
+    nombre: user?.nombre || '',
+    apellido: user?.apellido || '',
+    email: user?.email || '',
     direccion: user?.direccion || '',
     telefono: user?.telefono || '',
     metodoPago: 'stripe',
     terminos: false
   })
+
+  // Actualizar form data cuando los datos del usuario estén disponibles
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        nombre: user.nombre || prev.nombre,
+        apellido: user.apellido || prev.apellido,
+        email: user.email || prev.email,
+        direccion: user.direccion || prev.direccion,
+        telefono: user.telefono || prev.telefono,
+      }))
+    }
+  }, [user])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -34,8 +51,15 @@ const Checkout: React.FC = () => {
 
     try {
       // Actualizar datos del usuario si es necesario
-      if (formData.direccion !== user?.direccion || formData.telefono !== user?.telefono) {
+      if (formData.direccion !== user?.direccion || 
+          formData.telefono !== user?.telefono ||
+          formData.nombre !== user?.nombre ||
+          formData.apellido !== user?.apellido ||
+          formData.email !== user?.email) {
         await updateUser({
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.email,
           direccion: formData.direccion,
           telefono: formData.telefono
         })
@@ -57,7 +81,11 @@ const Checkout: React.FC = () => {
             imagen: item.producto.imagen
           })),
           total: getTotal(),
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+          email: formData.email,
           direccion: formData.direccion,
+          telefono: formData.telefono,
           metodo_pago: formData.metodoPago,
           usuario_id: user?.id // También enviarlo en el body como backup
         })
@@ -104,16 +132,35 @@ const Checkout: React.FC = () => {
               </h2>
 
               <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    Nombre Completo
-                  </label>
-                  <input
-                    type="text"
-                    value={`${user?.nombre || ''} ${user?.apellido || ''}`}
-                    disabled
-                    className="input-field bg-gray-100 dark:bg-gray-700"
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                      Nombre
+                    </label>
+                    <input
+                      type="text"
+                      name="nombre"
+                      value={formData.nombre}
+                      onChange={handleInputChange}
+                      required
+                      className="input-field"
+                      placeholder="Ingresa tu nombre"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                      Apellido
+                    </label>
+                    <input
+                      type="text"
+                      name="apellido"
+                      value={formData.apellido}
+                      onChange={handleInputChange}
+                      required
+                      className="input-field"
+                      placeholder="Ingresa tu apellido"
+                    />
+                  </div>
                 </div>
 
                 <div>
@@ -122,9 +169,12 @@ const Checkout: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    value={user?.email || ''}
-                    disabled
-                    className="input-field bg-gray-100 dark:bg-gray-700"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="input-field"
+                    placeholder="correo@ejemplo.com"
                   />
                 </div>
 

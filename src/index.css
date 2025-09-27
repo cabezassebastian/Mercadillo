@@ -132,6 +132,42 @@
   color: #333333 !important;
 }
 
+/* Improve social buttons visibility in dark mode */
+.dark .cl-socialButtonsBlockButton {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .cl-socialButtonsBlockButton:hover {
+  background-color: #4b5563 !important;
+  color: #ffffff !important;
+}
+
+/* Improve form field inputs in dark mode */
+.dark .cl-formFieldInput {
+  background-color: #374151 !important;
+  color: #f9fafb !important;
+  border-color: #4b5563 !important;
+}
+
+.dark .cl-formFieldInput:focus {
+  border-color: #fbbf24 !important;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2) !important;
+}
+
+/* Improve secondary buttons in dark mode */
+.dark .cl-formButtonSecondary {
+  background-color: #4b5563 !important;
+  color: #f9fafb !important;
+  border-color: #6b7280 !important;
+}
+
+.dark .cl-formButtonSecondary:hover {
+  background-color: #6b7280 !important;
+  color: #ffffff !important;
+}
+
 .dark .cl-footerActionLink {
   color: #fbbf24 !important;
 }
@@ -221,6 +257,50 @@
 .dark .cl-footerActionLink {
   color: #fbbf24 !important;
   background-color: #1f2937 !important;
+}
+
+/* Improve link visibility in dark mode */
+.dark .cl-formFieldAction {
+  color: #fbbf24 !important;
+}
+
+.dark .cl-formFieldAction:hover {
+  color: #f59e0b !important;
+}
+
+/* Improve divider text visibility */
+.dark .cl-dividerText {
+  color: #9ca3af !important;
+}
+
+/* Improve alternative action links */
+.dark .cl-alternativeActionLink {
+  color: #fbbf24 !important;
+}
+
+.dark .cl-alternativeActionLink:hover {
+  color: #f59e0b !important;
+}
+
+/* Improve loading and disabled states in dark mode */
+.dark .cl-formButtonPrimary:disabled {
+  background-color: #6b7280 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+
+.dark .cl-loading {
+  color: #fbbf24 !important;
+}
+
+/* Improve error states in dark mode */
+.dark .cl-formFieldErrorText {
+  color: #f87171 !important;
+}
+
+/* Improve label text in dark mode */
+.dark .cl-formFieldLabel {
+  color: #f3f4f6 !important;
 }
 
 /* Ensure Secured by section has consistent background */

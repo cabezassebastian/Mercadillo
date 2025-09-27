@@ -17,7 +17,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { items, total, direccion, metodo_pago, usuario_id } = req.body
+    const { items, total, nombre, apellido, email, direccion, telefono, metodo_pago, usuario_id } = req.body
     
     // Obtener el usuario_id del header o del body
     const userId = req.headers['x-user-id'] as string || usuario_id
@@ -46,6 +46,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         igv: parseFloat((total - (total / 1.18)).toFixed(2)),
         total,
         estado: 'pendiente',
+        nombre_cliente: nombre ? `${nombre} ${apellido}`.trim() : undefined,
+        email_cliente: email,
+        telefono_cliente: telefono,
         direccion_envio: direccion,
         metodo_pago: metodo_pago
       }])
