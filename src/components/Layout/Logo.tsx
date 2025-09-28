@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
+import OptimizedImage from '../common/OptimizedImage'
 
 interface LogoProps {
   className?: string
@@ -7,7 +8,7 @@ interface LogoProps {
 }
 
 const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
-  const [imageError, setImageError] = useState(false)
+  const [imageError] = useState(false)
 
   const sizeClasses = {
     small: 'h-8',
@@ -27,12 +28,11 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 'medium' }) => {
     <Link to="/" className={`flex items-center space-x-2 ${className}`}>
       <div className="relative">
         {!imageError ? (
-          <img 
-            src="/logo.webp" 
-            alt="Mercadillo Lima Perú Logo" 
+          <OptimizedImage
+            src="https://res.cloudinary.com/ddbihpqr1/image/upload/f_auto,q_auto/mercadillo/logo_v1"
+            alt="Mercadillo Lima Perú Logo"
             className={`${sizeClasses[size]} w-auto object-contain transition-transform duration-200 hover:scale-105 rounded-lg border border-gray-200 dark:border-gray-600 shadow-sm`}
-            onError={() => setImageError(true)}
-            onLoad={() => setImageError(false)}
+            priority={true}
           />
         ) : (
           <div className={`${fallbackSizeClasses[size]} flex items-center justify-center bg-amarillo dark:bg-yellow-500 rounded-lg text-gris-oscuro dark:text-gray-900 font-bold transition-transform duration-200 hover:scale-105 border border-gray-200 dark:border-gray-600 shadow-sm`}>

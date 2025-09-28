@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Star, Truck, Shield, Headphones } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import ProductCard from '@/components/Product/ProductCard'
+import OptimizedImage from '@/components/common/OptimizedImage'
 
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Producto[]>([])
@@ -62,15 +63,13 @@ const Home: React.FC = () => {
     <div className="min-h-screen bg-hueso dark:bg-gray-900 transition-colors duration-200">
       {/* Seccion Hero */}
       <section className="relative w-full h-96 overflow-hidden">
-        <img 
-          src="/banner.webp" 
-          alt="Mercadillo Lima Peru Banner" 
+        <OptimizedImage
+          src="https://res.cloudinary.com/ddbihpqr1/image/upload/f_auto,q_auto,w_1920,h_400,c_fill,g_center/mercadillo/banner_v1"
+          alt="Mercadillo Lima Peru Banner"
           className="w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-            const fallback = e.currentTarget.nextElementSibling as HTMLElement;
-            if (fallback) fallback.style.display = 'flex';
-          }}
+          width={1920}
+          height={400}
+          priority={true}
         />
         <div 
           style={{ display: 'none' }} 
