@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, Mail, Phone, MapPin } from 'lucide-react'
+import { Package, Mail, Phone, MapPin, Facebook, MessageCircle } from 'lucide-react'
 
 const Footer = () => {
   return (
@@ -81,10 +81,32 @@ const Footer = () => {
                 </Link>
               </li>
             </ul>
+            
+            {/* Redes Sociales debajo de Contacto */}
+            <div className="flex space-x-3 mt-4">
+              <a
+                href="https://wa.me/51977933410"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                aria-label="WhatsApp"
+              >
+                <MessageCircle className="w-5 h-5 text-white" />
+              </a>
+              <a
+                href="https://www.facebook.com/mercadillo.276649"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center transition-all duration-300 hover:scale-110"
+                aria-label="Facebook"
+              >
+                <Facebook className="w-5 h-5 text-white" />
+              </a>
+            </div>
           </div>
         </div>
 
-        <div className="border-t border-gray-600 mt-8 pt-8 text-center">
+        <div className="mt-8 pt-8 text-center">
           <p className="text-gris-claro">
             © 2025 Mercadillo Lima Perú. Todos los derechos reservados.
           </p>
