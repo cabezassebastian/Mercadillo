@@ -30,7 +30,7 @@ class SupabaseWithAuth {
   from(table: string) {
     const query = this.client.from(table);
     
-    // Para tabla direcciones_usuario, modificar las consultas con contexto
+    // SOLO para tabla direcciones_usuario, modificar las consultas con contexto
     if (table === 'direcciones_usuario' && this.currentUserId) {
       const originalInsert = query.insert.bind(query);
       const originalSelect = query.select.bind(query);
@@ -58,7 +58,7 @@ class SupabaseWithAuth {
       };
     }
     
-    // Para todas las demás tablas, retornar query normal
+    // Para TODAS las demás tablas (incluyendo usuarios), retornar query builder original sin modificar
     return query;
   }
 
