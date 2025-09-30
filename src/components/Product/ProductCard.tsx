@@ -1,8 +1,11 @@
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Star } from 'lucide-react'
+import { ShoppingCart } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import StarRating from '@/components/common/StarRating'
+import { getProductReviewStats } from '@/lib/reviews'
+import type { ReviewStats } from '@/types/reviews'
 
 interface ProductCardProps {
   producto: Producto
@@ -13,6 +16,20 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
   const { addToCart, items } = useCart()
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    promedio: 0,
+    total: 0,
+    distribucion: { cinco: 0, cuatro: 0, tres: 0, dos: 0, uno: 0 }
+  })
+
+  // Cargar estadísticas de reseñas al montar el componente
+  useEffect(() => {
+    const loadReviewStats = async () => {
+      const stats = await getProductReviewStats(producto.id)
+      setReviewStats(stats)
+    }
+    loadReviewStats()
+  }, [producto.id])
 
   const handleAddToCart = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -94,13 +111,13 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
                     <div className="text-2xl font-bold text-dorado dark:text-yellow-400 mb-1">
                       {formatPrice(producto.precio)}
                     </div>
-                    <div className="flex items-center justify-end space-x-1 mb-2">
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                      <Star className="w-4 h-4 text-gray-300 dark:text-gray-600" />
-                      <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">(4.0)</span>
+                    <div className="flex items-center justify-end mb-2">
+                      <StarRating rating={reviewStats.promedio} readonly size="sm" />
+                      {reviewStats.total > 0 && (
+                        <span className="text-sm text-gray-500 dark:text-gray-400 ml-2">
+                          ({reviewStats.promedio.toFixed(1)})
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -194,13 +211,13 @@ const ProductCard = ({ producto, viewMode = 'grid' }: ProductCardProps) => {
           </p>
           
           {/* Rating */}
-          <div className="flex items-center space-x-1 mb-3">
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <Star className="w-4 h-4 text-yellow-400 fill-current" />
-            <Star className="w-4 h-4 text-gray-300 dark:text-gray-600" />
-            <span className="text-xs text-gray-500 dark:text-gray-400 ml-1">(4.0)</span>
+          <div className="flex items-center mb-3">
+            <StarRating rating={reviewStats.promedio} readonly size="sm" />
+            {reviewStats.total > 0 && (
+              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                ({reviewStats.promedio.toFixed(1)})
+              </span>
+            )}
           </div>
           
           <div className="mb-4">

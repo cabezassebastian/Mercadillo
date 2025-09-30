@@ -62,10 +62,12 @@ CREATE TABLE IF NOT EXISTS reseñas (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     producto_id UUID NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+    pedido_id UUID NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
     calificacion INTEGER NOT NULL CHECK (calificacion >= 1 AND calificacion <= 5),
     comentario TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-    UNIQUE(usuario_id, producto_id)
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    UNIQUE(usuario_id, producto_id, pedido_id)
 );
 
 -- Índices para mejorar el rendimiento
@@ -93,6 +95,9 @@ CREATE TRIGGER update_productos_updated_at BEFORE UPDATE ON productos
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_pedidos_updated_at BEFORE UPDATE ON pedidos
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_reseñas_updated_at BEFORE UPDATE ON reseñas
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Políticas de seguridad (RLS)
@@ -147,11 +152,23 @@ CREATE POLICY "Admins pueden ver todos los pedidos" ON pedidos
 CREATE POLICY "Usuarios pueden ver reseñas" ON reseñas
     FOR SELECT USING (true);
 
-CREATE POLICY "Usuarios pueden crear reseñas" ON reseñas
-    FOR INSERT WITH CHECK (auth.uid()::text = usuario_id);
+CREATE POLICY "Usuarios pueden crear reseñas si compraron el producto" ON reseñas
+    FOR INSERT WITH CHECK (
+        auth.uid()::text = usuario_id AND
+        EXISTS (
+            SELECT 1 FROM pedidos 
+            WHERE id = pedido_id 
+            AND usuario_id = auth.uid()::text 
+            AND estado = 'entregado'
+            AND JSON_EXTRACT_PATH_TEXT(items::json, '$[*].id') LIKE '%' || producto_id::text || '%'
+        )
+    );
 
 CREATE POLICY "Usuarios pueden actualizar sus propias reseñas" ON reseñas
     FOR UPDATE USING (auth.uid()::text = usuario_id);
+
+CREATE POLICY "Usuarios pueden eliminar sus propias reseñas" ON reseñas
+    FOR DELETE USING (auth.uid()::text = usuario_id);
 
 -- Insertar categorías iniciales
 INSERT INTO categorias (nombre, descripcion) VALUES
