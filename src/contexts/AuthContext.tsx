@@ -1,8 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { useUser, useSession } from '@clerk/clerk-react'
-import { SupabaseClient } from '@supabase/supabase-js' // Solo importamos el tipo SupabaseClient
 import { UserResource } from '@clerk/types'
-import { supabase as globalSupabase } from "@/lib/supabaseClient"; // Cliente Supabase centralizado
+import { supabaseWithAuth as globalSupabase } from "@/lib/supabaseWithAuth"; // Cliente Supabase personalizado
 
 // Interface para Usuario (movida desde supabase.ts para evitar dependencia circular)
 export interface Usuario {
@@ -25,7 +24,7 @@ interface AuthContextType {
   error: string | null;
   updateUser: (userData: Partial<Usuario>) => Promise<void>;
   logout: () => Promise<void>;
-  supabaseAuthenticatedClient: SupabaseClient | null;
+  supabaseAuthenticatedClient: any;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -45,7 +44,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [error, setError] = useState<string | null>(null)
   const { isLoaded: isClerkLoaded, isSignedIn: isAuthenticated } = useSession()
 
-  const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<SupabaseClient | null>(null);
+  const [supabaseAuthenticatedClient, setSupabaseAuthenticatedClient] = useState<any>(null);
 
   // Se elimina getClerkTokenForSupabase y el useEffect de initializeSupabaseClient
   // porque AuthSync se encarga de la sincronizacion de la sesion de Supabase.
