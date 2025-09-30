@@ -9,7 +9,7 @@ import { useCart } from '@/contexts/CartContext'
 import { usePagination } from '@/hooks/usePagination'
 import { useUserHistory, useUserMutations } from '@/hooks/useUserQueries'
 import Pagination from '@/components/common/Pagination'
-import OptimizedImage from '@/components/common/OptimizedImage'
+
 import { Link } from 'react-router-dom'
 
 const HistoryPage: React.FC = () => {
