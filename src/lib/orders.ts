@@ -1,4 +1,4 @@
-import { supabaseWithAuth as supabase } from './supabaseWithAuth'
+import { supabase } from './supabaseClient'
 
 export interface CartItem {
   id: string
