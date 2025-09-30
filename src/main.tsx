@@ -34,6 +34,10 @@ import AboutPage from './pages/AboutPage'
 // Páginas de perfil de usuario
 import WishlistPage from './pages/WishlistPage'
 import OrdersPage from './pages/OrdersPage'
+import ReviewsPage from './pages/ReviewsPage'
+import HistoryPage from './pages/HistoryPage'
+import AddressesPage from './pages/AddressesPage'
+import UserProfileSettings from './pages/UserProfileSettings'
 
 // Paginas de autenticacion de Clerk
 import SignInPage from './pages/SignInPage'
@@ -86,6 +90,38 @@ const router = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <OrdersPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/reviews",
+        element: (
+          <ProtectedRoute>
+            <ReviewsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/history",
+        element: (
+          <ProtectedRoute>
+            <HistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/addresses",
+        element: (
+          <ProtectedRoute>
+            <AddressesPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/settings",
+        element: (
+          <ProtectedRoute>
+            <UserProfileSettings />
           </ProtectedRoute>
         ),
       },
