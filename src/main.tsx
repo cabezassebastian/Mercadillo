@@ -36,6 +36,9 @@ import SignInPage from './pages/SignInPage'
 import SignUpPage from './pages/SignUpPage'
 import NotFound404 from './pages/NotFound404'
 
+// Página de prueba temporal para las estrellas
+import TestStarsPage from './pages/TestStarsPage'
+
 // Configuracion del router principal
 const router = createBrowserRouter([
   {
@@ -79,6 +82,8 @@ const router = createBrowserRouter([
       { path: "envios", element: <ShippingPage /> },
       { path: "contacto", element: <ContactPage /> },
       { path: "sobre-nosotros", element: <AboutPage /> },
+      // Página de prueba temporal
+      { path: "test-stars", element: <TestStarsPage /> },
       // Página 404 - debe ir al final como catch-all
       { path: "*", element: <NotFound404 /> },
     ],

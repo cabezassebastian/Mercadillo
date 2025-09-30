@@ -148,15 +148,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
             Calificación *
           </label>
-          <StarRating
-            rating={rating}
-            onRatingChange={setRating}
-            size="lg"
-            showText={false}
-          />
+          <div className="mb-2">
+            <StarRating
+              rating={rating}
+              onRatingChange={setRating}
+              size="lg"
+              showText={false}
+            />
+          </div>
           {rating > 0 && (
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-              {rating} de 5 estrella{rating !== 1 ? 's' : ''}
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Has seleccionado {rating} de 5 estrella{rating !== 1 ? 's' : ''}
+            </p>
+          )}
+          {rating === 0 && (
+            <p className="text-sm text-gray-500 dark:text-gray-500">
+              Haz clic en las estrellas para calificar
             </p>
           )}
         </div>
