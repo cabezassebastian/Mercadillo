@@ -6,8 +6,8 @@ export const supabase = createClient(
   import.meta.env.VITE_SUPABASE_ANON_KEY!,
   {
     auth: {
-      persistSession: false, // No persistir sesión para evitar conflictos con Clerk
-      autoRefreshToken: false, // Clerk maneja los tokens
+      persistSession: true, // Permitir persistir sesión para JWT
+      autoRefreshToken: false, // Clerk maneja el refresh
       detectSessionInUrl: false // No detectar sesión en URL
     }
   }

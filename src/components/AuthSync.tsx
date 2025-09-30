@@ -33,10 +33,24 @@ const AuthSync: React.FC = () => {
           }
 
           if (clerkToken) {
-            console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}, Inicio: ${clerkToken.substring(0, 20)}, Fin: ${clerkToken.substring(clerkToken.length - 20)}`);
+            console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}`);
             
-            console.log("AuthSync: Saltando autenticación JWT y creando usuario directamente.");
+            // USAR EL JWT PARA AUTENTICAR EN SUPABASE
+            console.log("AuthSync: Estableciendo sesión JWT en Supabase.");
             
+            const { error: authError } = await globalSupabase.auth.setSession({
+              access_token: clerkToken,
+              refresh_token: clerkToken // Clerk maneja el refresh
+            });
+
+            if (authError) {
+              console.error("AuthSync: Error al establecer sesión JWT:", authError.message);
+              return;
+            }
+
+            console.log("AuthSync: Sesión JWT establecida exitosamente en Supabase.");
+            
+            // Ahora crear/actualizar usuario con el contexto autenticado
             try {
               const { error: upsertError } = await globalSupabase
                 .from('usuarios')
@@ -57,7 +71,6 @@ const AuthSync: React.FC = () => {
               } else {
                 console.log("AuthSync: Usuario creado/actualizado exitosamente en Supabase.");
                 syncedRef.current = user.id; // Marcar como sincronizado
-                console.log("AuthSync: Estableciendo contexto de usuario para Supabase.");
               }
             } catch (manualError) {
               console.error("AuthSync: Error inesperado al crear usuario:", manualError);
