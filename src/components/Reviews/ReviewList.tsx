@@ -121,13 +121,16 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
           <button
             onClick={() => setShowReviewForm(true)}
             className="
-              inline-flex items-center gap-2 px-4 py-2
-              bg-azul hover:bg-blue-600 text-white
-              rounded-lg font-medium transition-colors duration-200
-              focus:outline-none focus:ring-2 focus:ring-azul focus:ring-opacity-50
+              inline-flex items-center gap-2 px-6 py-3
+              bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
+              text-white font-semibold
+              rounded-lg shadow-md hover:shadow-lg
+              transition-all duration-200
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+              border border-blue-700 dark:border-blue-400
             "
           >
-            <MessageCircle className="w-4 h-4" />
+            <MessageCircle className="w-5 h-5" />
             Escribir reseña
           </button>
         </div>
