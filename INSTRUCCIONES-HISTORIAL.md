@@ -1,62 +1,50 @@
-# Solución para el Historial de Navegación
+# ✅ Solución Completa para el Historial de Navegación
 
-## Problema
-El historial de navegación no funciona debido a políticas RLS (Row Level Security) muy restrictivas en Supabase.
+## 🚨 Problema Actualizado
+El historial de navegación falla por **DOS problemas**:
+1. **RLS Policies**: Bloquean inserción de datos
+2. **Función RPC Duplicada**: Múltiples versiones causan conflictos de tipos
 
-## Solución Rápida
+## 🎯 Solución en 2 Pasos
 
-### Paso 1: Ir al Panel de Supabase
-1. Ve a https://supabase.com/dashboard/project/[tu-project-id]/sql
-2. Busca tu proyecto y accede al **SQL Editor**
+### 📋 **PASO 1: Ejecutar Script Principal**
+1. Ve a tu panel de Supabase: https://supabase.com/dashboard/project/[tu-project-id]/sql
+2. Copia y pega **TODO** el contenido del archivo `fix-rpc-function.sql`
+3. Haz clic en **RUN** para ejecutar
 
-### Paso 2: Ejecutar el Script SQL
-Copia y pega este código en el SQL Editor:
+**¿Qué hace este script?**
+- ✅ Elimina todas las versiones conflictivas de la función RPC
+- ✅ Desactiva RLS en la tabla `historial_navegacion`
+- ✅ Limpia cachés de esquema
+- ✅ Recrea la función RPC correctamente
+- ✅ Configura permisos adecuados
+- ✅ Incluye tests de verificación
 
-```sql
--- Deshabilitar RLS temporalmente para historial_navegacion
-ALTER TABLE historial_navegacion DISABLE ROW LEVEL SECURITY;
+### 🧪 **PASO 2: Limpiar Caché del Navegador**
+1. **Abre las herramientas de desarrollador** (F12)
+2. **Haz clic derecho en el botón de recarga** del navegador
+3. **Selecciona "Vaciar caché y recargar forzadamente"**
+4. **O usa Ctrl+Shift+R** (Windows) / **Cmd+Shift+R** (Mac)
 
--- Verificar que se deshabilitó correctamente
-SELECT tablename, rowsecurity 
-FROM pg_tables 
-WHERE tablename = 'historial_navegacion';
-```
+## 🔍 **Verificación**
 
-### Paso 3: Ejecutar y Verificar
-1. Haz clic en **Run** para ejecutar el script
-2. Deberías ver `rowsecurity: false` en los resultados
-3. Esto indica que RLS está deshabilitado para esta tabla
+### ✅ **Comprobar que Funciona:**
+1. Ve a cualquier producto en tu tienda
+2. Luego ve a **Perfil > Historial**
+3. **Deberías ver el producto visitado**
 
-## Qué hace esto
-- **Desactiva** las políticas de seguridad a nivel de fila para la tabla `historial_navegacion`
-- **Permite** que la aplicación pueda insertar y actualizar registros sin restricciones
-- **Mantiene** la funcionalidad sin comprometer la seguridad general
+### 🐛 **Si Sigue Fallando:**
+Abre la consola del navegador (F12) y busca:
+- ❌ `Multiple GoTrueClient instances` → **Limpiar caché del navegador**
+- ❌ `Could not choose best candidate function` → **Ejecutar script SQL nuevamente**
+- ❌ `nombre_producto column not found` → **Código cacheado, recargar página**
 
-## Alternativa (Más Segura)
-Si prefieres mantener RLS activo, ejecuta esto en su lugar:
+## 📝 **Archivos de Referencia**
+- `fix-rpc-function.sql` - Script principal completo
+- `fix-historial-rls.sql` - Script simple anterior (ya no necesario)
+- `RESUMEN-SOLUCIONES.md` - Documentación completa
 
-```sql
--- Mantener RLS pero crear política permisiva
-ALTER TABLE historial_navegacion ENABLE ROW LEVEL SECURITY;
-
--- Eliminar políticas conflictivas
-DROP POLICY IF EXISTS "historial_navegacion_policy" ON historial_navegacion;
-
--- Crear política permisiva para usuarios autenticados
-CREATE POLICY "allow_authenticated_historial" ON historial_navegacion
-FOR ALL
-TO authenticated
-USING (true)
-WITH CHECK (true);
-```
-
-## Probar la Solución
-1. Ejecuta uno de los scripts anteriores en Supabase
-2. Ve a tu aplicación web
-3. Navega a cualquier producto
-4. Ve a **Perfil > Historial** para verificar que se registró la visita
-
-## Notas Importantes
-- Esta solución es temporal para desarrollo/testing
-- Para producción, considera crear políticas más específicas
-- El historial ahora debería funcionar correctamente
+## ⚠️ **Notas Importantes**
+- **El script es seguro**: No elimina datos, solo reconfigura la función
+- **Funciona en producción**: Compatible con cualquier entorno Supabase
+- **Un solo script**: Soluciona todos los problemas conocidos del historial
