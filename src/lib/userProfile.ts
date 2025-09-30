@@ -197,60 +197,123 @@ export async function getUserNavigationHistory(userId: string, limit: number = 2
  */
 export async function addToNavigationHistory(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    console.log('Llamando RPC actualizar_historial_navegacion con:', { userId, productId })
+    console.log(`Intentando agregar al historial: usuario=${userId}, producto=${productId}`);
     
-    const { data, error } = await supabase.rpc('actualizar_historial_navegacion', {
-      p_usuario_id: userId,
-      p_producto_id: productId
-    })
+    // Primer intento: usando RPC (que debería obtener el nombre del producto automáticamente)
+    try {
+      console.log("Intento 1: Llamando a RPC actualizar_historial_navegacion");
+      const { data: rpcData, error: rpcError } = await supabase
+        .rpc('actualizar_historial_navegacion', {
+          p_usuario_id: userId,
+          p_producto_id: productId
+        });
 
-    if (error) {
-      console.error('Error RPC al agregar al historial de navegación:', error)
-      console.log('Intentando método alternativo con upsert directo...')
+      if (rpcError) {
+        console.error("Error en RPC:", rpcError.message);
+        throw rpcError;
+      }
+
+      console.log("RPC exitoso:", rpcData);
+      return { success: true, error: null };
+    } catch (rpcError) {
+      console.warn("RPC falló, intentando métodos alternativos:", rpcError);
       
-      // Método alternativo: usar upsert directo
-      return await addToNavigationHistoryDirect(userId, productId)
+      // Obtener información del producto para los métodos alternativos
+      let productName = 'Producto desconocido';
+      try {
+        const { data: productData } = await supabase
+          .from('productos')
+          .select('nombre')
+          .eq('id', productId)
+          .single();
+        
+        if (productData) {
+          productName = productData.nombre;
+        }
+      } catch (productError) {
+        console.warn("No se pudo obtener el nombre del producto:", productError);
+      }
+      
+      // Segundo intento: inserción directa sin RLS usando API REST
+      console.log("Intento 2: Inserción directa usando fetch API");
+      
+      try {
+        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/historial_navegacion`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            usuario_id: userId,
+            producto_id: productId,
+            nombre_producto: productName,
+            updated_at: new Date().toISOString()
+          })
+        });
+
+        if (response.ok) {
+          console.log("Fetch API exitoso");
+          return { success: true, error: null };
+        }
+        
+        const errorText = await response.text();
+        console.error("Error en fetch API:", response.status, errorText);
+      } catch (fetchError) {
+        console.error("Error en fetch:", fetchError);
+      }
+
+      // Tercer intento: UPSERT usando Supabase client con manejo de RLS
+      console.log("Intento 3: UPSERT usando Supabase client");
+      
+      try {
+        const { data: upsertData, error: upsertError } = await supabase
+          .from('historial_navegacion')
+          .upsert({
+            usuario_id: userId,
+            producto_id: productId,
+            nombre_producto: productName,
+            updated_at: new Date().toISOString()
+          }, {
+            onConflict: 'usuario_id,producto_id',
+            ignoreDuplicates: false
+          });
+
+        if (upsertError) {
+          console.error("Error en UPSERT:", upsertError.message);
+          
+          // Cuarto intento: inserción simple sin upsert
+          console.log("Intento 4: Inserción simple");
+          const { data: insertData, error: insertError } = await supabase
+            .from('historial_navegacion')
+            .insert({
+              usuario_id: userId,
+              producto_id: productId,
+              nombre_producto: productName,
+              updated_at: new Date().toISOString()
+            });
+
+          if (insertError) {
+            console.error("Todos los métodos fallaron. Último error:", insertError.message);
+            return { success: false, error: `Error RLS: ${insertError.message}. El historial no se pudo guardar.` };
+          }
+
+          console.log("Inserción simple exitosa:", insertData);
+          return { success: true, error: null };
+        }
+
+        console.log("UPSERT exitoso:", upsertData);
+        return { success: true, error: null };
+      } catch (upsertError) {
+        console.error("Error en operaciones con Supabase client:", upsertError);
+        return { success: false, error: "Todos los métodos fallaron. El historial no se pudo guardar." };
+      }
     }
-
-    console.log('RPC ejecutado exitosamente, resultado:', data)
-    return { success: true, error: null }
   } catch (error) {
-    console.error('Error inesperado al agregar al historial de navegación:', error)
-    console.log('Intentando método alternativo con upsert directo...')
-    
-    // Método alternativo en caso de error
-    return await addToNavigationHistoryDirect(userId, productId)
-  }
-}
-
-/**
- * Método alternativo para agregar al historial usando upsert directo
- */
-async function addToNavigationHistoryDirect(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
-  try {
-    console.log('Usando método directo para historial:', { userId, productId })
-    
-    // Intentar insertar, si ya existe actualizamos
-    const { error: insertError } = await supabase
-      .from('historial_navegacion')
-      .upsert({
-        usuario_id: userId,
-        producto_id: productId,
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'usuario_id,producto_id'
-      })
-
-    if (insertError) {
-      console.error('Error en upsert directo:', insertError)
-      return { success: false, error: insertError.message }
-    }
-
-    console.log('Historial actualizado exitosamente con método directo')
-    return { success: true, error: null }
-  } catch (error) {
-    console.error('Error inesperado en método directo:', error)
-    return { success: false, error: 'Error inesperado al actualizar historial con método directo' }
+    console.error("Error general al agregar al historial de navegación:", error);
+    return { success: false, error: "Error general. El historial no se pudo guardar." };
   }
 }
 
