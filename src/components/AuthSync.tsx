@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { supabase as globalSupabase } from "@/lib/supabaseClient";
+import { supabaseWithAuth as globalSupabase } from "@/lib/supabaseWithAuth";
 
 const AuthSync: React.FC = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -35,22 +35,13 @@ const AuthSync: React.FC = () => {
           if (clerkToken) {
             console.log(`AuthSync: Token de Clerk obtenido. Longitud: ${clerkToken.length}`);
             
-            // USAR EL JWT PARA AUTENTICAR EN SUPABASE
-            console.log("AuthSync: Estableciendo sesión JWT en Supabase.");
+            // En lugar de usar el JWT de Clerk directamente, establecer contexto de usuario
+            console.log("AuthSync: Estableciendo contexto de usuario para Supabase.");
             
-            const { error: authError } = await globalSupabase.auth.setSession({
-              access_token: clerkToken,
-              refresh_token: clerkToken // Clerk maneja el refresh
-            });
-
-            if (authError) {
-              console.error("AuthSync: Error al establecer sesión JWT:", authError.message);
-              return;
-            }
-
-            console.log("AuthSync: Sesión JWT establecida exitosamente en Supabase.");
+            // Establecer el usuario actual en el cliente personalizado
+            globalSupabase.setCurrentUser(user.id);
             
-            // Ahora crear/actualizar usuario con el contexto autenticado
+            // Crear/actualizar usuario en la tabla usuarios (sin RLS)
             try {
               const { error: upsertError } = await globalSupabase
                 .from('usuarios')
@@ -68,10 +59,13 @@ const AuthSync: React.FC = () => {
 
               if (upsertError) {
                 console.error("AuthSync: Error al crear usuario:", upsertError.message);
-              } else {
-                console.log("AuthSync: Usuario creado/actualizado exitosamente en Supabase.");
-                syncedRef.current = user.id; // Marcar como sincronizado
+                return;
               }
+
+              console.log("AuthSync: Usuario creado/actualizado exitosamente en Supabase.");
+              syncedRef.current = user.id; // Marcar como sincronizado
+              console.log("AuthSync: Contexto de usuario establecido con ID:", user.id);
+              
             } catch (manualError) {
               console.error("AuthSync: Error inesperado al crear usuario:", manualError);
             }
