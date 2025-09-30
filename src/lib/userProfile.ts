@@ -197,20 +197,60 @@ export async function getUserNavigationHistory(userId: string, limit: number = 2
  */
 export async function addToNavigationHistory(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    const { error } = await supabase.rpc('actualizar_historial_navegacion', {
+    console.log('Llamando RPC actualizar_historial_navegacion con:', { userId, productId })
+    
+    const { data, error } = await supabase.rpc('actualizar_historial_navegacion', {
       p_usuario_id: userId,
       p_producto_id: productId
     })
 
     if (error) {
-      console.error('Error adding to navigation history:', error)
-      return { success: false, error: error.message }
+      console.error('Error RPC al agregar al historial de navegación:', error)
+      console.log('Intentando método alternativo con upsert directo...')
+      
+      // Método alternativo: usar upsert directo
+      return await addToNavigationHistoryDirect(userId, productId)
     }
 
+    console.log('RPC ejecutado exitosamente, resultado:', data)
     return { success: true, error: null }
   } catch (error) {
-    console.error('Unexpected error adding to navigation history:', error)
-    return { success: false, error: 'Error inesperado al actualizar historial' }
+    console.error('Error inesperado al agregar al historial de navegación:', error)
+    console.log('Intentando método alternativo con upsert directo...')
+    
+    // Método alternativo en caso de error
+    return await addToNavigationHistoryDirect(userId, productId)
+  }
+}
+
+/**
+ * Método alternativo para agregar al historial usando upsert directo
+ */
+async function addToNavigationHistoryDirect(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
+  try {
+    console.log('Usando método directo para historial:', { userId, productId })
+    
+    // Intentar insertar, si ya existe actualizamos
+    const { error: insertError } = await supabase
+      .from('historial_navegacion')
+      .upsert({
+        usuario_id: userId,
+        producto_id: productId,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'usuario_id,producto_id'
+      })
+
+    if (insertError) {
+      console.error('Error en upsert directo:', insertError)
+      return { success: false, error: insertError.message }
+    }
+
+    console.log('Historial actualizado exitosamente con método directo')
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Error inesperado en método directo:', error)
+    return { success: false, error: 'Error inesperado al actualizar historial con método directo' }
   }
 }
 
