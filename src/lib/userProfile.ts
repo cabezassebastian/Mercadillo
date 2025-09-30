@@ -218,22 +218,6 @@ export async function addToNavigationHistory(userId: string, productId: string):
     } catch (rpcError) {
       console.warn("RPC falló, intentando métodos alternativos:", rpcError);
       
-      // Obtener información del producto para los métodos alternativos
-      let productName = 'Producto desconocido';
-      try {
-        const { data: productData } = await supabase
-          .from('productos')
-          .select('nombre')
-          .eq('id', productId)
-          .single();
-        
-        if (productData) {
-          productName = productData.nombre;
-        }
-      } catch (productError) {
-        console.warn("No se pudo obtener el nombre del producto:", productError);
-      }
-      
       // Segundo intento: inserción directa sin RLS usando API REST
       console.log("Intento 2: Inserción directa usando fetch API");
       
@@ -249,7 +233,6 @@ export async function addToNavigationHistory(userId: string, productId: string):
           body: JSON.stringify({
             usuario_id: userId,
             producto_id: productId,
-            nombre_producto: productName,
             updated_at: new Date().toISOString()
           })
         });
@@ -274,7 +257,6 @@ export async function addToNavigationHistory(userId: string, productId: string):
           .upsert({
             usuario_id: userId,
             producto_id: productId,
-            nombre_producto: productName,
             updated_at: new Date().toISOString()
           }, {
             onConflict: 'usuario_id,producto_id',
@@ -291,13 +273,12 @@ export async function addToNavigationHistory(userId: string, productId: string):
             .insert({
               usuario_id: userId,
               producto_id: productId,
-              nombre_producto: productName,
               updated_at: new Date().toISOString()
             });
 
           if (insertError) {
             console.error("Todos los métodos fallaron. Último error:", insertError.message);
-            return { success: false, error: `Error RLS: ${insertError.message}. El historial no se pudo guardar.` };
+            return { success: false, error: `Error: ${insertError.message}. El historial no se pudo guardar.` };
           }
 
           console.log("Inserción simple exitosa:", insertData);
