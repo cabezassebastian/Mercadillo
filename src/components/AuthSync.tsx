@@ -1,6 +1,13 @@
 import React, { useEffect, useRef } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { supabaseWithAuth as globalSupabase } from "@/lib/supabaseWithAuth";
+import { createClient } from "@supabase/supabase-js";
+
+// Cliente base para operaciones que no requieren el wrapper
+const baseSupabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL!,
+  import.meta.env.VITE_SUPABASE_ANON_KEY!
+);
 
 const AuthSync: React.FC = () => {
   const { isLoaded, isSignedIn, getToken } = useAuth();
@@ -41,9 +48,9 @@ const AuthSync: React.FC = () => {
             // Establecer el usuario actual en el cliente personalizado
             globalSupabase.setCurrentUser(user.id);
             
-            // Crear/actualizar usuario en la tabla usuarios (sin RLS)
+            // Crear/actualizar usuario en la tabla usuarios (usando cliente base)
             try {
-              const { error: upsertError } = await globalSupabase
+              const { error: upsertError } = await baseSupabase
                 .from('usuarios')
                 .upsert({
                   id: user.id,
