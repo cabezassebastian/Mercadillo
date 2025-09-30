@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft, ShoppingCart, Star, Truck, Shield, RotateCcw } from 'lucide-react'
+import { ArrowLeft, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
+import StarRating from '@/components/common/StarRating'
+import ReviewList from '@/components/Reviews/ReviewList'
+import { getProductReviewStats } from '@/lib/reviews'
+import type { ReviewStats } from '@/types/reviews'
 
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -13,6 +17,12 @@ const Product: React.FC = () => {
   const [quantity, setQuantity] = useState(1)
   const [addingToCart, setAddingToCart] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
+  const [reviewStats, setReviewStats] = useState<ReviewStats>({
+    promedio: 0,
+    total: 0,
+    distribucion: { cinco: 0, cuatro: 0, tres: 0, dos: 0, uno: 0 }
+  })
+  const [reviewsRefreshTrigger] = useState(0)
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -32,6 +42,10 @@ const Product: React.FC = () => {
         }
 
         setProducto(data)
+        
+        // Cargar estadísticas de reseñas
+        const stats = await getProductReviewStats(data.id)
+        setReviewStats(stats)
       } catch (error) {
         console.error('Error in fetchProducto:', error)
         navigate('/catalogo')
@@ -163,12 +177,13 @@ const Product: React.FC = () => {
                 {producto.categoria}
               </p>
               <div className="flex items-center space-x-2 mb-4">
-                <div className="flex items-center">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} className="w-5 h-5 text-amarillo fill-current" />
-                  ))}
-                </div>
-                <span className="text-gray-600">(4.8) - 124 reseñas</span>
+                <StarRating rating={reviewStats.promedio} readonly size="md" />
+                <span className="text-gray-600">
+                  {reviewStats.total > 0 
+                    ? `(${reviewStats.promedio.toFixed(1)}) - ${reviewStats.total} reseña${reviewStats.total > 1 ? 's' : ''}` 
+                    : 'Sin reseñas aún'
+                  }
+                </span>
               </div>
             </div>
 
@@ -265,6 +280,33 @@ const Product: React.FC = () => {
                   <p className="font-medium text-gris-oscuro">Devolución</p>
                   <p className="text-sm text-gray-600">Fácil y rápida</p>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews Section */}
+        <div className="mt-16">
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">
+                  Reseñas del producto
+                </h2>
+                {reviewStats.total > 0 && (
+                  <div className="flex items-center gap-4 mt-2">
+                    <StarRating rating={reviewStats.promedio} readonly size="sm" />
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {reviewStats.promedio.toFixed(1)} de 5 estrellas ({reviewStats.total} reseña{reviewStats.total > 1 ? 's' : ''})
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="p-6">
+                <ReviewList 
+                  productId={producto.id} 
+                  refreshTrigger={reviewsRefreshTrigger}
+                />
               </div>
             </div>
           </div>
