@@ -6,7 +6,7 @@ import MercadoPagoCheckout from '@/components/Checkout/MercadoPagoCheckout'
 import { CreditCard, User, ShoppingBag } from 'lucide-react'
 
 const Checkout: React.FC = () => {
-  const { items, getSubtotal, getTotal } = useCart()
+  const { items } = useCart()
   const { user } = useUser()
   const navigate = useNavigate()
   const [formData, setFormData] = useState({
@@ -43,13 +43,6 @@ const Checkout: React.FC = () => {
   const handlePaymentError = (error: any) => {
     console.error('Payment error:', error)
     // Mantener al usuario en la página para que pueda intentar de nuevo
-  }
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('es-PE', {
-      style: 'currency',
-      currency: 'PEN',
-    }).format(price)
   }
 
   // Redireccionar si no hay items en el carrito
