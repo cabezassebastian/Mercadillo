@@ -53,10 +53,15 @@ const Product: React.FC = () => {
         // Registrar visita al historial de navegación (si el usuario está autenticado)
         if (user?.id) {
           try {
-            await addToNavigationHistory(user.id, data.id)
-            console.log('Producto agregado al historial de navegación')
+            console.log('Intentando agregar al historial:', { userId: user.id, productId: data.id })
+            const result = await addToNavigationHistory(user.id, data.id)
+            if (result.success) {
+              console.log('Producto agregado al historial de navegación exitosamente')
+            } else {
+              console.error('Error al agregar al historial:', result.error)
+            }
           } catch (error) {
-            console.error('Error al agregar al historial:', error)
+            console.error('Error inesperado al agregar al historial:', error)
             // No es crítico, no interrumpir la carga de la página
           }
         }
