@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { initMercadoPago, Wallet } from '@mercadopago/sdk-react'
 import { createPaymentPreference, mapCartToMercadoPagoItems, calculateTotals, mercadoPagoConfig } from '@/lib/mercadopago'
-import { useCart, CartItem } from '@/contexts/CartContext'
+import { useCart } from '@/contexts/CartContext'
 import { useUser } from '@clerk/clerk-react'
 import { Loader2, CreditCard, Smartphone } from 'lucide-react'
 
@@ -18,10 +18,9 @@ interface MercadoPagoCheckoutProps {
 }
 
 const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
-  onSuccess,
   onError
 }) => {
-  const { items, clearCart } = useCart()
+  const { items } = useCart()
   const { user } = useUser()
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -80,12 +79,6 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
     } finally {
       setLoading(false)
     }
-  }
-
-  const handlePaymentSuccess = () => {
-    console.log('Payment successful')
-    clearCart()
-    onSuccess?.({})
   }
 
   const handlePaymentError = (error: any) => {
