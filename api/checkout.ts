@@ -1,10 +1,5 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
-import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2023-10-16',
-})
 
 const supabase = createClient(
   process.env.SUPABASE_URL!,
@@ -17,7 +12,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { items, total, nombre, apellido, email, direccion, telefono, metodo_pago, usuario_id } = req.body
+    const { items, total, nombre, email, direccion, telefono, usuario_id } = req.body
     
     // Obtener el usuario_id del header o del body
     const userId = req.headers['x-user-id'] as string || usuario_id
@@ -36,7 +31,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log('Items:', items)
     console.log('Total:', total)
 
-    // Crear el pedido en la base de datos
+    // Crear el pedido en la base de datos con estado pendiente
     const { data: pedido, error: pedidoError } = await supabase
       .from('pedidos')
       .insert([{
@@ -46,11 +41,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         igv: parseFloat((total - (total / 1.18)).toFixed(2)),
         total,
         estado: 'pendiente',
-        nombre_cliente: nombre ? `${nombre} ${apellido}`.trim() : undefined,
+        nombre_cliente: nombre,
         email_cliente: email,
         telefono_cliente: telefono,
         direccion_envio: direccion,
-        metodo_pago: metodo_pago
+        metodo_pago: 'mercadopago'
       }])
       .select()
       .single()
@@ -65,39 +60,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     console.log('Order created successfully:', pedido.id)
 
-    // Determinar la URL base para las redirecciones
-    const appUrl = process.env.VERCEL_URL 
-      ? `https://${process.env.VERCEL_URL}` 
-      : process.env.PUBLIC_URL 
-      || 'https://www.mercadillo.app'; // Usar tu dominio como fallback
-
-    console.log('App URL for redirects:', appUrl)
-
-    // Crear sesión de pago con Stripe
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: items.map((item: any) => ({
-        price_data: {
-          currency: 'pen',
-          product_data: {
-            name: item.nombre,
-            images: [item.imagen],
-          },
-          unit_amount: Math.round(item.precio * 100),
-        },
-        quantity: item.cantidad,
-      })),
-      mode: 'payment',
-      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${appUrl}/carrito`,
-      metadata: {
-        pedido_id: pedido.id,
-        usuario_id: userId,
-      },
+    res.status(200).json({ 
+      success: true,
+      pedido_id: pedido.id,
+      message: 'Order created successfully'
     })
-
-    console.log('Stripe session created:', session.id)
-    res.status(200).json({ url: session.url })
   } catch (error) {
     console.error('Error in checkout:', error)
     res.status(500).json({ 

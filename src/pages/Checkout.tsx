@@ -1,19 +1,18 @@
 import React, { useState, useEffect } from 'react'
 import { useCart } from '@/contexts/CartContext'
-import { useAuth } from '@/contexts/AuthContext'
-import { CreditCard, User } from 'lucide-react'
+import { useUser } from '@clerk/clerk-react'
+import { useNavigate } from 'react-router-dom'
+import MercadoPagoCheckout from '@/components/Checkout/MercadoPagoCheckout'
+import { CreditCard, User, ShoppingBag } from 'lucide-react'
 
 const Checkout: React.FC = () => {
-  const { items, getSubtotal, getIGV, getTotal } = useCart()
-  const { user, updateUser } = useAuth()
-  const [isProcessing, setIsProcessing] = useState(false)
+  const { items, getSubtotal, getTotal } = useCart()
+  const { user } = useUser()
+  const navigate = useNavigate()
   const [formData, setFormData] = useState({
-    nombre: user?.nombre || '',
-    apellido: user?.apellido || '',
-    email: user?.email || '',
-    direccion: user?.direccion || '',
-    telefono: user?.telefono || '',
-    metodoPago: 'stripe',
+    nombre: '',
+    telefono: '',
+    direccion: '',
     terminos: false
   })
 
@@ -22,16 +21,13 @@ const Checkout: React.FC = () => {
     if (user) {
       setFormData(prev => ({
         ...prev,
-        nombre: user.nombre || prev.nombre,
-        apellido: user.apellido || prev.apellido,
-        email: user.email || prev.email,
-        direccion: user.direccion || prev.direccion,
-        telefono: user.telefono || prev.telefono,
+        nombre: user.fullName || user.firstName || prev.nombre,
+        telefono: user.phoneNumbers[0]?.phoneNumber || prev.telefono,
       }))
     }
   }, [user])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
     setFormData(prev => ({
       ...prev,
@@ -39,73 +35,14 @@ const Checkout: React.FC = () => {
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    
-    if (!formData.terminos) {
-      alert('Debes aceptar los términos y condiciones')
-      return
-    }
+  const handlePaymentSuccess = (paymentData: any) => {
+    console.log('Payment successful:', paymentData)
+    navigate('/checkout/success')
+  }
 
-    setIsProcessing(true)
-
-    try {
-      // Actualizar datos del usuario si es necesario
-      if (formData.direccion !== user?.direccion || 
-          formData.telefono !== user?.telefono ||
-          formData.nombre !== user?.nombre ||
-          formData.apellido !== user?.apellido ||
-          formData.email !== user?.email) {
-        await updateUser({
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          email: formData.email,
-          direccion: formData.direccion,
-          telefono: formData.telefono
-        })
-      }
-
-      // Crear sesión de pago
-      const response = await fetch('/api/checkout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-user-id': user?.id || '', // Agregar el ID del usuario
-        },
-        body: JSON.stringify({
-          items: items.map(item => ({
-            producto_id: item.producto.id,
-            cantidad: item.cantidad,
-            precio: item.producto.precio,
-            nombre: item.producto.nombre,
-            imagen: item.producto.imagen
-          })),
-          total: getTotal(),
-          nombre: formData.nombre,
-          apellido: formData.apellido,
-          email: formData.email,
-          direccion: formData.direccion,
-          telefono: formData.telefono,
-          metodo_pago: formData.metodoPago,
-          usuario_id: user?.id // También enviarlo en el body como backup
-        })
-      })
-
-      if (!response.ok) {
-        throw new Error('Error al procesar el pago')
-      }
-
-      const { url } = await response.json()
-      
-      // Redirigir a Stripe
-      window.location.href = url
-
-    } catch (error) {
-      console.error('Error en checkout:', error)
-      alert('Error al procesar el pago. Inténtalo de nuevo.')
-    } finally {
-      setIsProcessing(false)
-    }
+  const handlePaymentError = (error: any) => {
+    console.error('Payment error:', error)
+    // Mantener al usuario en la página para que pueda intentar de nuevo
   }
 
   const formatPrice = (price: number) => {
@@ -115,52 +52,82 @@ const Checkout: React.FC = () => {
     }).format(price)
   }
 
+  // Redireccionar si no hay items en el carrito
+  if (items.length === 0) {
+    return (
+      <div className="min-h-screen bg-hueso dark:bg-gray-900 py-8 transition-colors duration-200">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <ShoppingBag className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h1 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
+            Tu carrito está vacío
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Agrega productos a tu carrito para continuar con la compra
+          </p>
+          <button
+            onClick={() => navigate('/catalogo')}
+            className="btn-primary"
+          >
+            Ver Catálogo
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // Verificar si el usuario está autenticado
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-hueso dark:bg-gray-900 py-8 transition-colors duration-200">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <User className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+          <h1 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
+            Inicia sesión para continuar
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-8">
+            Necesitas iniciar sesión para completar tu compra
+          </p>
+          <button
+            onClick={() => navigate('/signin')}
+            className="btn-primary"
+          >
+            Iniciar Sesión
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-hueso dark:bg-gray-900 py-8 transition-colors duration-200">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-8">
           Finalizar Compra
         </h1>
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Formulario de envio */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Información de envío */}
           <div className="space-y-6">
             <div className="card p-6">
               <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6 flex items-center">
                 <User className="w-6 h-6 mr-2 text-amarillo dark:text-yellow-400" />
-                Informacion de Envio
+                Información de Envío
               </h2>
 
               <div className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                      Nombre
-                    </label>
-                    <input
-                      type="text"
-                      name="nombre"
-                      value={formData.nombre}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="Ingresa tu nombre"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                      Apellido
-                    </label>
-                    <input
-                      type="text"
-                      name="apellido"
-                      value={formData.apellido}
-                      onChange={handleInputChange}
-                      required
-                      className="input-field"
-                      placeholder="Ingresa tu apellido"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                    Nombre Completo
+                  </label>
+                  <input
+                    type="text"
+                    name="nombre"
+                    value={formData.nombre}
+                    onChange={handleInputChange}
+                    required
+                    className="input-field"
+                    placeholder="Ingresa tu nombre completo"
+                  />
                 </div>
 
                 <div>
@@ -169,18 +136,15 @@ const Checkout: React.FC = () => {
                   </label>
                   <input
                     type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    required
-                    className="input-field"
-                    placeholder="correo@ejemplo.com"
+                    value={user.emailAddresses[0]?.emailAddress || ''}
+                    disabled
+                    className="input-field bg-gray-100 dark:bg-gray-700"
                   />
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    Telefono
+                    Teléfono
                   </label>
                   <input
                     type="tel"
@@ -195,7 +159,7 @@ const Checkout: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    Direccion de Envio
+                    Dirección de Envío
                   </label>
                   <textarea
                     name="direccion"
@@ -204,55 +168,13 @@ const Checkout: React.FC = () => {
                     required
                     rows={3}
                     className="input-field"
-                    placeholder="Ingresa tu direccion completa"
+                    placeholder="Ingresa tu dirección completa de entrega"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Metodo de pago */}
-            <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6 flex items-center">
-                <CreditCard className="w-6 h-6 mr-2 text-amarillo dark:text-yellow-400" />
-                Metodo de Pago
-              </h2>
-
-              <div className="space-y-4">
-                <div className="flex items-center space-x-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
-                  <input
-                    type="radio"
-                    id="stripe"
-                    name="metodoPago"
-                    value="stripe"
-                    checked={formData.metodoPago === 'stripe'}
-                    onChange={handleInputChange}
-                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
-                  />
-                  <label htmlFor="stripe" className="flex-1">
-                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Tarjeta de Crédito/Débito</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Visa, Mastercard, American Express</div>
-                  </label>
-                </div>
-
-                <div className="flex items-center space-x-3 p-4 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800">
-                  <input
-                    type="radio"
-                    id="mercadopago"
-                    name="metodoPago"
-                    value="mercadopago"
-                    checked={formData.metodoPago === 'mercadopago'}
-                    onChange={handleInputChange}
-                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
-                  />
-                  <label htmlFor="mercadopago" className="flex-1">
-                    <div className="font-medium text-gris-oscuro dark:text-gray-100">Mercado Pago</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Pago con cuenta Mercado Pago</div>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            {/* Terminos y condiciones */}
+            {/* Términos y condiciones */}
             <div className="card p-6">
               <div className="flex items-start space-x-3">
                 <input
@@ -267,74 +189,37 @@ const Checkout: React.FC = () => {
                 <label htmlFor="terminos" className="text-sm text-gray-600 dark:text-gray-400">
                   Acepto los{' '}
                   <a href="/terminos" className="text-amarillo dark:text-yellow-400 hover:underline">
-                    terminos y condiciones
+                    términos y condiciones
                   </a>{' '}
                   y la{' '}
                   <a href="/privacidad" className="text-amarillo dark:text-yellow-400 hover:underline">
-                    politica de privacidad
+                    política de privacidad
                   </a>
                 </label>
               </div>
             </div>
           </div>
 
-          {/* Resumen del pedido */}
+          {/* Componente de Mercado Pago */}
           <div className="space-y-6">
-            <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6">
-                Resumen del Pedido
-              </h2>
-
-              <div className="space-y-4">
-                {items.map((item) => (
-                  <div key={item.producto.id} className="flex items-center space-x-3">
-                    <div className="w-12 h-12 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
-                      <img
-                        src={item.producto.imagen}
-                        alt={item.producto.nombre}
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gris-oscuro dark:text-gray-100 text-sm">
-                        {item.producto.nombre}
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400">
-                        Cantidad: {item.cantidad}
-                      </p>
-                    </div>
-                    <span className="font-medium text-dorado dark:text-yellow-400">
-                      {formatPrice(item.producto.precio * item.cantidad)}
-                    </span>
-                  </div>
-                ))}
+            {formData.terminos && formData.nombre && formData.telefono && formData.direccion ? (
+              <MercadoPagoCheckout
+                onSuccess={handlePaymentSuccess}
+                onError={handlePaymentError}
+              />
+            ) : (
+              <div className="card p-6">
+                <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-gray-100 flex items-center">
+                  <CreditCard className="w-5 h-5 mr-2" />
+                  Completa la información
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Completa todos los campos requeridos y acepta los términos para continuar con el pago.
+                </p>
               </div>
-
-              <div className="border-t border-gray-200 dark:border-gray-600 pt-4 mt-6 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
-                  <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getSubtotal())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">IGV (18%):</span>
-                  <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getIGV())}</span>
-                </div>
-                <div className="flex justify-between text-lg font-bold">
-                  <span className="text-gris-oscuro dark:text-gray-100">Total:</span>
-                  <span className="text-dorado dark:text-yellow-400">{formatPrice(getTotal())}</span>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isProcessing}
-                className="w-full btn-primary py-4 text-lg mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isProcessing ? 'Procesando...' : 'Finalizar Compra'}
-              </button>
-            </div>
+            )}
           </div>
-        </form>
+        </div>
       </div>
     </div>
   )

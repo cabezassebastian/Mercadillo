@@ -15,6 +15,9 @@ import Catalog from './pages/Catalog'
 import Product from './pages/Product'
 import Cart from './pages/Cart'
 import Checkout from './pages/Checkout'
+import CheckoutSuccess from './pages/CheckoutSuccess'
+import CheckoutFailure from './pages/CheckoutFailure'
+import CheckoutPending from './pages/CheckoutPending'
 import Profile from './pages/Profile'
 import Admin from './pages/Admin'
 import ProtectedRoute from './components/Auth/ProtectedRoute'
@@ -51,6 +54,9 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      { path: "checkout/success", element: <CheckoutSuccess /> },
+      { path: "checkout/failure", element: <CheckoutFailure /> },
+      { path: "checkout/pending", element: <CheckoutPending /> },
       {
         path: "perfil",
         element: (
