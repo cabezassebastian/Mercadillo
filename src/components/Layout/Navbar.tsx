@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useUser, UserButton } from '@clerk/clerk-react'
+import { useUser } from '@clerk/clerk-react'
 import { ShoppingCart, Menu, X } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import { useAuth } from '@/contexts/AuthContext'
@@ -8,6 +8,7 @@ import { supabase, Producto } from '@/lib/supabase'
 import ThemeToggle from '@/components/ThemeToggle'
 import Logo from '@/components/Layout/Logo'
 import SearchWithSuggestions from '@/components/Search/SearchWithSuggestions'
+import UserProfileMenu from '@/components/User/UserProfileMenu'
 
 const Navbar: React.FC = () => {
   const { user } = useUser()
@@ -130,7 +131,7 @@ const Navbar: React.FC = () => {
             {/* User Menu */}
             {user ? (
               <div className="flex items-center space-x-2">
-                <UserButton afterSignOutUrl="/" />
+                <UserProfileMenu />
               </div>
             ) : (
               <div className="hidden md:flex items-center space-x-2">

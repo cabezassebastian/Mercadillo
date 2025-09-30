@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { hasUserPurchasedProduct } from './orders'
 import type { Review, CreateReview, UpdateReview, ReviewStats, UserPurchaseCheck } from '@/types/reviews'
 
 // Verificar si un usuario puede crear una reseña para un producto
@@ -7,41 +8,30 @@ export const canUserReviewProduct = async (
   productId: string
 ): Promise<UserPurchaseCheck> => {
   try {
-    // Buscar pedidos entregados del usuario que contengan este producto
-    const { data: pedidos, error } = await supabase
-      .from('pedidos')
-      .select('id, items')
-      .eq('usuario_id', userId)
-      .eq('estado', 'entregado')
-
-    if (error) {
-      console.error('Error al verificar pedidos:', error)
+    // Usar la nueva función de orders para verificar compra
+    const purchaseResult = await hasUserPurchasedProduct(userId, productId)
+    
+    if (purchaseResult.error) {
+      console.error('Error al verificar compras:', purchaseResult.error)
       return {
         can_review: false,
         message: 'Error al verificar historial de compras'
       }
     }
 
-    // Verificar si algún pedido contiene el producto
-    const pedidoConProducto = pedidos?.find(pedido => {
-      const items = pedido.items as any[]
-      return items.some(item => item.id === productId)
-    })
-
-    if (!pedidoConProducto) {
+    if (!purchaseResult.purchased) {
       return {
         can_review: false,
         message: 'Debes haber comprado este producto para poder reseñarlo'
       }
     }
 
-    // Verificar si ya tiene una reseña para este producto en este pedido
+    // Verificar si ya existe una reseña del usuario para este producto
     const { data: existingReview, error: reviewError } = await supabase
       .from('resenas')
       .select('id')
       .eq('usuario_id', userId)
       .eq('producto_id', productId)
-      .eq('pedido_id', pedidoConProducto.id)
       .single()
 
     if (reviewError && reviewError.code !== 'PGRST116') {
@@ -55,15 +45,14 @@ export const canUserReviewProduct = async (
     if (existingReview) {
       return {
         can_review: false,
-        pedido_id: pedidoConProducto.id,
-        message: 'Ya has reseñado este producto'
+        message: 'Ya has creado una reseña para este producto'
       }
     }
 
     return {
       can_review: true,
-      pedido_id: pedidoConProducto.id,
-      message: 'Puedes crear una reseña para este producto'
+      message: 'Puedes crear una reseña para este producto',
+      pedido_id: purchaseResult.pedido_id
     }
 
   } catch (error) {
