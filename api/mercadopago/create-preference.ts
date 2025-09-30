@@ -1,5 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
+import { createClient } from '@supabase/supabase-js'
+import { createOrder, generateExternalReference, calculateOrderTotals, updateOrderWithMercadoPago, type CartItem } from '../../src/lib/orders'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Solo permitir método POST
@@ -8,6 +10,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
+    // Configurar cliente de Supabase
+    const supabase = createClient(
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // Usamos service role para insertar datos
+    )
+
     // Configurar cliente de Mercado Pago
     const client = new MercadoPagoConfig({
       accessToken: process.env.MERCADOPAGO_ACCESS_TOKEN!,
@@ -20,7 +28,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const preference = new Preference(client)
 
     // Extraer datos del cuerpo de la petición
-    const { items, payer, back_urls, auto_return, notification_url } = req.body
+    const { 
+      items, 
+      payer, 
+      back_urls, 
+      auto_return, 
+      notification_url,
+      shipping_address, // Nueva: dirección de envío
+      user_id // Nueva: ID del usuario
+    } = req.body
 
     // Validar datos requeridos
     if (!items || !Array.isArray(items) || items.length === 0) {
@@ -30,6 +46,50 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!payer || !payer.email) {
       return res.status(400).json({ error: 'Información del pagador es requerida' })
     }
+
+    if (!user_id) {
+      return res.status(400).json({ error: 'ID de usuario es requerido' })
+    }
+
+    if (!shipping_address) {
+      return res.status(400).json({ error: 'Dirección de envío es requerida' })
+    }
+
+    // Generar referencia externa única
+    const externalReference = generateExternalReference()
+
+    // Calcular totales
+    const cartItems: CartItem[] = items.map(item => ({
+      id: item.id,
+      title: item.title,
+      price: Number(item.unit_price),
+      quantity: Number(item.quantity),
+      image: item.picture_url || ''
+    }))
+
+    const { subtotal, igv, total } = calculateOrderTotals(cartItems)
+
+    // 1. Crear el pedido en Supabase PRIMERO
+    const orderResult = await createOrder({
+      usuario_id: user_id,
+      items: cartItems,
+      subtotal,
+      igv,
+      total,
+      direccion_envio: shipping_address,
+      metodo_pago: 'mercadopago',
+      mercadopago_external_reference: externalReference
+    })
+
+    if (orderResult.error || !orderResult.data) {
+      console.error('Error creating order in Supabase:', orderResult.error)
+      return res.status(500).json({ 
+        error: 'Error al crear el pedido',
+        details: orderResult.error
+      })
+    }
+
+    const orderId = orderResult.data.id
 
     // Crear la preferencia de pago
     const preferenceData = {
@@ -50,14 +110,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } : undefined
       },
       back_urls: {
-        success: back_urls?.success || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`,
-        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure`,
-        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending`
+        success: back_urls?.success || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success?order_id=${orderId}`,
+        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure?order_id=${orderId}`,
+        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending?order_id=${orderId}`
       },
       auto_return: auto_return || 'approved',
       notification_url: notification_url || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/api/mercadopago/webhook`,
       statement_descriptor: 'MERCADILLO',
-      external_reference: `order_${Date.now()}`,
+      external_reference: externalReference,
       expires: true,
       expiration_date_from: new Date().toISOString(),
       expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutos
@@ -68,19 +128,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // Crear la preferencia
+    // 2. Crear la preferencia en MercadoPago
     const result = await preference.create({ body: preferenceData })
 
     if (!result.id) {
       throw new Error('No se pudo crear la preferencia de pago')
     }
 
-    // Retornar la preferencia creada
+    // 3. Actualizar el pedido con el preference_id de MercadoPago
+    const updateResult = await updateOrderWithMercadoPago(orderId, {
+      preference_id: result.id
+    })
+
+    if (updateResult.error) {
+      console.error('Error updating order with preference ID:', updateResult.error)
+      // No fallar aquí, la preferencia ya se creó
+    }
+
+    // Retornar la preferencia creada junto con información del pedido
     res.status(200).json({
       id: result.id,
       init_point: result.init_point,
       sandbox_init_point: result.sandbox_init_point,
-      preference_id: result.id
+      preference_id: result.id,
+      order_id: orderId,
+      external_reference: externalReference
     })
 
   } catch (error) {

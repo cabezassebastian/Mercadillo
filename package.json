@@ -18,6 +18,8 @@
     "@emailjs/browser": "^4.4.1",
     "@mercadopago/sdk-react": "^1.0.6",
     "@supabase/supabase-js": "^2.38.4",
+    "@tanstack/react-query": "^5.90.2",
+    "@tanstack/react-query-devtools": "^5.90.2",
     "@vercel/node": "^3.0.0",
     "clsx": "^2.0.0",
     "lucide-react": "^0.294.0",

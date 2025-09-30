@@ -15,10 +15,12 @@ if (mercadoPagoConfig.publicKey) {
 interface MercadoPagoCheckoutProps {
   onSuccess?: (paymentData: any) => void
   onError?: (error: any) => void
+  shippingAddress?: string
 }
 
 const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
-  onError
+  onError,
+  shippingAddress = "Lima, Perú" // Dirección por defecto
 }) => {
   const { items } = useCart()
   const { user } = useUser()
@@ -63,6 +65,9 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         },
         auto_return: 'approved' as const,
         notification_url: `${baseUrl}/api/mercadopago/webhook`,
+        // Nuevos campos para integración con Supabase
+        user_id: user.id,
+        shipping_address: shippingAddress,
         metadata: {
           user_id: user.id,
           order_total: totals.total

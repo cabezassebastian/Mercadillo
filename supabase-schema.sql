@@ -48,10 +48,16 @@ CREATE TABLE IF NOT EXISTS pedidos (
     subtotal DECIMAL(10,2) NOT NULL CHECK (subtotal >= 0),
     igv DECIMAL(10,2) NOT NULL CHECK (igv >= 0),
     total DECIMAL(10,2) NOT NULL CHECK (total >= 0),
-    estado TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'procesando', 'enviado', 'entregado', 'cancelado')),
+    estado TEXT NOT NULL DEFAULT 'pendiente' CHECK (estado IN ('pendiente', 'pagado', 'procesando', 'enviado', 'entregado', 'cancelado', 'fallido')),
     direccion_envio TEXT NOT NULL,
-    metodo_pago TEXT NOT NULL,
-    stripe_session_id TEXT,
+    metodo_pago TEXT NOT NULL CHECK (metodo_pago IN ('mercadopago', 'transferencia', 'efectivo')),
+    -- Campos específicos de MercadoPago
+    mercadopago_preference_id TEXT,
+    mercadopago_payment_id TEXT,
+    mercadopago_status TEXT DEFAULT 'pending',
+    mercadopago_status_detail TEXT,
+    mercadopago_payment_type TEXT,
+    mercadopago_external_reference TEXT,
     fecha_pago TIMESTAMP WITH TIME ZONE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -78,11 +84,43 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_estado ON pedidos(estado);
 CREATE INDEX IF NOT EXISTS idx_pedidos_created_at ON pedidos(created_at);
 CREATE INDEX IF NOT EXISTS idx_resenas_producto_id ON resenas(producto_id);
 
+-- Índices específicos para MercadoPago
+CREATE INDEX IF NOT EXISTS idx_pedidos_mercadopago_preference_id ON pedidos(mercadopago_preference_id);
+CREATE INDEX IF NOT EXISTS idx_pedidos_mercadopago_payment_id ON pedidos(mercadopago_payment_id);
+CREATE INDEX IF NOT EXISTS idx_pedidos_mercadopago_status ON pedidos(mercadopago_status);
+CREATE INDEX IF NOT EXISTS idx_pedidos_external_reference ON pedidos(mercadopago_external_reference);
+
 -- Función para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
 BEGIN
     NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Función para actualizar estado del pedido basado en el estado de MercadoPago
+CREATE OR REPLACE FUNCTION update_order_status_from_mercadopago()
+RETURNS TRIGGER AS $$
+BEGIN
+    -- Mapear estados de MercadoPago a estados de pedido
+    CASE NEW.mercadopago_status
+        WHEN 'approved' THEN 
+            NEW.estado = 'pagado';
+            NEW.fecha_pago = NOW();
+        WHEN 'pending' THEN 
+            NEW.estado = 'pendiente';
+        WHEN 'in_process' THEN 
+            NEW.estado = 'pendiente';
+        WHEN 'cancelled' THEN 
+            NEW.estado = 'cancelado';
+        WHEN 'rejected' THEN 
+            NEW.estado = 'fallido';
+        ELSE 
+            -- Mantener estado actual si no reconocemos el estado de MP
+            NULL;
+    END CASE;
+    
     RETURN NEW;
 END;
 $$ language 'plpgsql';
@@ -99,6 +137,13 @@ CREATE TRIGGER update_pedidos_updated_at BEFORE UPDATE ON pedidos
 
 CREATE TRIGGER update_resenas_updated_at BEFORE UPDATE ON resenas
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Trigger para actualizar estado automáticamente basado en MercadoPago
+CREATE TRIGGER update_pedido_status_from_mp 
+    BEFORE UPDATE ON pedidos
+    FOR EACH ROW 
+    WHEN (OLD.mercadopago_status IS DISTINCT FROM NEW.mercadopago_status)
+    EXECUTE FUNCTION update_order_status_from_mercadopago();
 
 -- Políticas de seguridad (RLS)
 ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
@@ -140,6 +185,9 @@ CREATE POLICY "Usuarios pueden ver sus propios pedidos" ON pedidos
 CREATE POLICY "Usuarios pueden crear pedidos" ON pedidos
     FOR INSERT WITH CHECK (auth.uid()::text = usuario_id);
 
+CREATE POLICY "Sistema puede actualizar pedidos via webhook" ON pedidos
+    FOR UPDATE USING (true);  -- Para webhooks de MercadoPago
+
 CREATE POLICY "Admins pueden ver todos los pedidos" ON pedidos
     FOR ALL USING (
         EXISTS (
@@ -159,7 +207,7 @@ CREATE POLICY "Usuarios pueden crear reseñas si compraron el producto" ON resen
             SELECT 1 FROM pedidos 
             WHERE id = pedido_id 
             AND usuario_id = auth.uid()::text 
-            AND estado = 'entregado'
+            AND estado IN ('pagado', 'entregado')
             AND JSON_EXTRACT_PATH_TEXT(items::json, '$[*].id') LIKE '%' || producto_id::text || '%'
         )
     );
