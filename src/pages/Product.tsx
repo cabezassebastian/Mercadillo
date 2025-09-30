@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
+import { useUser } from '@clerk/clerk-react'
 import { ArrowLeft, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
 import ReviewList from '@/components/Reviews/ReviewList'
 import { getProductReviewStats } from '@/lib/reviews'
+import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
 
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const { user } = useUser()
   const { addToCart, items } = useCart()
   const [producto, setProducto] = useState<Producto | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -46,6 +49,17 @@ const Product: React.FC = () => {
         // Cargar estadísticas de reseñas
         const stats = await getProductReviewStats(data.id)
         setReviewStats(stats)
+        
+        // Registrar visita al historial de navegación (si el usuario está autenticado)
+        if (user?.id) {
+          try {
+            await addToNavigationHistory(user.id, data.id)
+            console.log('Producto agregado al historial de navegación')
+          } catch (error) {
+            console.error('Error al agregar al historial:', error)
+            // No es crítico, no interrumpir la carga de la página
+          }
+        }
       } catch (error) {
         console.error('Error in fetchProducto:', error)
         navigate('/catalogo')
