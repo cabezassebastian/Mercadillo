@@ -52,14 +52,22 @@ SELECT routine_name, routine_type, specific_name
 FROM information_schema.routines 
 WHERE routine_name = 'actualizar_historial_navegacion';
 
--- 8. Probar la función manualmente con un UUID válido
+-- 8. Crear usuario temporal para el test
+INSERT INTO usuarios (id, email, nombre, apellido, rol)
+VALUES ('test_user', 'test@ejemplo.com', 'Usuario', 'Prueba', 'cliente')
+ON CONFLICT (id) DO NOTHING;
+
+-- 9. Probar la función manualmente con un UUID válido
+-- NOTA: Si obtienes error de clave foránea para producto_id, 
+-- usa un UUID de un producto real de tu tabla productos
 SELECT actualizar_historial_navegacion('test_user', 'c1a7962d-4ffe-49f2-aef1-2ed8a16d70ed');
 
--- 9. Verificar que se insertó
+-- 10. Verificar que se insertó
 SELECT * FROM historial_navegacion WHERE usuario_id = 'test_user';
 
--- 10. Limpiar test
+-- 11. Limpiar test (historial y usuario temporal)
 DELETE FROM historial_navegacion WHERE usuario_id = 'test_user';
+DELETE FROM usuarios WHERE id = 'test_user';
 
--- 11. Mensaje de confirmación
-SELECT 'Función RPC recreada exitosamente con conversión UUID. Cachés limpiados.' as resultado;
+-- 12. Mensaje de confirmación
+SELECT 'Función RPC recreada exitosamente con conversión UUID. Test completado. Cachés limpiados.' as resultado;
