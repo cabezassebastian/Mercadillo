@@ -98,7 +98,7 @@ export const useNotificationHelpers = () => {
         title: '¡Pedido realizado!',
         message: `Tu pedido #${orderNumber} ha sido procesado exitosamente.`,
         actionLabel: 'Ver pedido',
-        actionHandler: () => window.location.href = `/profile/orders`
+        actionHandler: () => window.location.href = `/perfil/pedidos`
       }),
 
     showAddressAdded: () =>
@@ -128,7 +128,7 @@ export const useNotificationHelpers = () => {
         title: 'Agregado a favoritos',
         message: `${productName} ha sido agregado a tu lista de deseos.`,
         actionLabel: 'Ver lista',
-        actionHandler: () => window.location.href = `/profile/wishlist`
+        actionHandler: () => window.location.href = `/perfil/lista-deseos`
       }),
 
     showWishlistRemoved: (productName: string) =>

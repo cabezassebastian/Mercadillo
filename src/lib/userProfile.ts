@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'
+import { supabaseWithAuth as supabase } from './supabaseWithAuth'
 
 // Tipos para Lista de Deseos
 export interface WishlistItem {

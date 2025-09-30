@@ -235,7 +235,7 @@ const ReviewsPage: React.FC = () => {
               Compra productos y comparte tu experiencia con otros usuarios
             </p>
             <Link
-              to="/profile/orders"
+              to="/perfil/pedidos"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             >
               Ver Mis Pedidos

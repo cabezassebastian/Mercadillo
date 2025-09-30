@@ -76,9 +76,9 @@ const router = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      // Rutas de perfil de usuario
+      // Rutas de perfil de usuario en español
       {
-        path: "profile/wishlist",
+        path: "perfil/lista-deseos",
         element: (
           <ProtectedRoute>
             <WishlistPage />
@@ -86,7 +86,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "profile/orders",
+        path: "perfil/pedidos",
         element: (
           <ProtectedRoute>
             <OrdersPage />
@@ -94,7 +94,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "profile/reviews",
+        path: "perfil/reseñas",
         element: (
           <ProtectedRoute>
             <ReviewsPage />
@@ -102,7 +102,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "profile/history",
+        path: "perfil/historial",
         element: (
           <ProtectedRoute>
             <HistoryPage />
@@ -110,7 +110,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "profile/addresses",
+        path: "perfil/direcciones",
         element: (
           <ProtectedRoute>
             <AddressesPage />
@@ -118,7 +118,7 @@ const router = createBrowserRouter([
         ),
       },
       {
-        path: "profile/settings",
+        path: "perfil/configuracion",
         element: (
           <ProtectedRoute>
             <UserProfileSettings />
