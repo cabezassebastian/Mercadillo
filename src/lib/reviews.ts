@@ -37,7 +37,7 @@ export const canUserReviewProduct = async (
 
     // Verificar si ya tiene una reseña para este producto en este pedido
     const { data: existingReview, error: reviewError } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .select('id')
       .eq('usuario_id', userId)
       .eq('producto_id', productId)
@@ -93,7 +93,7 @@ export const createReview = async (
 
     // Crear la reseña
     const { data, error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .insert({
         usuario_id: userId,
         producto_id: reviewData.producto_id,
@@ -138,7 +138,7 @@ export const getProductReviews = async (
   try {
     // Obtener reseñas con información del usuario
     const { data: reviews, error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .select(`
         *,
         usuario:usuarios(nombre, apellido)
@@ -154,7 +154,7 @@ export const getProductReviews = async (
 
     // Obtener total de reseñas
     const { count } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .select('*', { count: 'exact', head: true })
       .eq('producto_id', productId)
 
@@ -173,7 +173,7 @@ export const getProductReviews = async (
 export const getProductReviewStats = async (productId: string): Promise<ReviewStats> => {
   try {
     const { data: reviews, error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .select('calificacion')
       .eq('producto_id', productId)
 
@@ -232,7 +232,7 @@ export const updateReview = async (
 ): Promise<{ success: boolean; review?: Review; error?: string }> => {
   try {
     const { data, error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .update(updateData)
       .eq('id', reviewId)
       .eq('usuario_id', userId)
@@ -271,7 +271,7 @@ export const deleteReview = async (
 ): Promise<{ success: boolean; error?: string }> => {
   try {
     const { error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .delete()
       .eq('id', reviewId)
       .eq('usuario_id', userId)
@@ -302,7 +302,7 @@ export const getUserReviewForProduct = async (
 ): Promise<Review | null> => {
   try {
     const { data, error } = await supabase
-      .from('reseñas')
+      .from('resenas')
       .select(`
         *,
         usuario:usuarios(nombre, apellido)
