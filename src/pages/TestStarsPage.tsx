@@ -119,6 +119,7 @@ const TestStarsPage: React.FC = () => {
                 <div className="mt-4">
                   <ReviewForm
                     productId={testProductId}
+                    skipPurchaseValidation={true}
                     onReviewCreated={() => {
                       console.log('Reseña creada exitosamente!')
                       setShowReviewForm(false)
