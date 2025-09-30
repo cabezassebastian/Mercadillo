@@ -58,7 +58,7 @@ CREATE TABLE IF NOT EXISTS pedidos (
 );
 
 -- Tabla de reseñas
-CREATE TABLE IF NOT EXISTS reseñas (
+CREATE TABLE IF NOT EXISTS resenas (
     id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
     usuario_id TEXT NOT NULL REFERENCES usuarios(id) ON DELETE CASCADE,
     producto_id UUID NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
@@ -76,7 +76,7 @@ CREATE INDEX IF NOT EXISTS idx_productos_activo ON productos(activo);
 CREATE INDEX IF NOT EXISTS idx_pedidos_usuario_id ON pedidos(usuario_id);
 CREATE INDEX IF NOT EXISTS idx_pedidos_estado ON pedidos(estado);
 CREATE INDEX IF NOT EXISTS idx_pedidos_created_at ON pedidos(created_at);
-CREATE INDEX IF NOT EXISTS idx_reseñas_producto_id ON reseñas(producto_id);
+CREATE INDEX IF NOT EXISTS idx_resenas_producto_id ON resenas(producto_id);
 
 -- Función para actualizar updated_at automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -97,14 +97,14 @@ CREATE TRIGGER update_productos_updated_at BEFORE UPDATE ON productos
 CREATE TRIGGER update_pedidos_updated_at BEFORE UPDATE ON pedidos
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TRIGGER update_reseñas_updated_at BEFORE UPDATE ON reseñas
+CREATE TRIGGER update_resenas_updated_at BEFORE UPDATE ON resenas
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Políticas de seguridad (RLS)
 ALTER TABLE usuarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE productos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE pedidos ENABLE ROW LEVEL SECURITY;
-ALTER TABLE reseñas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE resenas ENABLE ROW LEVEL SECURITY;
 
 -- Políticas para usuarios
 CREATE POLICY "Usuarios pueden ver su propio perfil" ON usuarios
@@ -149,10 +149,10 @@ CREATE POLICY "Admins pueden ver todos los pedidos" ON pedidos
     );
 
 -- Políticas para reseñas
-CREATE POLICY "Usuarios pueden ver reseñas" ON reseñas
+CREATE POLICY "Usuarios pueden ver reseñas" ON resenas
     FOR SELECT USING (true);
 
-CREATE POLICY "Usuarios pueden crear reseñas si compraron el producto" ON reseñas
+CREATE POLICY "Usuarios pueden crear reseñas si compraron el producto" ON resenas
     FOR INSERT WITH CHECK (
         auth.uid()::text = usuario_id AND
         EXISTS (
@@ -164,10 +164,10 @@ CREATE POLICY "Usuarios pueden crear reseñas si compraron el producto" ON rese�
         )
     );
 
-CREATE POLICY "Usuarios pueden actualizar sus propias reseñas" ON reseñas
+CREATE POLICY "Usuarios pueden actualizar sus propias reseñas" ON resenas
     FOR UPDATE USING (auth.uid()::text = usuario_id);
 
-CREATE POLICY "Usuarios pueden eliminar sus propias reseñas" ON reseñas
+CREATE POLICY "Usuarios pueden eliminar sus propias reseñas" ON resenas
     FOR DELETE USING (auth.uid()::text = usuario_id);
 
 -- Insertar categorías iniciales
