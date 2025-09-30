@@ -50,31 +50,31 @@ const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ className = '' }) => 
     {
       icon: Heart,
       label: 'Lista de Deseos',
-      path: '/profile/wishlist',
+      path: '/perfil/lista-deseos',
       description: 'Productos guardados'
     },
     {
       icon: Package,
       label: 'Mis Pedidos',
-      path: '/profile/orders',
+      path: '/perfil/pedidos',
       description: 'Historial de compras'
     },
     {
       icon: Star,
       label: 'Mis Reseñas',
-      path: '/profile/reviews',
+      path: '/perfil/reseñas',
       description: 'Reseñas escritas'
     },
     {
       icon: Clock,
       label: 'Historial',
-      path: '/profile/history',
+      path: '/perfil/historial',
       description: 'Productos visitados'
     },
     {
       icon: MapPin,
       label: 'Direcciones',
-      path: '/profile/addresses',
+      path: '/perfil/direcciones',
       description: 'Direcciones de envío'
     }
   ]
@@ -192,7 +192,7 @@ const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ className = '' }) => 
             {/* Additional options */}
             <div className="py-2">
               <Link
-                to="/profile/settings"
+                to="/perfil/configuracion"
                 onClick={() => setIsOpen(false)}
                 className="
                   flex items-center px-4 py-2

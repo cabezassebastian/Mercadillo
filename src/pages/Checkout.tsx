@@ -303,7 +303,7 @@ const Checkout: React.FC = () => {
                     <div className="mt-3">
                       <button
                         type="button"
-                        onClick={() => navigate('/profile/addresses')}
+                        onClick={() => navigate('/perfil/direcciones')}
                         className="text-sm text-amarillo dark:text-yellow-400 hover:underline"
                       >
                         Gestionar mis direcciones

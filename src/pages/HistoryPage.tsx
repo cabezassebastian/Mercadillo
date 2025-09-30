@@ -9,7 +9,6 @@ import { useCart } from '@/contexts/CartContext'
 import { usePagination } from '@/hooks/usePagination'
 import { useUserHistory, useUserMutations } from '@/hooks/useUserQueries'
 import Pagination from '@/components/common/Pagination'
-
 import { Link } from 'react-router-dom'
 
 const HistoryPage: React.FC = () => {
@@ -236,7 +235,7 @@ const HistoryPage: React.FC = () => {
               Explora nuestros productos para comenzar a construir tu historial
             </p>
             <Link
-              to="/catalog"
+              to="/catalogo"
               className="inline-flex items-center px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
             >
               Explorar Productos

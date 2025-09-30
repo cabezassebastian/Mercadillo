@@ -1,4 +1,4 @@
-import { supabase } from './supabaseClient'
+import { supabaseWithAuth as supabase } from './supabaseWithAuth'
 import { hasUserPurchasedProduct } from './orders'
 import type { Review, CreateReview, UpdateReview, ReviewStats, UserPurchaseCheck } from '@/types/reviews'
 
