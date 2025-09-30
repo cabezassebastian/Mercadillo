@@ -9,12 +9,14 @@ interface ReviewFormProps {
   productId: string
   onReviewCreated?: () => void
   onCancel?: () => void
+  skipPurchaseValidation?: boolean // Para testing
 }
 
 const ReviewForm: React.FC<ReviewFormProps> = ({
   productId,
   onReviewCreated,
-  onCancel
+  onCancel,
+  skipPurchaseValidation = false
 }) => {
   const { user } = useUser()
   const [rating, setRating] = useState<number>(0)
@@ -30,6 +32,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     const checkPermission = async () => {
       if (!user?.id) return
       
+      // Si estamos en modo testing, saltarse la validación
+      if (skipPurchaseValidation) {
+        setCanReview(true)
+        setPedidoId('test-order-id')
+        setIsCheckingPermission(false)
+        return
+      }
+      
       setIsCheckingPermission(true)
       const permission = await canUserReviewProduct(user.id, productId)
       setCanReview(permission.can_review)
@@ -41,7 +51,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     }
 
     checkPermission()
-  }, [user?.id, productId])
+  }, [user?.id, productId, skipPurchaseValidation])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
