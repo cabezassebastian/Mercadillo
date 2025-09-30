@@ -49,7 +49,7 @@ const Home: React.FC = () => {
     {
       icon: <Shield className="w-8 h-8" />,
       title: 'Compra Segura',
-      description: 'Pagos protegidos con Stripe'
+      description: 'Pagos seguros con Mercado Pago'
     },
     {
       icon: <Headphones className="w-8 h-8" />,
