@@ -134,10 +134,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   }
 
   return (
-    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+    <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-lg">
       <div className="flex items-center gap-2 mb-4">
-        <MessageCircle className="w-5 h-5 text-azul dark:text-blue-400" />
-        <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
+        <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
           Escribe tu reseña
         </h3>
       </div>
@@ -208,15 +208,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             type="submit"
             disabled={isSubmitting || rating === 0}
             className="
-              flex items-center gap-2 px-4 py-2
-              bg-azul hover:bg-blue-600 
+              flex items-center gap-2 px-6 py-3
+              bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600
               disabled:bg-gray-400 disabled:cursor-not-allowed
-              text-white font-medium
-              rounded-lg transition-colors duration-200
-              focus:outline-none focus:ring-2 focus:ring-azul focus:ring-opacity-50
+              text-white font-semibold
+              rounded-lg shadow-md hover:shadow-lg
+              transition-all duration-200
+              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50
+              border border-blue-700 dark:border-blue-400
             "
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-5 h-5" />
             {isSubmitting ? 'Enviando...' : 'Enviar reseña'}
           </button>
 
@@ -226,12 +228,15 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               onClick={handleCancel}
               disabled={isSubmitting}
               className="
-                px-4 py-2
-                border border-gray-300 dark:border-gray-600
-                text-gris-oscuro dark:text-gray-200
-                hover:bg-gray-50 dark:hover:bg-gray-700
+                px-6 py-3
+                border-2 border-gray-400 dark:border-gray-500
+                bg-white dark:bg-gray-800
+                text-gray-700 dark:text-gray-200 font-semibold
+                hover:bg-gray-100 dark:hover:bg-gray-700
+                hover:border-gray-500 dark:hover:border-gray-400
                 disabled:opacity-50 disabled:cursor-not-allowed
-                rounded-lg transition-colors duration-200
+                rounded-lg shadow-md hover:shadow-lg
+                transition-all duration-200
                 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50
               "
             >
