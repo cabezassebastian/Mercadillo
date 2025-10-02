@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Heart } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
-import { isInWishlist, addToWishlist, removeFromWishlist } from '@/lib/userProfile'
+import { isInWishlist, addToWishlist, removeFromWishlist, ensureSupabaseSession } from '@/lib/userProfile'
 
 interface Props {
   productId: string
@@ -23,37 +23,26 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
         setInitialLoaded(true)
         return
       }
-      // Retry loop: give Clerk->Supabase propagation up to ~5s
-      const maxAttempts = 20
-      const delayMs = 250
-      let attempt = 0
-      let found = false
-      for (; attempt < maxAttempts; attempt++) {
-        try {
-          const res = await isInWishlist(user.id, productId)
-          if (res.error === 'no_supabase_session') {
-            // Not ready yet, wait and retry
-            await new Promise(r => setTimeout(r, delayMs))
-            continue
-          }
-          // Got a definitive answer
-          if (mounted) setIsWished(!!res.isInWishlist)
-          if (mounted) setSessionAvailable(true)
-          found = true
-          break
-        } catch (err) {
-          console.error('Error checking wishlist state', err)
-          await new Promise(r => setTimeout(r, delayMs))
-        }
-      }
-
-      if (!found && mounted) {
-        // After retries, assume session isn't available
+      // Wait for a shared global supabase session (Clerk -> Supabase propagation)
+      setSessionAvailable(null)
+      const ok = await ensureSupabaseSession()
+      if (!mounted) return
+      if (!ok) {
         console.warn('isInWishlist: No supabase session available (timeout)')
         setSessionAvailable(false)
+        setInitialLoaded(true)
+        return
       }
 
-      if (mounted) setInitialLoaded(true)
+      setSessionAvailable(true)
+      try {
+        const res = await isInWishlist(user.id, productId)
+        if (mounted) setIsWished(!!res.isInWishlist)
+      } catch (err) {
+        console.error('Error checking wishlist state', err)
+      } finally {
+        if (mounted) setInitialLoaded(true)
+      }
     }
     fetchState()
     return () => { mounted = false }
@@ -63,7 +52,7 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user?.id) return
-    // prevent toggle before initial server-state has been fetched
+    // prevent toggle before initial server-state has been fetched or session ready
     if (!initialLoaded) {
       console.warn('WishlistButton: toggle prevented — initial wishlist state not loaded yet')
       return
@@ -95,12 +84,16 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
   return (
     <button
       onClick={toggle}
-      disabled={!user?.id || loading}
+      disabled={!user?.id || loading || sessionAvailable === null}
       aria-pressed={isWished}
       title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
       className={className}
     >
-      <Heart className={`w-5 h-5 ${isWished ? 'text-red-600' : 'text-gray-600'}`} />
+      {sessionAvailable === null || loading ? (
+        <span className="w-5 h-5 inline-block animate-pulse bg-gray-200 rounded" />
+      ) : (
+        <Heart className={`w-5 h-5 ${isWished ? 'text-red-600' : 'text-gray-600'}`} />
+      )}
     </button>
   )
 }

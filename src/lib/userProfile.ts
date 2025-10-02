@@ -2,7 +2,9 @@ import { supabase } from './supabaseClient'
 
 // Ensure the shared supabase client has an access token derived from Clerk.
 // Uses a small retry to wait for the token if Clerk is still propagating.
-async function ensureSupabaseSession(timeout = 5000): Promise<boolean> {
+let _sharedSessionPromise: Promise<boolean> | null = null
+
+export async function ensureSupabaseSession(timeout = 10000): Promise<boolean> {
   try {
     // If supabase already has a session, we're good
     const { data } = await supabase.auth.getSession()
@@ -12,8 +14,13 @@ async function ensureSupabaseSession(timeout = 5000): Promise<boolean> {
     const getter = (window as any).__getClerkToken
     const start = Date.now()
 
-    // Wait loop: either token via getter or event 'supabase-session-ready'
-    while (Date.now() - start < timeout) {
+    // If another caller is already waiting, reuse that promise so we don't
+    // concurrently poll/get the token multiple times.
+    if (_sharedSessionPromise) return _sharedSessionPromise
+
+    _sharedSessionPromise = (async () => {
+      // Wait loop: either token via getter or event 'supabase-session-ready'
+      while (Date.now() - start < timeout) {
       // First try getter if available
       if (typeof getter === 'function') {
         try {
@@ -61,11 +68,21 @@ async function ensureSupabaseSession(timeout = 5000): Promise<boolean> {
 
       // short sleep before next iteration
       await new Promise(res => setTimeout(res, 200))
-    }
+      }
 
-    return false
+      return false
+    })()
+
+    try {
+      const result = await _sharedSessionPromise
+      return result
+    } finally {
+      // clear shared promise so subsequent calls can re-check if needed
+      _sharedSessionPromise = null
+    }
   } catch (err) {
     console.error('ensureSupabaseSession error', err)
+    _sharedSessionPromise = null
     return false
   }
 }

@@ -1,10 +1,5 @@
-import { createClient, SupabaseClient } from "@supabase/supabase-js";
-
-// Cliente base de Supabase
-const baseSupabase = createClient(
-  import.meta.env.VITE_SUPABASE_URL!,
-  import.meta.env.VITE_SUPABASE_ANON_KEY!
-);
+import { SupabaseClient } from "@supabase/supabase-js";
+import { supabase as baseSupabase } from './supabaseClient'
 
 // Cliente personalizado que puede inyectar contexto de usuario
 class SupabaseWithAuth {
