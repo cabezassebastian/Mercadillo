@@ -2,7 +2,7 @@ import { supabase } from './supabaseClient'
 
 // Ensure the shared supabase client has an access token derived from Clerk.
 // Uses a small retry to wait for the token if Clerk is still propagating.
-async function ensureSupabaseSession(timeout = 2000): Promise<boolean> {
+async function ensureSupabaseSession(timeout = 5000): Promise<boolean> {
   try {
     // If supabase already has a session, we're good
     const { data } = await supabase.auth.getSession()
@@ -10,23 +10,57 @@ async function ensureSupabaseSession(timeout = 2000): Promise<boolean> {
 
     // If a global getter was installed by AuthSync, use it
     const getter = (window as any).__getClerkToken
-    if (typeof getter === 'function') {
-      // Try to get token, with a small retry loop in case Clerk is still initializing
-      const start = Date.now()
-      while (Date.now() - start < timeout) {
+    const start = Date.now()
+
+    // Wait loop: either token via getter or event 'supabase-session-ready'
+    while (Date.now() - start < timeout) {
+      // First try getter if available
+      if (typeof getter === 'function') {
         try {
           const token = await getter()
           if (token) {
-            // setSession expects an object with access_token and refresh_token
             await supabase.auth.setSession({ access_token: token, refresh_token: '' })
-            return true
+            // verify
+            const { data: newSession } = await supabase.auth.getSession()
+            if (newSession?.session?.access_token) return true
           }
         } catch (e) {
-          // ignore and retry
+          // ignore and continue waiting
         }
-        // short sleep
-        await new Promise(res => setTimeout(res, 150))
       }
+
+      // Also listen for the event which AuthSync dispatches when ready
+      const ready = await new Promise<boolean>(res => {
+        let resolved = false
+        const onReady = async () => {
+          if (resolved) return
+          resolved = true
+          try {
+            const { data: s } = await supabase.auth.getSession()
+            res(!!s?.session?.access_token)
+          } catch (e) {
+            res(false)
+          }
+        }
+
+        window.addEventListener('supabase-session-ready', onReady, { once: true })
+
+        // timeout small fallback to continue loop
+        setTimeout(() => {
+          if (!resolved) {
+            resolved = true
+            res(false)
+          }
+        }, 300)
+      })
+
+      if (ready) {
+        const { data: final } = await supabase.auth.getSession()
+        if (final?.session?.access_token) return true
+      }
+
+      // short sleep before next iteration
+      await new Promise(res => setTimeout(res, 200))
     }
 
     return false
@@ -141,7 +175,7 @@ export async function addToWishlist(userId: string, productId: string): Promise<
         return { data: null, error: 'El producto ya está en tu lista de deseos' }
       }
       console.error('Error adding to wishlist:', error)
-      return { data: null, error: error.message }
+      return { data: null, error: JSON.stringify(error) }
     }
 
     return { data, error: null }
@@ -165,7 +199,7 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
 
     if (error) {
       console.error('Error removing from wishlist:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: JSON.stringify(error) }
     }
 
     return { success: true, error: null }
@@ -193,7 +227,7 @@ export async function isInWishlist(userId: string, productId: string): Promise<{
         return { isInWishlist: false, error: null }
       }
       console.error('Error checking wishlist:', error)
-      return { isInWishlist: false, error: error.message }
+      return { isInWishlist: false, error: JSON.stringify(error) }
     }
 
     return { isInWishlist: !!data, error: null }
