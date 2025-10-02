@@ -1,6 +1,8 @@
 import React, { memo, useState, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart } from 'lucide-react'
+import { ShoppingCart, Heart } from 'lucide-react'
+import { useUser } from '@clerk/clerk-react'
+import { addToWishlist, removeFromWishlist } from '@/lib/userProfile'
 import { Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
@@ -14,6 +16,9 @@ interface ProductCardProps {
 
 const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => {
   const { addToCart, items } = useCart()
+  const { user } = useUser()
+  const [isWished, setIsWished] = useState<boolean>(false)
+  const [isWishing, setIsWishing] = useState<boolean>(false)
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   
@@ -70,6 +75,45 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
       setIsLoading(false)
     }
   }, [isLoading, stockInfo.currentQuantityInCart, producto, addToCart])
+
+  const toggleWishlist = useCallback(async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    if (!user?.id) {
+      setMessage('Inicia sesión para usar la lista de deseos')
+      setTimeout(() => setMessage(null), 2000)
+      return
+    }
+
+    if (isWishing) return
+    setIsWishing(true)
+
+    // Optimistic UI
+    const previous = isWished
+    setIsWished(!previous)
+
+    try {
+      if (!previous) {
+        const res = await addToWishlist(user.id, producto.id)
+        if (res.error) {
+          throw new Error(res.error)
+        }
+      } else {
+        const res = await removeFromWishlist(user.id, producto.id)
+        if (res.error) {
+          throw new Error(res.error)
+        }
+      }
+    } catch (err) {
+      console.error('Wishlist error:', err)
+      setIsWished(previous) // rollback
+      setMessage('Error updating wishlist')
+      setTimeout(() => setMessage(null), 2000)
+    } finally {
+      setIsWishing(false)
+    }
+  }, [isWished, isWishing, producto.id, user])
 
   if (viewMode === 'list') {
     return (
@@ -149,16 +193,24 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
               </div>
               
               {/* Action Buttons */}
-              <div>
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={handleAddToCart}
                   disabled={stockInfo.isOutOfStock || isLoading}
-                  className="w-full btn-primary py-3 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-base font-semibold"
+                  className="flex-1 btn-primary py-3 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-base font-semibold"
                 >
                   <ShoppingCart className="w-5 h-5" />
                   <span>
                     {isLoading ? 'Agregando...' : stockInfo.isOutOfStock ? 'Sin Stock' : 'Agregar al carrito'}
                   </span>
+                </button>
+
+                <button
+                  onClick={toggleWishlist}
+                  disabled={isWishing}
+                  className={`p-3 rounded-lg border ${isWished ? 'bg-red-600 text-white border-red-600' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+                >
+                  <Heart className="w-5 h-5" />
                 </button>
               </div>
             </div>
@@ -253,16 +305,24 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
           </div>
           
           {/* Action Buttons */}
-          <div>
+          <div className="flex space-x-2">
             <button
               onClick={handleAddToCart}
               disabled={stockInfo.isOutOfStock || isLoading}
-              className="w-full btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+              className="flex-1 btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>
                 {isLoading ? 'Agregando...' : stockInfo.isOutOfStock ? 'Sin Stock' : 'Agregar'}
               </span>
+            </button>
+
+            <button
+              onClick={toggleWishlist}
+              disabled={isWishing}
+              className={`px-4 py-2 rounded-lg border ${isWished ? 'bg-red-600 text-white border-red-600' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
+            >
+              <Heart className="w-4 h-4" />
             </button>
           </div>
         </div>
