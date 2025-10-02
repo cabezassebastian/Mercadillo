@@ -47,42 +47,99 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
         // Buscar el pedido en Supabase usando external_reference
         if (paymentInfo.external_reference) {
-          const orderResult = await findOrderByExternalReference(paymentInfo.external_reference)
+          // Decodificar el external_reference para obtener los datos del pedido
+          const [refId, encodedData] = paymentInfo.external_reference.split('|')
           
-          if (orderResult.error || !orderResult.data) {
-            console.error('Order not found for external_reference:', paymentInfo.external_reference)
+          let orderData: any = null
+          if (encodedData) {
+            try {
+              const decodedData = Buffer.from(encodedData, 'base64').toString('utf-8')
+              orderData = JSON.parse(decodedData)
+            } catch (decodeError) {
+              console.error('Error decoding order data:', decodeError)
+            }
+          }
+
+          // Buscar si ya existe un pedido con este external_reference
+          const orderResult = await findOrderByExternalReference(refId)
+          
+          let order = orderResult.data
+
+          // Si no existe el pedido y tenemos los datos, crearlo ahora
+          if (!order && orderData && paymentInfo.status === 'approved') {
+            console.log('Creating order from payment approval:', {
+              external_reference: refId,
+              user_id: orderData.user_id
+            })
+
+            const { data: newOrder, error: createError } = await supabase
+              .from('pedidos')
+              .insert([{
+                usuario_id: orderData.user_id,
+                items: orderData.items,
+                subtotal: orderData.subtotal,
+                igv: orderData.igv,
+                total: orderData.total,
+                estado: 'completado',
+                direccion_envio: orderData.shipping_address,
+                metodo_pago: 'mercadopago',
+                mercadopago_external_reference: refId,
+                mercadopago_preference_id: paymentInfo.id?.toString(),
+                mercadopago_payment_id: paymentInfo.id?.toString(),
+                mercadopago_status: paymentInfo.status,
+                mercadopago_status_detail: paymentInfo.status_detail || '',
+                mercadopago_payment_type: paymentInfo.payment_type_id || ''
+              }])
+              .select()
+              .single()
+
+            if (createError) {
+              console.error('Error creating order:', createError)
+              return res.status(500).json({ 
+                error: 'Error creating order',
+                details: createError.message
+              })
+            }
+
+            order = newOrder
+            console.log('Order created successfully:', {
+              orderId: newOrder.id,
+              status: newOrder.estado
+            })
+
+          } else if (order) {
+            // Si el pedido ya existe, actualizarlo con la información del pago
+            const updateResult = await updateOrderWithMercadoPago(order.id, {
+              payment_id: paymentInfo.id?.toString(),
+              status: paymentInfo.status || 'unknown',
+              status_detail: paymentInfo.status_detail || '',
+              payment_type: paymentInfo.payment_type_id || ''
+            })
+
+            if (updateResult.error) {
+              console.error('Error updating order:', updateResult.error)
+              return res.status(500).json({ 
+                error: 'Error updating order',
+                details: updateResult.error
+              })
+            }
+
+            console.log('Order updated successfully:', {
+              orderId: order.id,
+              paymentStatus: paymentInfo.status,
+              orderStatus: updateResult.data?.estado
+            })
+          } else {
+            // No hay datos del pedido y no se encontró en la BD
+            console.warn('Payment received but no order data available:', refId)
             return res.status(200).json({ 
               received: true, 
-              message: 'Payment processed but order not found' 
+              message: 'Payment processed but order data not available' 
             })
           }
-
-          const order = orderResult.data
-
-          // Actualizar el pedido con la información del pago
-          const updateResult = await updateOrderWithMercadoPago(order.id, {
-            payment_id: paymentInfo.id?.toString(),
-            status: paymentInfo.status || 'unknown',
-            status_detail: paymentInfo.status_detail || '',
-            payment_type: paymentInfo.payment_type_id || ''
-          })
-
-          if (updateResult.error) {
-            console.error('Error updating order:', updateResult.error)
-            return res.status(500).json({ 
-              error: 'Error updating order',
-              details: updateResult.error
-            })
-          }
-
-          console.log('Order updated successfully:', {
-            orderId: order.id,
-            paymentStatus: paymentInfo.status,
-            orderStatus: updateResult.data?.estado
-          })
 
           // Enviar email de confirmación si el pago fue aprobado
-          if (paymentInfo.status === 'approved') {
+          if (paymentInfo.status === 'approved' && order) {
             console.log('Payment approved - order completed:', order.id)
             // Aquí podrías agregar lógica para enviar emails, actualizar stock, etc.
           }

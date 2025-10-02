@@ -84,7 +84,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Dirección de envío es requerida' })
     }
 
-    // Generar referencia externa única
+    // Generar referencia externa única con los datos del pedido
     const externalReference = generateExternalReference()
 
     // Calcular totales
@@ -98,34 +98,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { subtotal, igv, total } = calculateOrderTotals(cartItems)
 
-    // 1. Crear el pedido en Supabase PRIMERO usando el cliente con service role
-    const { data: newOrder, error: orderError } = await supabase
-      .from('pedidos')
-      .insert([{
-        usuario_id: user_id,
-        items: cartItems,
-        subtotal,
-        igv,
-        total,
-        estado: 'pendiente',
-        direccion_envio: shipping_address,
-        metodo_pago: 'mercadopago',
-        mercadopago_external_reference: externalReference
-      }])
-      .select()
-      .single()
-
-    if (orderError || !newOrder) {
-      console.error('Error creating order in Supabase:', orderError)
-      return res.status(500).json({ 
-        error: 'Error al crear el pedido',
-        details: orderError?.message || 'Error desconocido'
-      })
+    // Guardar datos del pedido en el external_reference para crear el pedido después del pago
+    const orderData = {
+      user_id,
+      items: cartItems,
+      subtotal,
+      igv,
+      total,
+      shipping_address,
+      external_reference: externalReference
     }
 
-    const orderId = newOrder.id
+    // Codificar los datos como base64 para incluirlos en external_reference
+    const encodedOrderData = Buffer.from(JSON.stringify(orderData)).toString('base64')
+    const fullExternalReference = `${externalReference}|${encodedOrderData}`
 
-    // Crear la preferencia de pago
+    // Crear la preferencia de pago SIN crear el pedido todavía
     const preferenceData = {
       items: items.map(item => ({
         id: item.id,
@@ -144,14 +132,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } : undefined
       },
       back_urls: {
-        success: back_urls?.success || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success?order_id=${orderId}`,
-        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure?order_id=${orderId}`,
-        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending?order_id=${orderId}`
+        success: back_urls?.success || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`,
+        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure`,
+        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending`
       },
       auto_return: auto_return || 'approved',
       notification_url: notification_url || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/api/mercadopago/webhook`,
       statement_descriptor: 'MERCADILLO',
-      external_reference: externalReference,
+      external_reference: fullExternalReference,
       expires: true,
       expiration_date_from: new Date().toISOString(),
       expiration_date_to: new Date(Date.now() + 30 * 60 * 1000).toISOString(), // 30 minutos
@@ -162,31 +150,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // 2. Crear la preferencia en MercadoPago
+    // Crear la preferencia en MercadoPago
     const result = await preference.create({ body: preferenceData })
 
     if (!result.id) {
       throw new Error('No se pudo crear la preferencia de pago')
     }
 
-    // 3. Actualizar el pedido con el preference_id de MercadoPago
-    const { error: updateError } = await supabase
-      .from('pedidos')
-      .update({ mercadopago_preference_id: result.id })
-      .eq('id', orderId)
-
-    if (updateError) {
-      console.error('Error updating order with preference ID:', updateError)
-      // No fallar aquí, la preferencia ya se creó
-    }
-
-    // Retornar la preferencia creada junto con información del pedido
+    // Retornar la preferencia creada
     res.status(200).json({
       id: result.id,
       init_point: result.init_point,
       sandbox_init_point: result.sandbox_init_point,
       preference_id: result.id,
-      order_id: orderId,
       external_reference: externalReference
     })
 
