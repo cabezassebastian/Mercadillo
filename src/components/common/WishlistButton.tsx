@@ -38,9 +38,12 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
   const toggle = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-  if (!user?.id) return
-  // prevent toggle before initial server-state has been fetched
-  if (!initialLoaded) return
+    if (!user?.id) return
+    // prevent toggle before initial server-state has been fetched
+    if (!initialLoaded) {
+      console.warn('WishlistButton: toggle prevented — initial wishlist state not loaded yet')
+      return
+    }
   if (loading) return
     setLoading(true)
     const prev = isWished

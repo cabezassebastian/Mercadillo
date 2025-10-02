@@ -136,7 +136,11 @@ export interface CreateUserAddress {
  */
 export async function getUserWishlist(userId: string): Promise<{ data: WishlistItem[] | null; error: string | null }> {
   try {
-    await ensureSupabaseSession()
+    const ok = await ensureSupabaseSession()
+    if (!ok) {
+      console.warn('getUserWishlist: No supabase session available (Clerk token not ready)')
+      return { data: null, error: 'no_supabase_session' }
+    }
     const { data, error } = await supabase
       .from('lista_deseos')
       .select(`
@@ -163,7 +167,11 @@ export async function getUserWishlist(userId: string): Promise<{ data: WishlistI
  */
 export async function addToWishlist(userId: string, productId: string): Promise<{ data: WishlistItem | null; error: string | null }> {
   try {
-    await ensureSupabaseSession()
+    const ok = await ensureSupabaseSession()
+    if (!ok) {
+      console.warn('addToWishlist: No supabase session available (Clerk token not ready)')
+      return { data: null, error: 'no_supabase_session' }
+    }
     const { data, error } = await supabase
       .from('lista_deseos')
       .insert([{ usuario_id: userId, producto_id: productId }])
@@ -190,7 +198,11 @@ export async function addToWishlist(userId: string, productId: string): Promise<
  */
 export async function removeFromWishlist(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    await ensureSupabaseSession()
+    const ok = await ensureSupabaseSession()
+    if (!ok) {
+      console.warn('removeFromWishlist: No supabase session available (Clerk token not ready)')
+      return { success: false, error: 'no_supabase_session' }
+    }
     const { error } = await supabase
       .from('lista_deseos')
       .delete()
@@ -214,7 +226,11 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
  */
 export async function isInWishlist(userId: string, productId: string): Promise<{ isInWishlist: boolean; error: string | null }> {
   try {
-    await ensureSupabaseSession()
+    const ok = await ensureSupabaseSession()
+    if (!ok) {
+      console.warn('isInWishlist: No supabase session available (Clerk token not ready)')
+      return { isInWishlist: false, error: 'no_supabase_session' }
+    }
     const { data, error } = await supabase
       .from('lista_deseos')
       .select('id')
