@@ -58,7 +58,7 @@ const CheckoutSuccess: React.FC = () => {
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
             <button
-              onClick={() => navigate('/pedidos')}
+              onClick={() => navigate('/perfil/pedidos')}
               className="btn-primary w-full sm:w-auto px-8 flex items-center justify-center space-x-2"
             >
               <Package className="w-4 h-4" />

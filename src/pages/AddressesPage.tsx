@@ -221,11 +221,18 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.nombre}
-                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.slice(0, 100)
+                      setFormData({ ...formData, nombre: value })
+                    }}
                     placeholder="Ej: Casa, Oficina, etc."
+                    maxLength={100}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                     required
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.nombre.length}/100 caracteres
+                  </p>
                 </div>
 
                 <div>
@@ -235,10 +242,17 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="tel"
                     value={formData.telefono_contacto}
-                    onChange={(e) => setFormData({ ...formData, telefono_contacto: e.target.value })}
-                    placeholder="Ej: 987654321"
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9+]/g, '').slice(0, 25)
+                      setFormData({ ...formData, telefono_contacto: value })
+                    }}
+                    placeholder="Ej: +51987654321 o 987654321"
+                    maxLength={25}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.telefono_contacto.length}/25 caracteres (solo números y +)
+                  </p>
                 </div>
               </div>
 
@@ -248,12 +262,19 @@ const AddressesPage: React.FC = () => {
                 </label>
                 <textarea
                   value={formData.direccion_completa}
-                  onChange={(e) => setFormData({ ...formData, direccion_completa: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value.slice(0, 255)
+                    setFormData({ ...formData, direccion_completa: value })
+                  }}
                   placeholder="Ej: Av. Lima 123, San Isidro"
                   rows={3}
+                  maxLength={255}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                   required
                 />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                  {formData.direccion_completa.length}/255 caracteres
+                </p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -264,10 +285,17 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.distrito}
-                    onChange={(e) => setFormData({ ...formData, distrito: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100)
+                      setFormData({ ...formData, distrito: value })
+                    }}
                     placeholder="Ej: San Isidro"
+                    maxLength={100}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.distrito.length}/100 (solo letras)
+                  </p>
                 </div>
 
                 <div>
@@ -277,11 +305,18 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.provincia}
-                    onChange={(e) => setFormData({ ...formData, provincia: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100)
+                      setFormData({ ...formData, provincia: value })
+                    }}
                     placeholder="Ej: Lima"
+                    maxLength={100}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                     required
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.provincia.length}/100 (solo letras)
+                  </p>
                 </div>
 
                 <div>
@@ -291,11 +326,18 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.departamento}
-                    onChange={(e) => setFormData({ ...formData, departamento: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 100)
+                      setFormData({ ...formData, departamento: value })
+                    }}
                     placeholder="Ej: Lima"
+                    maxLength={100}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                     required
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.departamento.length}/100 (solo letras)
+                  </p>
                 </div>
               </div>
 
@@ -307,10 +349,17 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.codigo_postal}
-                    onChange={(e) => setFormData({ ...formData, codigo_postal: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '').slice(0, 5)
+                      setFormData({ ...formData, codigo_postal: value })
+                    }}
                     placeholder="Ej: 15001"
+                    maxLength={5}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.codigo_postal.length}/5 (solo números)
+                  </p>
                 </div>
 
                 <div>
@@ -320,10 +369,17 @@ const AddressesPage: React.FC = () => {
                   <input
                     type="text"
                     value={formData.referencia}
-                    onChange={(e) => setFormData({ ...formData, referencia: e.target.value })}
+                    onChange={(e) => {
+                      const value = e.target.value.slice(0, 255)
+                      setFormData({ ...formData, referencia: value })
+                    }}
                     placeholder="Ej: Cerca al parque principal"
+                    maxLength={255}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent dark:bg-gray-700 dark:text-gray-100"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.referencia.length}/255 caracteres
+                  </p>
                 </div>
               </div>
 
