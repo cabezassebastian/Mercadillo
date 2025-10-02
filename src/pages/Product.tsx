@@ -280,7 +280,8 @@ const Product: React.FC = () => {
                 </button>
 
                 <WishlistButton 
-                  productId={producto.id} 
+                  productId={producto.id}
+                  productName={producto.nombre}
                   className="sm:w-auto w-full px-6 py-4 text-lg rounded-lg border-2 justify-center" 
                 />
               </div>

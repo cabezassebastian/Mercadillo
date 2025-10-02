@@ -6,6 +6,7 @@ import {
   type NavigationHistoryItem 
 } from '@/lib/userProfile'
 import { useCart } from '@/contexts/CartContext'
+import { useNotificationHelpers } from '@/contexts/NotificationContext'
 import { usePagination } from '@/hooks/usePagination'
 import { useUserHistory, useUserMutations } from '@/hooks/useUserQueries'
 import Pagination from '@/components/common/Pagination'
@@ -14,7 +15,8 @@ import { Producto } from '@/lib/supabase'
 
 const HistoryPage: React.FC = () => {
   const { user } = useUser()
-  const { addToCart } = useCart()
+  const { addToCart, items } = useCart()
+  const { showCartAdded, showOutOfStock } = useNotificationHelpers()
   const [clearing, setClearing] = useState(false)
   
   // Usar React Query para obtener el historial con cache
@@ -64,7 +66,19 @@ const HistoryPage: React.FC = () => {
       updated_at: (item.producto as any).updated_at || ''
     }
 
+    // Verificar stock disponible considerando lo que ya está en el carrito
+    const existingItem = items.find(cartItem => cartItem.producto.id === productoToAdd.id)
+    const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
+    const availableStock = productoToAdd.stock - currentQuantityInCart
+
+    // Verificar si hay stock disponible
+    if (availableStock <= 0) {
+      showOutOfStock(productoToAdd.nombre)
+      return
+    }
+
     addToCart(productoToAdd, 1)
+    showCartAdded(productoToAdd.nombre)
   }
 
   const getTimeAgo = (dateString: string) => {

@@ -8,8 +8,8 @@ import { Link } from 'react-router-dom'
 
 const WishlistPage: React.FC = () => {
   const { user } = useUser()
-  const { addToCart } = useCart()
-  const { showWishlistRemoved, showCartAdded } = useNotificationHelpers()
+  const { addToCart, items } = useCart()
+  const { showWishlistRemoved, showCartAdded, showOutOfStock } = useNotificationHelpers()
   const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -56,6 +56,17 @@ const WishlistPage: React.FC = () => {
 
   const handleAddToCart = (item: WishlistItem) => {
     if (!item.producto) return
+
+    // Verificar stock disponible considerando lo que ya está en el carrito
+    const existingItem = items.find(cartItem => cartItem.producto.id === item.producto!.id)
+    const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
+    const availableStock = item.producto.stock - currentQuantityInCart
+
+    // Verificar si hay stock disponible
+    if (availableStock <= 0) {
+      showOutOfStock(item.producto.nombre)
+      return
+    }
 
     addToCart({
       id: item.producto.id,

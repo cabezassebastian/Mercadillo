@@ -165,7 +165,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
                   </span>
                 </button>
 
-                <WishlistButton productId={producto.id} className="p-3 rounded-lg border" />
+                <WishlistButton productId={producto.id} productName={producto.nombre} className="p-3 rounded-lg border" />
               </div>
             </div>
           </div>
@@ -271,7 +271,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
               </span>
             </button>
 
-            <WishlistButton productId={producto.id} className="sm:w-auto w-full px-4 py-2.5 rounded-lg border justify-center" />
+            <WishlistButton productId={producto.id} productName={producto.nombre} className="sm:w-auto w-full px-4 py-2.5 rounded-lg border justify-center" />
           </div>
         </div>
       </Link>

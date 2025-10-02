@@ -144,7 +144,15 @@ export const useNotificationHelpers = () => {
         title: 'Agregado al carrito',
         message: `${productName} ha sido agregado a tu carrito.`,
         actionLabel: 'Ver carrito',
-        actionHandler: () => window.location.href = `/cart`
+        actionHandler: () => window.location.href = `/carrito`
+      }),
+
+    showOutOfStock: (productName: string) =>
+      addNotification({
+        type: 'warning',
+        title: 'Sin stock disponible',
+        message: `Lo sentimos, ${productName} no tiene stock disponible en este momento.`,
+        duration: 5000
       }),
 
     showReviewAdded: () =>
