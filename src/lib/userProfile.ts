@@ -8,73 +8,92 @@ export async function ensureSupabaseSession(timeout = 10000): Promise<boolean> {
   try {
     // If supabase already has a session, we're good
     const { data } = await supabase.auth.getSession()
-    if (data?.session?.access_token) return true
-
-    // If a global getter was installed by AuthSync, use it
-    const getter = (window as any).__getClerkToken
-    const start = Date.now()
+    if (data?.session?.access_token) {
+      console.log('ensureSupabaseSession: Session already available')
+      return true
+    }
 
     // If another caller is already waiting, reuse that promise so we don't
     // concurrently poll/get the token multiple times.
-    if (_sharedSessionPromise) return _sharedSessionPromise
+    if (_sharedSessionPromise) {
+      console.log('ensureSupabaseSession: Reusing existing promise')
+      return _sharedSessionPromise
+    }
+
+    console.log('ensureSupabaseSession: Starting session wait...')
+    const getter = (window as any).__getClerkToken
+    const start = Date.now()
 
     _sharedSessionPromise = (async () => {
-      // Wait loop: either token via getter or event 'supabase-session-ready'
+      // Wait loop: check session more frequently and try different approaches
       while (Date.now() - start < timeout) {
-      // First try getter if available
-      if (typeof getter === 'function') {
-        try {
-          const token = await getter()
-          if (token) {
-            await supabase.auth.setSession({ access_token: token, refresh_token: '' })
-            // verify
-            const { data: newSession } = await supabase.auth.getSession()
-            if (newSession?.session?.access_token) return true
-          }
-        } catch (e) {
-          // ignore and continue waiting
+        // Check if session was set by AuthSync
+        const { data: currentSession } = await supabase.auth.getSession()
+        if (currentSession?.session?.access_token) {
+          console.log('ensureSupabaseSession: Session found during wait')
+          return true
         }
-      }
 
-      // Also listen for the event which AuthSync dispatches when ready
-      const ready = await new Promise<boolean>(res => {
-        let resolved = false
-        const onReady = async () => {
-          if (resolved) return
-          resolved = true
+        // Try getter if available
+        if (typeof getter === 'function') {
           try {
-            const { data: s } = await supabase.auth.getSession()
-            res(!!s?.session?.access_token)
+            const token = await getter()
+            if (token) {
+              console.log('ensureSupabaseSession: Got token from getter, setting session')
+              await supabase.auth.setSession({ access_token: token, refresh_token: '' })
+              // verify
+              const { data: newSession } = await supabase.auth.getSession()
+              if (newSession?.session?.access_token) {
+                console.log('ensureSupabaseSession: Session set successfully')
+                return true
+              }
+            }
           } catch (e) {
-            res(false)
+            console.warn('ensureSupabaseSession: Error with getter', e)
           }
         }
 
-        window.addEventListener('supabase-session-ready', onReady, { once: true })
-
-        // timeout small fallback to continue loop
-        setTimeout(() => {
-          if (!resolved) {
+        // Listen for AuthSync event (shorter timeout since we're in a loop)
+        const ready = await new Promise<boolean>(res => {
+          let resolved = false
+          const onReady = async () => {
+            if (resolved) return
             resolved = true
-            res(false)
+            try {
+              const { data: s } = await supabase.auth.getSession()
+              res(!!s?.session?.access_token)
+            } catch (e) {
+              res(false)
+            }
           }
-        }, 300)
-      })
 
-      if (ready) {
-        const { data: final } = await supabase.auth.getSession()
-        if (final?.session?.access_token) return true
+          window.addEventListener('supabase-session-ready', onReady, { once: true })
+
+          // shorter timeout to check more frequently
+          setTimeout(() => {
+            if (!resolved) {
+              resolved = true
+              res(false)
+            }
+          }, 100)
+        })
+
+        if (ready) {
+          console.log('ensureSupabaseSession: Session ready via event')
+          return true
+        }
+
+        // short sleep before next iteration
+        await new Promise(res => setTimeout(res, 100))
       }
 
-      // short sleep before next iteration
-      await new Promise(res => setTimeout(res, 200))
-      }
-
+      console.warn('ensureSupabaseSession: Timeout reached after', timeout + 'ms')
       return false
     })()
 
     try {
       const result = await _sharedSessionPromise
+      console.log('ensureSupabaseSession: Final result:', result)
       return result
     } finally {
       // clear shared promise so subsequent calls can re-check if needed
