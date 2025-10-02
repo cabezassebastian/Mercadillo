@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
-import { createOrder, generateExternalReference, calculateOrderTotals, updateOrderWithMercadoPago, type CartItem } from '../../src/lib/orders'
+import { generateExternalReference, calculateOrderTotals, type CartItem } from '../../src/lib/orders'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Solo permitir método POST
@@ -69,27 +69,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const { subtotal, igv, total } = calculateOrderTotals(cartItems)
 
-    // 1. Crear el pedido en Supabase PRIMERO
-    const orderResult = await createOrder({
-      usuario_id: user_id,
-      items: cartItems,
-      subtotal,
-      igv,
-      total,
-      direccion_envio: shipping_address,
-      metodo_pago: 'mercadopago',
-      mercadopago_external_reference: externalReference
-    })
+    // 1. Crear el pedido en Supabase PRIMERO usando el cliente con service role
+    const { data: newOrder, error: orderError } = await supabase
+      .from('pedidos')
+      .insert([{
+        usuario_id: user_id,
+        items: cartItems,
+        subtotal,
+        igv,
+        total,
+        estado: 'pendiente',
+        direccion_envio: shipping_address,
+        metodo_pago: 'mercadopago',
+        mercadopago_external_reference: externalReference
+      }])
+      .select()
+      .single()
 
-    if (orderResult.error || !orderResult.data) {
-      console.error('Error creating order in Supabase:', orderResult.error)
+    if (orderError || !newOrder) {
+      console.error('Error creating order in Supabase:', orderError)
       return res.status(500).json({ 
         error: 'Error al crear el pedido',
-        details: orderResult.error
+        details: orderError?.message || 'Error desconocido'
       })
     }
 
-    const orderId = orderResult.data.id
+    const orderId = newOrder.id
 
     // Crear la preferencia de pago
     const preferenceData = {
@@ -136,12 +141,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // 3. Actualizar el pedido con el preference_id de MercadoPago
-    const updateResult = await updateOrderWithMercadoPago(orderId, {
-      preference_id: result.id
-    })
+    const { error: updateError } = await supabase
+      .from('pedidos')
+      .update({ mercadopago_preference_id: result.id })
+      .eq('id', orderId)
 
-    if (updateResult.error) {
-      console.error('Error updating order with preference ID:', updateResult.error)
+    if (updateError) {
+      console.error('Error updating order with preference ID:', updateError)
       // No fallar aquí, la preferencia ya se creó
     }
 
