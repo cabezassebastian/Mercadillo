@@ -174,7 +174,7 @@ export async function getUserNavigationHistory(userId: string, limit: number = 2
       .from('historial_navegacion')
       .select(`
         *,
-        producto:productos(id, nombre, precio, imagen)
+        producto:productos(id, nombre, precio, imagen, stock, categoria, descripcion, created_at, updated_at)
       `)
       .eq('usuario_id', userId)
       .order('updated_at', { ascending: false })
