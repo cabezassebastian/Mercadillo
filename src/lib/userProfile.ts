@@ -1,5 +1,41 @@
 import { supabase } from './supabaseClient'
 
+// Ensure the shared supabase client has an access token derived from Clerk.
+// Uses a small retry to wait for the token if Clerk is still propagating.
+async function ensureSupabaseSession(timeout = 2000): Promise<boolean> {
+  try {
+    // If supabase already has a session, we're good
+    const { data } = await supabase.auth.getSession()
+    if (data?.session?.access_token) return true
+
+    // If a global getter was installed by AuthSync, use it
+    const getter = (window as any).__getClerkToken
+    if (typeof getter === 'function') {
+      // Try to get token, with a small retry loop in case Clerk is still initializing
+      const start = Date.now()
+      while (Date.now() - start < timeout) {
+        try {
+          const token = await getter()
+          if (token) {
+            // setSession expects an object with access_token and refresh_token
+            await supabase.auth.setSession({ access_token: token, refresh_token: '' })
+            return true
+          }
+        } catch (e) {
+          // ignore and retry
+        }
+        // short sleep
+        await new Promise(res => setTimeout(res, 150))
+      }
+    }
+
+    return false
+  } catch (err) {
+    console.error('ensureSupabaseSession error', err)
+    return false
+  }
+}
+
 // Tipos para Lista de Deseos
 export interface WishlistItem {
   id: string
@@ -66,6 +102,7 @@ export interface CreateUserAddress {
  */
 export async function getUserWishlist(userId: string): Promise<{ data: WishlistItem[] | null; error: string | null }> {
   try {
+    await ensureSupabaseSession()
     const { data, error } = await supabase
       .from('lista_deseos')
       .select(`
@@ -92,6 +129,7 @@ export async function getUserWishlist(userId: string): Promise<{ data: WishlistI
  */
 export async function addToWishlist(userId: string, productId: string): Promise<{ data: WishlistItem | null; error: string | null }> {
   try {
+    await ensureSupabaseSession()
     const { data, error } = await supabase
       .from('lista_deseos')
       .insert([{ usuario_id: userId, producto_id: productId }])
@@ -118,6 +156,7 @@ export async function addToWishlist(userId: string, productId: string): Promise<
  */
 export async function removeFromWishlist(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
+    await ensureSupabaseSession()
     const { error } = await supabase
       .from('lista_deseos')
       .delete()
@@ -141,6 +180,7 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
  */
 export async function isInWishlist(userId: string, productId: string): Promise<{ isInWishlist: boolean; error: string | null }> {
   try {
+    await ensureSupabaseSession()
     const { data, error } = await supabase
       .from('lista_deseos')
       .select('id')

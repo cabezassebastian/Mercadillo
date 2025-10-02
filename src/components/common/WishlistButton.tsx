@@ -12,19 +12,23 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
   const { user } = useUser()
   const [isWished, setIsWished] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
+  const [initialLoaded, setInitialLoaded] = useState<boolean>(false)
 
   useEffect(() => {
     let mounted = true
     const fetchState = async () => {
       if (!user?.id) {
         setIsWished(false)
+        setInitialLoaded(true)
         return
       }
       try {
         const res = await isInWishlist(user.id, productId)
         if (mounted) setIsWished(!!res.isInWishlist)
+        if (mounted) setInitialLoaded(true)
       } catch (err) {
         console.error('Error checking wishlist state', err)
+        if (mounted) setInitialLoaded(true)
       }
     }
     fetchState()
@@ -34,8 +38,10 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
   const toggle = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    if (!user?.id) return
-    if (loading) return
+  if (!user?.id) return
+  // prevent toggle before initial server-state has been fetched
+  if (!initialLoaded) return
+  if (loading) return
     setLoading(true)
     const prev = isWished
     setIsWished(!prev)
