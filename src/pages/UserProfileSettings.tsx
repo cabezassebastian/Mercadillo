@@ -4,16 +4,16 @@ import { UserProfile } from '@clerk/clerk-react'
 const UserProfileSettings: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
-      <div className="container mx-auto px-4 max-w-7xl">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8 text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-8">
           Configuración de Cuenta
         </h1>
         
-        <div className="flex justify-center items-start">
+        <div className="w-full">
           <UserProfile 
             appearance={{
               elements: {
-                rootBox: "w-full max-w-4xl mx-auto",
+                rootBox: "w-full",
                 card: "w-full shadow-lg border-0 rounded-lg overflow-hidden",
                 navbar: "bg-gray-50 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-700",
                 navbarButton: "text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md",
