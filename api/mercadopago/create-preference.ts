@@ -1,7 +1,36 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
-import { generateExternalReference, calculateOrderTotals, type CartItem } from '../utils/orders'
+
+// Tipos e interfaces
+interface CartItem {
+  id: string
+  title: string
+  price: number
+  quantity: number
+  image: string
+}
+
+// Funciones auxiliares
+function generateExternalReference(): string {
+  return `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+}
+
+function calculateOrderTotals(items: CartItem[]): {
+  subtotal: number
+  igv: number
+  total: number
+} {
+  const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
+  const igv = subtotal * 0.18 // IGV 18% en Perú
+  const total = subtotal + igv
+
+  return {
+    subtotal: Math.round(subtotal * 100) / 100,
+    igv: Math.round(igv * 100) / 100,
+    total: Math.round(total * 100) / 100
+  }
+}
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Solo permitir método POST
