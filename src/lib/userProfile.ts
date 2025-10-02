@@ -255,6 +255,12 @@ export async function isInWishlist(userId: string, productId: string): Promise<{
  */
 export async function getUserNavigationHistory(userId: string, limit: number = 20): Promise<{ data: NavigationHistoryItem[] | null; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('getUserNavigationHistory: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
     const { data, error } = await supabase
       .from('historial_navegacion')
       .select(`
@@ -388,6 +394,12 @@ export async function addToNavigationHistory(userId: string, productId: string):
  */
 export async function clearNavigationHistory(userId: string): Promise<{ success: boolean; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('clearNavigationHistory: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
+    }
+
     const { error } = await supabase
       .from('historial_navegacion')
       .delete()
@@ -412,6 +424,12 @@ export async function clearNavigationHistory(userId: string): Promise<{ success:
  */
 export async function getUserAddresses(userId: string): Promise<{ data: UserAddress[] | null; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('getUserAddresses: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
     const { data, error } = await supabase
       .from('direcciones_usuario')
       .select('*')
@@ -436,6 +454,12 @@ export async function getUserAddresses(userId: string): Promise<{ data: UserAddr
  */
 export async function createUserAddress(userId: string, addressData: CreateUserAddress): Promise<{ data: UserAddress | null; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('createUserAddress: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
     const { data, error } = await supabase
       .from('direcciones_usuario')
       .insert([{
@@ -464,6 +488,12 @@ export async function createUserAddress(userId: string, addressData: CreateUserA
  */
 export async function updateUserAddress(addressId: string, addressData: Partial<CreateUserAddress>): Promise<{ data: UserAddress | null; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('updateUserAddress: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
     const { data, error } = await supabase
       .from('direcciones_usuario')
       .update(addressData)
@@ -488,6 +518,12 @@ export async function updateUserAddress(addressId: string, addressData: Partial<
  */
 export async function deleteUserAddress(addressId: string): Promise<{ success: boolean; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('deleteUserAddress: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
+    }
+
     const { error } = await supabase
       .from('direcciones_usuario')
       .delete()
@@ -510,6 +546,12 @@ export async function deleteUserAddress(addressId: string): Promise<{ success: b
  */
 export async function setDefaultAddress(addressId: string): Promise<{ success: boolean; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('setDefaultAddress: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
+    }
+
     const { error } = await supabase
       .from('direcciones_usuario')
       .update({ es_predeterminada: true })
@@ -532,6 +574,12 @@ export async function setDefaultAddress(addressId: string): Promise<{ success: b
  */
 export async function getDefaultAddress(userId: string): Promise<{ data: UserAddress | null; error: string | null }> {
   try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('getDefaultAddress: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
     const { data, error } = await supabase
       .from('direcciones_usuario')
       .select('*')
