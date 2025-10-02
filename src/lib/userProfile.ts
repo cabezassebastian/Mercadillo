@@ -288,104 +288,54 @@ export async function getUserNavigationHistory(userId: string, limit: number = 2
  */
 export async function addToNavigationHistory(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    console.log(`Intentando agregar al historial: usuario=${userId}, producto=${productId}`);
-    
-    // Primer intento: usando RPC (que debería obtener el nombre del producto automáticamente)
-    try {
-      console.log("Intento 1: Llamando a RPC actualizar_historial_navegacion");
-      const { data: rpcData, error: rpcError } = await supabase
-        .rpc('actualizar_historial_navegacion', {
-          p_usuario_id: userId,
-          p_producto_id: productId
-        });
+    // 🔑 Esperar el token de Clerk PRIMERO
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('addToNavigationHistory: No Clerk token available')
+      // No fallar, solo no agregar al historial silenciosamente
+      return { success: true, error: null }
+    }
 
-      if (rpcError) {
-        console.error("Error en RPC:", rpcError.message);
-        throw rpcError;
+    // Verificar si ya existe el registro
+    const { data: existing } = await supabase
+      .from('historial_navegacion')
+      .select('id')
+      .eq('usuario_id', userId)
+      .eq('producto_id', productId)
+      .maybeSingle()
+
+    if (existing) {
+      // Si existe, actualizar el updated_at
+      const { error: updateError } = await supabase
+        .from('historial_navegacion')
+        .update({ updated_at: new Date().toISOString() })
+        .eq('id', existing.id)
+
+      if (updateError) {
+        console.error('Error updating navigation history:', updateError.message)
+        return { success: false, error: updateError.message }
       }
+    } else {
+      // Si no existe, insertar nuevo registro
+      const { error: insertError } = await supabase
+        .from('historial_navegacion')
+        .insert({
+          usuario_id: userId,
+          producto_id: productId,
+          updated_at: new Date().toISOString()
+        })
 
-      console.log("RPC exitoso:", rpcData);
-      return { success: true, error: null };
-    } catch (rpcError) {
-      console.warn("RPC falló, intentando métodos alternativos:", rpcError);
-      
-      // Segundo intento: inserción directa sin RLS usando API REST
-      console.log("Intento 2: Inserción directa usando fetch API");
-      
-      try {
-        const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/historial_navegacion`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-            'Prefer': 'resolution=merge-duplicates'
-          },
-          body: JSON.stringify({
-            usuario_id: userId,
-            producto_id: productId,
-            updated_at: new Date().toISOString()
-          })
-        });
-
-        if (response.ok) {
-          console.log("Fetch API exitoso");
-          return { success: true, error: null };
-        }
-        
-        const errorText = await response.text();
-        console.error("Error en fetch API:", response.status, errorText);
-      } catch (fetchError) {
-        console.error("Error en fetch:", fetchError);
-      }
-
-      // Tercer intento: UPSERT usando Supabase client con manejo de RLS
-      console.log("Intento 3: UPSERT usando Supabase client");
-      
-      try {
-        const { data: upsertData, error: upsertError } = await supabase
-          .from('historial_navegacion')
-          .upsert({
-            usuario_id: userId,
-            producto_id: productId,
-            updated_at: new Date().toISOString()
-          }, {
-            onConflict: 'usuario_id,producto_id',
-            ignoreDuplicates: false
-          });
-
-        if (upsertError) {
-          console.error("Error en UPSERT:", upsertError.message);
-          
-          // Cuarto intento: inserción simple sin upsert
-          console.log("Intento 4: Inserción simple");
-          const { data: insertData, error: insertError } = await supabase
-            .from('historial_navegacion')
-            .insert({
-              usuario_id: userId,
-              producto_id: productId,
-              updated_at: new Date().toISOString()
-            });
-
-          if (insertError) {
-            console.error("Todos los métodos fallaron. Último error:", insertError.message);
-            return { success: false, error: `Error: ${insertError.message}. El historial no se pudo guardar.` };
-          }
-
-          console.log("Inserción simple exitosa:", insertData);
-          return { success: true, error: null };
-        }
-
-        console.log("UPSERT exitoso:", upsertData);
-        return { success: true, error: null };
-      } catch (upsertError) {
-        console.error("Error en operaciones con Supabase client:", upsertError);
-        return { success: false, error: "Todos los métodos fallaron. El historial no se pudo guardar." };
+      if (insertError) {
+        console.error('Error inserting navigation history:', insertError.message)
+        return { success: false, error: insertError.message }
       }
     }
+
+    return { success: true, error: null }
   } catch (error) {
-    console.error("Error general al agregar al historial de navegación:", error);
-    return { success: false, error: "Error general. El historial no se pudo guardar." };
+    console.error('Unexpected error adding to navigation history:', error)
+    // No fallar la navegación si el historial falla
+    return { success: true, error: null }
   }
 }
 
