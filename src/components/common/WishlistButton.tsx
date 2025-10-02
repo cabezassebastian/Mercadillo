@@ -13,6 +13,7 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
   const [isWished, setIsWished] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(false)
   const [initialLoaded, setInitialLoaded] = useState<boolean>(false)
+  const [sessionAvailable, setSessionAvailable] = useState<boolean | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -22,14 +23,37 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
         setInitialLoaded(true)
         return
       }
-      try {
-        const res = await isInWishlist(user.id, productId)
-        if (mounted) setIsWished(!!res.isInWishlist)
-        if (mounted) setInitialLoaded(true)
-      } catch (err) {
-        console.error('Error checking wishlist state', err)
-        if (mounted) setInitialLoaded(true)
+      // Retry loop: give Clerk->Supabase propagation up to ~5s
+      const maxAttempts = 20
+      const delayMs = 250
+      let attempt = 0
+      let found = false
+      for (; attempt < maxAttempts; attempt++) {
+        try {
+          const res = await isInWishlist(user.id, productId)
+          if (res.error === 'no_supabase_session') {
+            // Not ready yet, wait and retry
+            await new Promise(r => setTimeout(r, delayMs))
+            continue
+          }
+          // Got a definitive answer
+          if (mounted) setIsWished(!!res.isInWishlist)
+          if (mounted) setSessionAvailable(true)
+          found = true
+          break
+        } catch (err) {
+          console.error('Error checking wishlist state', err)
+          await new Promise(r => setTimeout(r, delayMs))
+        }
       }
+
+      if (!found && mounted) {
+        // After retries, assume session isn't available
+        console.warn('isInWishlist: No supabase session available (timeout)')
+        setSessionAvailable(false)
+      }
+
+      if (mounted) setInitialLoaded(true)
     }
     fetchState()
     return () => { mounted = false }
@@ -42,6 +66,10 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
     // prevent toggle before initial server-state has been fetched
     if (!initialLoaded) {
       console.warn('WishlistButton: toggle prevented — initial wishlist state not loaded yet')
+      return
+    }
+    if (sessionAvailable === false) {
+      console.warn('WishlistButton: toggle prevented — supabase session not available')
       return
     }
   if (loading) return
