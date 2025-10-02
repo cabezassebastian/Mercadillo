@@ -47,9 +47,12 @@ CREATE INDEX IF NOT EXISTS idx_direcciones_usuario_id ON direcciones_usuario(usu
 CREATE INDEX IF NOT EXISTS idx_direcciones_predeterminada ON direcciones_usuario(es_predeterminada);
 
 -- 5. Trigger para updated_at en las nuevas tablas
+-- Asegurar idempotencia: eliminar triggers si ya existen
+DROP TRIGGER IF EXISTS update_historial_navegacion_updated_at ON historial_navegacion;
 CREATE TRIGGER update_historial_navegacion_updated_at BEFORE UPDATE ON historial_navegacion
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
+DROP TRIGGER IF EXISTS update_direcciones_usuario_updated_at ON direcciones_usuario;
 CREATE TRIGGER update_direcciones_usuario_updated_at BEFORE UPDATE ON direcciones_usuario
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
@@ -104,6 +107,8 @@ END;
 $$ language 'plpgsql';
 
 -- 9. Trigger para dirección predeterminada
+-- Asegurar idempotencia: eliminar trigger si ya existe
+DROP TRIGGER IF EXISTS trigger_direccion_predeterminada ON direcciones_usuario;
 CREATE TRIGGER trigger_direccion_predeterminada
     BEFORE INSERT OR UPDATE ON direcciones_usuario
     FOR EACH ROW EXECUTE FUNCTION asegurar_direccion_predeterminada();
@@ -113,28 +118,35 @@ ALTER TABLE lista_deseos ENABLE ROW LEVEL SECURITY;
 ALTER TABLE historial_navegacion ENABLE ROW LEVEL SECURITY;
 ALTER TABLE direcciones_usuario ENABLE ROW LEVEL SECURITY;
 
--- Políticas para lista de deseos
+-- Asegurar idempotencia: eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Usuarios pueden ver su propia lista de deseos" ON lista_deseos;
 CREATE POLICY "Usuarios pueden ver su propia lista de deseos" ON lista_deseos
     FOR SELECT USING (auth.uid()::text = usuario_id);
 
+DROP POLICY IF EXISTS "Usuarios pueden gestionar su lista de deseos" ON lista_deseos;
 CREATE POLICY "Usuarios pueden gestionar su lista de deseos" ON lista_deseos
     FOR ALL USING (auth.uid()::text = usuario_id);
 
--- Políticas para historial de navegación
+-- Asegurar idempotencia: eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Usuarios pueden ver su historial" ON historial_navegacion;
 CREATE POLICY "Usuarios pueden ver su historial" ON historial_navegacion
     FOR SELECT USING (auth.uid()::text = usuario_id);
 
+DROP POLICY IF EXISTS "Sistema puede actualizar historial" ON historial_navegacion;
 CREATE POLICY "Sistema puede actualizar historial" ON historial_navegacion
     FOR ALL USING (auth.uid()::text = usuario_id);
 
--- Políticas para direcciones
+-- Asegurar idempotencia: eliminar políticas si ya existen
+DROP POLICY IF EXISTS "Usuarios pueden ver sus direcciones" ON direcciones_usuario;
 CREATE POLICY "Usuarios pueden ver sus direcciones" ON direcciones_usuario
     FOR SELECT USING (auth.uid()::text = usuario_id);
 
+DROP POLICY IF EXISTS "Usuarios pueden gestionar sus direcciones" ON direcciones_usuario;
 CREATE POLICY "Usuarios pueden gestionar sus direcciones" ON direcciones_usuario
     FOR ALL USING (auth.uid()::text = usuario_id);
 
--- Políticas para admins
+-- Asegurar idempotencia: eliminar política si ya existe
+DROP POLICY IF EXISTS "Admins pueden ver todo el historial" ON historial_navegacion;
 CREATE POLICY "Admins pueden ver todo el historial" ON historial_navegacion
     FOR ALL USING (
         EXISTS (
