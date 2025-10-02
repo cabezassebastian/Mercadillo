@@ -136,7 +136,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure`,
         pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending`
       },
-      auto_return: auto_return || 'approved',
+      auto_return: 'all', // Cambiar de 'approved' a 'all' para redirigir en todos los casos
+      back_urls_enabled: true, // Habilitar URLs de retorno en todos los casos
       notification_url: notification_url || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/api/mercadopago/webhook`,
       statement_descriptor: 'MERCADILLO',
       external_reference: fullExternalReference,

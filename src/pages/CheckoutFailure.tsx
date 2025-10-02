@@ -60,10 +60,10 @@ const CheckoutFailure: React.FC = () => {
             </div>
           </div>
 
-          <div className="space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
             <button
               onClick={() => navigate('/checkout')}
-              className="btn-primary flex items-center space-x-2"
+              className="btn-primary flex items-center justify-center space-x-2 w-full sm:w-auto px-8"
             >
               <ShoppingCart className="w-4 h-4" />
               <span>Intentar de Nuevo</span>
@@ -71,7 +71,7 @@ const CheckoutFailure: React.FC = () => {
             
             <button
               onClick={() => navigate('/')}
-              className="btn-secondary flex items-center space-x-2"
+              className="btn-secondary flex items-center justify-center space-x-2 w-full sm:w-auto px-8"
             >
               <Home className="w-4 h-4" />
               <span>Volver al Inicio</span>

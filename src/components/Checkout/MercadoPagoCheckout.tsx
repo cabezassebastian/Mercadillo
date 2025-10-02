@@ -63,7 +63,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
           failure: `${baseUrl}/checkout/failure`,
           pending: `${baseUrl}/checkout/pending`
         },
-        auto_return: 'approved' as const,
+        auto_return: 'all' as const, // Redirigir automáticamente en todos los casos (approved, rejected, cancelled)
         notification_url: `${baseUrl}/api/mercadopago/webhook`,
         // Nuevos campos para integración con Supabase
         user_id: user.id,
