@@ -50,15 +50,12 @@ const AuthSync = () => {
 							await supabase.auth.setSession({ access_token: token, refresh_token: '' })
 						} catch (e) {
 							// If setSession fails, that's OK - we'll use the token directly
-							console.log('AuthSync: setSession failed (expected), will use token directly')
 						}
 						
-						console.log('✅ AuthSync: Clerk token cached and ready')
 						// Dispatch event so waiting code knows token is ready
 						window.dispatchEvent(new Event('supabase-session-ready'))
 						return
 					}
-					console.warn('AuthSync: Clerk getToken returned null')
 				} catch (err) {
 					console.error('AuthSync: error getting Clerk token', err)
 				}

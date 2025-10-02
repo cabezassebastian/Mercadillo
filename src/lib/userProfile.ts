@@ -17,7 +17,6 @@ async function getClerkToken(timeout = 5000): Promise<string | null> {
         try {
           const token = await getter()
           if (token) {
-            console.log('✅ Got Clerk token')
             return token
           }
         } catch (e) {
@@ -37,7 +36,6 @@ async function getClerkToken(timeout = 5000): Promise<string | null> {
         try {
           const token = await getter()
           if (token) {
-            console.log('✅ Got Clerk token after event')
             return token
           }
         } catch (e) {
@@ -226,17 +224,11 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
  */
 export async function isInWishlist(userId: string, productId: string): Promise<{ isInWishlist: boolean; error: string | null }> {
   try {
-    console.log(`🔍 isInWishlist called - userId: ${userId}, productId: ${productId}`)
-    
     const token = await getClerkToken()
     if (!token) {
-      console.warn('isInWishlist: No Clerk token available')
       return { isInWishlist: false, error: 'no_clerk_token' }
     }
 
-    console.log('✅ Token available for isInWishlist check')
-
-    // 🎯 Usar el token directamente en los headers
     const { data, error } = await supabase
       .from('lista_deseos')
       .select('id')
@@ -245,19 +237,13 @@ export async function isInWishlist(userId: string, productId: string): Promise<{
       .maybeSingle()
 
     if (error) {
-      console.error('❌ Error checking wishlist:', {
-        code: error.code,
-        message: error.message,
-        details: error.details,
-        hint: error.hint
-      })
+      console.error('Error checking wishlist:', error.message)
       return { isInWishlist: false, error: JSON.stringify(error) }
     }
 
-    console.log(`✅ isInWishlist result: ${!!data}`)
     return { isInWishlist: !!data, error: null }
   } catch (error) {
-    console.error('❌ Unexpected error checking wishlist:', error)
+    console.error('Unexpected error checking wishlist:', error)
     return { isInWishlist: false, error: 'Error inesperado al verificar lista de deseos' }
   }
 }

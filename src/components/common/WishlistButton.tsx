@@ -43,7 +43,6 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
             setSessionAvailable(true)
             setIsWished(!!res.isInWishlist)
             setInitialLoaded(true) // ✅ Estado cargado
-            console.log('✅ WishlistButton ready for product:', productId, 'isWished:', !!res.isInWishlist)
           }
         }
       } catch (err) {
@@ -97,13 +96,19 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
       disabled={!user?.id || loading || sessionAvailable === null}
       aria-pressed={isWished}
       title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
-      className={className}
+      className={`${className} group transition-transform duration-200 ease-out hover:scale-110 active:scale-95 disabled:hover:scale-100`}
     >
-      {sessionAvailable === null || loading ? (
-        <span className="w-5 h-5 inline-block animate-pulse bg-gray-200 rounded" />
-      ) : (
-        <Heart className={`w-5 h-5 ${isWished ? 'text-red-600' : 'text-gray-600'}`} />
-      )}
+      <Heart 
+        className={`
+          w-5 h-5 
+          transition-all duration-300 ease-in-out
+          ${isWished 
+            ? 'text-red-600 fill-red-600' 
+            : 'text-gray-400 group-hover:text-red-400 group-hover:fill-red-100'
+          }
+          ${loading ? 'opacity-70' : 'opacity-100'}
+        `} 
+      />
     </button>
   )
 }
