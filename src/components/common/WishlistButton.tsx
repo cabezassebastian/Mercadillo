@@ -31,21 +31,27 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
         // 🎯 Simplemente intentar obtener el estado
         const res = await isInWishlist(user.id, productId)
         
-        if (!mounted) return
-        
         if (res.error === 'no_clerk_token') {
           // Token aún no disponible
-          setSessionAvailable(false)
+          if (mounted) {
+            setSessionAvailable(false)
+            setInitialLoaded(false) // Esperamos token
+          }
         } else {
           // Token disponible, tenemos respuesta
-          setSessionAvailable(true)
-          setIsWished(!!res.isInWishlist)
+          if (mounted) {
+            setSessionAvailable(true)
+            setIsWished(!!res.isInWishlist)
+            setInitialLoaded(true) // ✅ Estado cargado
+            console.log('✅ WishlistButton ready for product:', productId, 'isWished:', !!res.isInWishlist)
+          }
         }
       } catch (err) {
         console.error('Error checking wishlist state', err)
-        if (mounted) setSessionAvailable(false)
-      } finally {
-        if (mounted) setInitialLoaded(true)
+        if (mounted) {
+          setSessionAvailable(false)
+          setInitialLoaded(true) // Marcamos como cargado aunque haya error
+        }
       }
     }
     fetchState()
@@ -56,16 +62,16 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
     e.preventDefault()
     e.stopPropagation()
     if (!user?.id) return
-    // prevent toggle before initial server-state has been fetched or session ready
-    if (!initialLoaded) {
-      console.warn('WishlistButton: toggle prevented — initial wishlist state not loaded yet')
+    if (loading) return
+    
+    // ✅ Solo prevenir si definitivamente no estamos listos
+    if (!initialLoaded || sessionAvailable !== true) {
+      console.warn('WishlistButton: toggle prevented — waiting for initial state', {
+        initialLoaded,
+        sessionAvailable
+      })
       return
     }
-    if (sessionAvailable === false) {
-      console.warn('WishlistButton: toggle prevented — supabase session not available')
-      return
-    }
-  if (loading) return
     setLoading(true)
     const prev = isWished
     setIsWished(!prev)
@@ -83,7 +89,7 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
     } finally {
       setLoading(false)
     }
-  }, [user?.id, productId, isWished, loading])
+  }, [user?.id, productId, isWished, loading, initialLoaded, sessionAvailable])
 
   return (
     <button
