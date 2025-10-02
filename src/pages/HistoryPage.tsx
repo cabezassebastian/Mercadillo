@@ -10,6 +10,7 @@ import { usePagination } from '@/hooks/usePagination'
 import { useUserHistory, useUserMutations } from '@/hooks/useUserQueries'
 import Pagination from '@/components/common/Pagination'
 import { Link } from 'react-router-dom'
+import { Producto } from '@/lib/supabase'
 
 const HistoryPage: React.FC = () => {
   const { user } = useUser()
@@ -48,17 +49,22 @@ const HistoryPage: React.FC = () => {
   const handleAddToCart = (item: NavigationHistoryItem) => {
     if (!item.producto) return
 
-    addToCart({
+    // Build a complete Producto object from the lightweight producto returned
+    // in the history query. Provide sensible defaults for missing fields so
+    // the CartContext's stock checks work correctly.
+    const productoToAdd: Producto = {
       id: item.producto.id,
       nombre: item.producto.nombre,
-      descripcion: '',
+      descripcion: (item.producto as any).descripcion || '',
       precio: item.producto.precio,
       imagen: item.producto.imagen,
-      stock: 0, // Se validará en el carrito
-      categoria: '',
-      created_at: '',
-      updated_at: ''
-    }, 1)
+      stock: (item.producto as any).stock ?? 1, // assume at least 1 if unknown
+      categoria: (item.producto as any).categoria || '',
+      created_at: (item.producto as any).created_at || '',
+      updated_at: (item.producto as any).updated_at || ''
+    }
+
+    addToCart(productoToAdd, 1)
   }
 
   const getTimeAgo = (dateString: string) => {
