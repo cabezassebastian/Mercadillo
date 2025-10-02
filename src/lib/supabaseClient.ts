@@ -11,18 +11,42 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
     if (typeof getToken === 'function') {
       try {
         const token = await getToken()
+        console.log('🔐 Fetch Interceptor: Got token?', !!token, 'for URL:', url.substring(0, 100))
         if (token) {
           // Inyectar el token de Clerk
           const headers = new Headers(init?.headers)
           headers.set('Authorization', `Bearer ${token}`)
           
-          return originalFetch(input, {
+          // 🔍 Log el JWT payload para ver qué usuario_id tiene
+          try {
+            const payload = JSON.parse(atob(token.split('.')[1]))
+            console.log('🎫 JWT Payload - sub:', payload.sub, 'user_metadata:', payload.user_metadata)
+          } catch (e) {}
+          
+          const response = await originalFetch(input, {
             ...init,
             headers
           })
+          
+          // 🔍 Log respuesta
+          if (!response.ok) {
+            const clonedResponse = response.clone()
+            clonedResponse.text().then(text => {
+              console.error('❌ Supabase Error Response:', {
+                status: response.status,
+                statusText: response.statusText,
+                body: text.substring(0, 500),
+                url: url.substring(0, 100)
+              })
+            })
+          } else {
+            console.log('✅ Supabase request OK:', url.substring(0, 100))
+          }
+          
+          return response
         }
       } catch (e) {
-        // Si falla, continuar con la petición normal
+        console.error('❌ Fetch interceptor error:', e)
       }
     }
   }
