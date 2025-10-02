@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react'
 import { Heart } from 'lucide-react'
 import { useUser } from '@clerk/clerk-react'
-import { isInWishlist, addToWishlist, removeFromWishlist, ensureSupabaseSession } from '@/lib/userProfile'
+import { isInWishlist, addToWishlist, removeFromWishlist } from '@/lib/userProfile'
 
 interface Props {
   productId: string
@@ -21,25 +21,29 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '' }) => {
       if (!user?.id) {
         setIsWished(false)
         setInitialLoaded(true)
-        return
-      }
-      // Wait for a shared global supabase session (Clerk -> Supabase propagation)
-      setSessionAvailable(null)
-      const ok = await ensureSupabaseSession()
-      if (!mounted) return
-      if (!ok) {
-        console.warn('isInWishlist: No supabase session available (timeout)')
-        setSessionAvailable(false)
-        setInitialLoaded(true)
+        setSessionAvailable(true)
         return
       }
 
-      setSessionAvailable(true)
+      setSessionAvailable(null)
+      
       try {
+        // 🎯 Simplemente intentar obtener el estado
         const res = await isInWishlist(user.id, productId)
-        if (mounted) setIsWished(!!res.isInWishlist)
+        
+        if (!mounted) return
+        
+        if (res.error === 'no_clerk_token') {
+          // Token aún no disponible
+          setSessionAvailable(false)
+        } else {
+          // Token disponible, tenemos respuesta
+          setSessionAvailable(true)
+          setIsWished(!!res.isInWishlist)
+        }
       } catch (err) {
         console.error('Error checking wishlist state', err)
+        if (mounted) setSessionAvailable(false)
       } finally {
         if (mounted) setInitialLoaded(true)
       }

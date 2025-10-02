@@ -1,80 +1,68 @@
 import { supabase } from './supabaseClient'
 
-// Ensure the shared supabase client has an access token derived from Clerk.
-// Uses a small retry to wait for the token if Clerk is still propagating.
-let _sharedSessionPromise: Promise<boolean> | null = null
+// 🎯 NUEVO ENFOQUE SIMPLE: Solo esperar a que el token esté disponible
+let _tokenWaitPromise: Promise<string | null> | null = null
 
-export async function ensureSupabaseSession(timeout = 15000): Promise<boolean> {
-  try {
-    // If supabase already has a session, we're good
-    const { data } = await supabase.auth.getSession()
-    if (data?.session?.access_token) {
-      console.log('ensureSupabaseSession: Session already available')
-      return true
-    }
+async function getClerkToken(timeout = 5000): Promise<string | null> {
+  // Si ya hay una espera en curso, reutilizarla
+  if (_tokenWaitPromise) return _tokenWaitPromise
 
-    // If another caller is already waiting, reuse that promise so we don't
-    // concurrently poll/get the token multiple times.
-    if (_sharedSessionPromise) {
-      console.log('ensureSupabaseSession: Reusing existing promise')
-      return _sharedSessionPromise
-    }
+  _tokenWaitPromise = (async () => {
+    const start = Date.now()
+    const getter = (window as any).__getClerkToken
 
-    console.log('ensureSupabaseSession: Starting session wait...')
-
-    _sharedSessionPromise = (async () => {
-      // Simple approach: wait for AuthSync to set the session via event
-      let sessionReady = false
-      
-      // Listen for the session ready event from AuthSync
-      const eventPromise = new Promise<boolean>((resolve) => {
-        const onReady = () => {
-          console.log('ensureSupabaseSession: Got supabase-session-ready event')
-          sessionReady = true
-          resolve(true)
-        }
-        window.addEventListener('supabase-session-ready', onReady, { once: true })
-        
-        // Also set a timeout
-        setTimeout(() => {
-          if (!sessionReady) {
-            console.warn('ensureSupabaseSession: Event timeout after', timeout + 'ms')
-            resolve(false)
+    // Esperar hasta que el getter esté disponible y retorne un token
+    while (Date.now() - start < timeout) {
+      if (typeof getter === 'function') {
+        try {
+          const token = await getter()
+          if (token) {
+            console.log('✅ Got Clerk token')
+            return token
           }
-        }, timeout)
-      })
-
-      // Wait for either the event or timeout
-      const result = await eventPromise
-      
-      if (result) {
-        // Double-check the session is actually there
-        const { data: finalSession } = await supabase.auth.getSession()
-        if (finalSession?.session?.access_token) {
-          console.log('ensureSupabaseSession: Session confirmed after event')
-          return true
-        } else {
-          console.warn('ensureSupabaseSession: Event fired but no session found')
-          return false
+        } catch (e) {
+          // ignore
         }
       }
-
-      return false
-    })()
-
-    try {
-      const result = await _sharedSessionPromise
-      console.log('ensureSupabaseSession: Final result:', result)
-      return result
-    } finally {
-      // clear shared promise so subsequent calls can re-check if needed
-      _sharedSessionPromise = null
+      
+      // También escuchar el evento
+      const eventPromise = new Promise<boolean>(resolve => {
+        const onReady = () => resolve(true)
+        window.addEventListener('supabase-session-ready', onReady, { once: true })
+        setTimeout(() => resolve(false), 200)
+      })
+      
+      const gotEvent = await eventPromise
+      if (gotEvent && typeof getter === 'function') {
+        try {
+          const token = await getter()
+          if (token) {
+            console.log('✅ Got Clerk token after event')
+            return token
+          }
+        } catch (e) {
+          // ignore
+        }
+      }
+      
+      await new Promise(r => setTimeout(r, 100))
     }
-  } catch (err) {
-    console.error('ensureSupabaseSession error', err)
-    _sharedSessionPromise = null
-    return false
+
+    console.warn('⏱️ Timeout waiting for Clerk token')
+    return null
+  })()
+
+  try {
+    return await _tokenWaitPromise
+  } finally {
+    _tokenWaitPromise = null
   }
+}
+
+// Mantener esta función para compatibilidad pero simplificada
+export async function ensureSupabaseSession(timeout = 5000): Promise<boolean> {
+  const token = await getClerkToken(timeout)
+  return !!token
 }
 
 // Tipos para Lista de Deseos
@@ -143,11 +131,12 @@ export interface CreateUserAddress {
  */
 export async function getUserWishlist(userId: string): Promise<{ data: WishlistItem[] | null; error: string | null }> {
   try {
-    const ok = await ensureSupabaseSession()
-    if (!ok) {
-      console.warn('getUserWishlist: No supabase session available (Clerk token not ready)')
-      return { data: null, error: 'no_supabase_session' }
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('getUserWishlist: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
     }
+
     const { data, error } = await supabase
       .from('lista_deseos')
       .select(`
@@ -174,11 +163,12 @@ export async function getUserWishlist(userId: string): Promise<{ data: WishlistI
  */
 export async function addToWishlist(userId: string, productId: string): Promise<{ data: WishlistItem | null; error: string | null }> {
   try {
-    const ok = await ensureSupabaseSession()
-    if (!ok) {
-      console.warn('addToWishlist: No supabase session available (Clerk token not ready)')
-      return { data: null, error: 'no_supabase_session' }
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('addToWishlist: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
     }
+
     const { data, error } = await supabase
       .from('lista_deseos')
       .insert([{ usuario_id: userId, producto_id: productId }])
@@ -193,6 +183,7 @@ export async function addToWishlist(userId: string, productId: string): Promise<
       return { data: null, error: JSON.stringify(error) }
     }
 
+    console.log('✅ Added to wishlist')
     return { data, error: null }
   } catch (error) {
     console.error('Unexpected error adding to wishlist:', error)
@@ -205,11 +196,12 @@ export async function addToWishlist(userId: string, productId: string): Promise<
  */
 export async function removeFromWishlist(userId: string, productId: string): Promise<{ success: boolean; error: string | null }> {
   try {
-    const ok = await ensureSupabaseSession()
-    if (!ok) {
-      console.warn('removeFromWishlist: No supabase session available (Clerk token not ready)')
-      return { success: false, error: 'no_supabase_session' }
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('removeFromWishlist: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
     }
+
     const { error } = await supabase
       .from('lista_deseos')
       .delete()
@@ -221,6 +213,7 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
       return { success: false, error: JSON.stringify(error) }
     }
 
+    console.log('✅ Removed from wishlist')
     return { success: true, error: null }
   } catch (error) {
     console.error('Unexpected error removing from wishlist:', error)
@@ -233,22 +226,21 @@ export async function removeFromWishlist(userId: string, productId: string): Pro
  */
 export async function isInWishlist(userId: string, productId: string): Promise<{ isInWishlist: boolean; error: string | null }> {
   try {
-    const ok = await ensureSupabaseSession()
-    if (!ok) {
-      console.warn('isInWishlist: No supabase session available (Clerk token not ready)')
-      return { isInWishlist: false, error: 'no_supabase_session' }
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('isInWishlist: No Clerk token available')
+      return { isInWishlist: false, error: 'no_clerk_token' }
     }
+
+    // 🎯 Usar el token directamente en los headers
     const { data, error } = await supabase
       .from('lista_deseos')
       .select('id')
       .eq('usuario_id', userId)
       .eq('producto_id', productId)
-      .single()
+      .maybeSingle()
 
     if (error) {
-      if (error.code === 'PGRST116') { // No rows returned
-        return { isInWishlist: false, error: null }
-      }
       console.error('Error checking wishlist:', error)
       return { isInWishlist: false, error: JSON.stringify(error) }
     }
