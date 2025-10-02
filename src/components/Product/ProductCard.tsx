@@ -1,8 +1,7 @@
 import React, { memo, useState, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
-import { ShoppingCart, Heart } from 'lucide-react'
-import { useUser } from '@clerk/clerk-react'
-import { addToWishlist, removeFromWishlist } from '@/lib/userProfile'
+import { ShoppingCart } from 'lucide-react'
+import WishlistButton from '@/components/common/WishlistButton'
 import { Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
@@ -16,9 +15,7 @@ interface ProductCardProps {
 
 const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => {
   const { addToCart, items } = useCart()
-  const { user } = useUser()
-  const [isWished, setIsWished] = useState<boolean>(false)
-  const [isWishing, setIsWishing] = useState<boolean>(false)
+  // wishlist state handled by WishlistButton
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
   
@@ -76,44 +73,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
     }
   }, [isLoading, stockInfo.currentQuantityInCart, producto, addToCart])
 
-  const toggleWishlist = useCallback(async (e: React.MouseEvent) => {
-    e.preventDefault()
-    e.stopPropagation()
-
-    if (!user?.id) {
-      setMessage('Inicia sesión para usar la lista de deseos')
-      setTimeout(() => setMessage(null), 2000)
-      return
-    }
-
-    if (isWishing) return
-    setIsWishing(true)
-
-    // Optimistic UI
-    const previous = isWished
-    setIsWished(!previous)
-
-    try {
-      if (!previous) {
-        const res = await addToWishlist(user.id, producto.id)
-        if (res.error) {
-          throw new Error(res.error)
-        }
-      } else {
-        const res = await removeFromWishlist(user.id, producto.id)
-        if (res.error) {
-          throw new Error(res.error)
-        }
-      }
-    } catch (err) {
-      console.error('Wishlist error:', err)
-      setIsWished(previous) // rollback
-      setMessage('Error updating wishlist')
-      setTimeout(() => setMessage(null), 2000)
-    } finally {
-      setIsWishing(false)
-    }
-  }, [isWished, isWishing, producto.id, user])
+  // wishlist handled by WishlistButton component
 
   if (viewMode === 'list') {
     return (
@@ -205,13 +165,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
                   </span>
                 </button>
 
-                <button
-                  onClick={toggleWishlist}
-                  disabled={isWishing}
-                  className={`p-3 rounded-lg border ${isWished ? 'bg-red-600 text-white border-red-600' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
-                >
-                  <Heart className="w-5 h-5" />
-                </button>
+                <WishlistButton productId={producto.id} className="p-3 rounded-lg border" />
               </div>
             </div>
           </div>
@@ -317,13 +271,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
               </span>
             </button>
 
-            <button
-              onClick={toggleWishlist}
-              disabled={isWishing}
-              className={`px-4 py-2 rounded-lg border ${isWished ? 'bg-red-600 text-white border-red-600' : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200'}`}
-            >
-              <Heart className="w-4 h-4" />
-            </button>
+            <WishlistButton productId={producto.id} className="px-4 py-2 rounded-lg border" />
           </div>
         </div>
       </Link>
