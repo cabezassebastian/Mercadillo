@@ -1,7 +1,7 @@
 import React, { memo, useState, useMemo, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { ShoppingCart } from 'lucide-react'
-import WishlistButton from '../common/WishlistButton'
+import WishlistButton from '../common/WishlistButton.tsx'
 import { Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
