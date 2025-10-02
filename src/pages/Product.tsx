@@ -6,6 +6,7 @@ import { supabase, Producto } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
 import ReviewList from '@/components/Reviews/ReviewList'
+import WishlistButton from '@/components/common/WishlistButton'
 import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
@@ -260,21 +261,29 @@ const Product: React.FC = () => {
                 </span>
               </div>
 
-              <button
-                onClick={handleAddToCart}
-                disabled={availableStock === 0 || addingToCart}
-                className="w-full btn-primary flex items-center justify-center space-x-2 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <ShoppingCart className="w-6 h-6" />
-                <span>
-                  {addingToCart 
-                    ? 'Agregando...' 
-                    : availableStock > 0 
-                      ? 'Agregar al carrito' 
-                      : 'Producto agotado'
-                  }
-                </span>
-              </button>
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-3">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={availableStock === 0 || addingToCart}
+                  className="flex-1 btn-primary flex items-center justify-center space-x-2 py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <ShoppingCart className="w-6 h-6" />
+                  <span>
+                    {addingToCart 
+                      ? 'Agregando...' 
+                      : availableStock > 0 
+                        ? 'Agregar al carrito' 
+                        : 'Producto agotado'
+                    }
+                  </span>
+                </button>
+
+                <WishlistButton 
+                  productId={producto.id} 
+                  className="sm:w-auto w-full px-6 py-4 text-lg rounded-lg border-2 justify-center" 
+                />
+              </div>
             </div>
 
             {/* Features */}

@@ -259,19 +259,19 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
           </div>
           
           {/* Action Buttons */}
-          <div className="flex space-x-2">
+          <div className="flex flex-col sm:flex-row gap-2">
             <button
               onClick={handleAddToCart}
               disabled={stockInfo.isOutOfStock || isLoading}
               className="flex-1 btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
             >
               <ShoppingCart className="w-4 h-4" />
-              <span>
+              <span className="truncate">
                 {isLoading ? 'Agregando...' : stockInfo.isOutOfStock ? 'Sin Stock' : 'Agregar'}
               </span>
             </button>
 
-            <WishlistButton productId={producto.id} className="px-4 py-2 rounded-lg border" />
+            <WishlistButton productId={producto.id} className="sm:w-auto w-full px-4 py-2.5 rounded-lg border justify-center" />
           </div>
         </div>
       </Link>
