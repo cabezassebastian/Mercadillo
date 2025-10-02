@@ -9,7 +9,7 @@ const UserProfileSettings: React.FC = () => {
           Configuración de Cuenta
         </h1>
         
-        <div className="w-full">
+        <div className="max-w-5xl">
           <UserProfile 
             appearance={{
               elements: {
