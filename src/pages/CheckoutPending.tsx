@@ -66,10 +66,10 @@ const CheckoutPending: React.FC = () => {
             </p>
           </div>
 
-          <div className="space-x-4">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8">
             <button
-              onClick={() => navigate('/profile')}
-              className="btn-primary flex items-center space-x-2"
+              onClick={() => navigate('/pedidos')}
+              className="btn-primary w-full sm:w-auto px-8 flex items-center justify-center space-x-2"
             >
               <RefreshCw className="w-4 h-4" />
               <span>Ver Estado del Pedido</span>
@@ -77,7 +77,7 @@ const CheckoutPending: React.FC = () => {
             
             <button
               onClick={() => navigate('/')}
-              className="btn-secondary flex items-center space-x-2"
+              className="btn-secondary w-full sm:w-auto px-8 flex items-center justify-center space-x-2"
             >
               <Home className="w-4 h-4" />
               <span>Volver al Inicio</span>
