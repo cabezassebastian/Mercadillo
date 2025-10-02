@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
-import { generateExternalReference, calculateOrderTotals, type CartItem } from '../../src/lib/orders'
+import { generateExternalReference, calculateOrderTotals, type CartItem } from '../utils/orders'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Solo permitir método POST
