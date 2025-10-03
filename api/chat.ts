@@ -15,9 +15,9 @@ async function searchProducts(query: string, limit = 5) {
   try {
     const { data, error } = await supabase
       .from('productos')
-      .select('id, nombre, precio, imagen_url, descripcion, stock')
+      .select('id, nombre, precio, imagen, descripcion, stock')
       .or(`nombre.ilike.%${query}%,descripcion.ilike.%${query}%`)
-      .eq('disponible', true)
+      .eq('activo', true)
       .gt('stock', 0)
       .limit(limit)
 
@@ -26,7 +26,13 @@ async function searchProducts(query: string, limit = 5) {
       return []
     }
 
-    return data || []
+    // Mapear 'imagen' a 'imagen_url' para compatibilidad con el frontend
+    const products = (data || []).map(product => ({
+      ...product,
+      imagen_url: product.imagen
+    }))
+
+    return products
   } catch (error) {
     console.error('Error en searchProducts:', error)
     return []
