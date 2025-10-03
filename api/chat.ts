@@ -168,8 +168,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   } catch (error) {
     console.error('Error en chat endpoint:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido'
+    console.error('Detalles del error:', errorMessage)
+    
     return res.status(200).json({
-      response: 'Lo siento, hubo un problema al procesar tu mensaje. Por favor, intenta de nuevo o contacta a nuestro equipo de soporte.'
+      response: `Lo siento, hubo un problema al procesar tu mensaje. ${process.env.NODE_ENV === 'development' ? `Error: ${errorMessage}` : 'Por favor, intenta de nuevo o contacta a nuestro equipo de soporte.'}`
     })
   }
 }
