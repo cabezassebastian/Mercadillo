@@ -1,7 +1,37 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
+import { createClient } from '@supabase/supabase-js'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
+
+// Inicializar Supabase
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
+
+// Función para buscar productos
+async function searchProducts(query: string, limit = 5) {
+  try {
+    const { data, error } = await supabase
+      .from('productos')
+      .select('id, nombre, precio, imagen_url, descripcion, stock')
+      .or(`nombre.ilike.%${query}%,descripcion.ilike.%${query}%`)
+      .eq('disponible', true)
+      .gt('stock', 0)
+      .limit(limit)
+
+    if (error) {
+      console.error('Error buscando productos:', error)
+      return []
+    }
+
+    return data || []
+  } catch (error) {
+    console.error('Error en searchProducts:', error)
+    return []
+  }
+}
 
 // Sistema de prompts con contexto de Mercadillo
 const SYSTEM_PROMPT = `Eres un asistente virtual amable y servicial de Mercadillo, una tienda online en Lima, Perú.
@@ -12,6 +42,7 @@ INFORMACIÓN IMPORTANTE SOBRE MERCADILLO:
 - Vendemos productos variados: tecnología, hogar, moda, accesorios, etc.
 - Los usuarios pueden explorar el catálogo en la página principal
 - Cada producto tiene descripción, precio, imágenes y reseñas
+- Puedo buscar productos si me dicen qué están buscando (ejemplo: "busca laptops" o "muéstrame audífonos")
 
 🚚 ENVÍOS:
 - Hacemos envíos a todo Lima
@@ -82,10 +113,27 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { message, history = [] } = req.body
+    const { message, history = [], userId, sessionId } = req.body
 
     if (!message || typeof message !== 'string') {
       return res.status(400).json({ error: 'Mensaje inválido' })
+    }
+
+    // Detectar si el usuario pide búsqueda de productos
+    const searchKeywords = ['busca', 'buscar', 'muestra', 'muéstrame', 'quiero ver', 'productos de', 'tienes', 'venden', 'hay']
+    const isProductSearch = searchKeywords.some(keyword => message.toLowerCase().includes(keyword))
+    
+    let productos: any[] = []
+    if (isProductSearch) {
+      // Extraer término de búsqueda (simplificado)
+      const searchTerms = message
+        .toLowerCase()
+        .replace(/busca|buscar|muestra|muéstrame|quiero ver|productos de|tienes|venden|hay/gi, '')
+        .trim()
+      
+      if (searchTerms.length > 2) {
+        productos = await searchProducts(searchTerms)
+      }
     }
 
     // Construir el historial de conversación para contexto
@@ -162,8 +210,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       })
     }
 
+    // Guardar conversación en Supabase (sin bloquear la respuesta)
+    supabase
+      .from('chat_conversations')
+      .insert({
+        usuario_id: userId || null,
+        mensaje: message,
+        respuesta: aiResponse.trim(),
+        session_id: sessionId || `session_${Date.now()}`,
+        metadata: {
+          model: 'gemini-2.0-flash',
+          timestamp: new Date().toISOString(),
+          historyLength: history.length,
+          productsFound: productos.length
+        }
+      })
+      .then(({ error }) => {
+        if (error) {
+          console.error('Error guardando conversación:', error)
+        }
+      })
+
     return res.status(200).json({
-      response: aiResponse.trim()
+      response: aiResponse.trim(),
+      products: productos.length > 0 ? productos : undefined
     })
 
   } catch (error) {

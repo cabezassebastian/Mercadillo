@@ -3,12 +3,14 @@ import {
   Package, 
   ShoppingCart, 
   Users, 
-  BarChart3
+  BarChart3,
+  MessageSquare
 } from 'lucide-react'
 import AdminProducts from '../components/Admin/AdminProducts'
 import AdminOrders from '../components/Admin/AdminOrders'
 import AdminUsers from '../components/Admin/AdminUsers'
 import AdminDashboard from '../components/Admin/AdminDashboard'
+import ChatAnalytics from './Admin/ChatAnalytics'
 
 const Admin = () => {
   const location = useLocation()
@@ -18,6 +20,7 @@ const Admin = () => {
     { path: '/admin/productos', icon: Package, label: 'Productos' },
     { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
     { path: '/admin/usuarios', icon: Users, label: 'Usuarios' },
+    { path: '/admin/chat-analytics', icon: MessageSquare, label: 'Analíticas Chat' },
   ]
 
   return (
@@ -68,6 +71,7 @@ const Admin = () => {
               <Route path="/productos" element={<AdminProducts />} />
               <Route path="/pedidos" element={<AdminOrders />} />
               <Route path="/usuarios" element={<AdminUsers />} />
+              <Route path="/chat-analytics" element={<ChatAnalytics />} />
             </Routes>
           </div>
         </div>

@@ -1,19 +1,24 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import ChatMessage from './ChatMessage'
+import { useUser } from '@clerk/clerk-react'
 
 interface Message {
   id: string
   role: 'user' | 'assistant'
   content: string
   timestamp: Date
+  products?: any[]
 }
 
 const ChatWidget: React.FC = () => {
+  const { user } = useUser()
   const [isOpen, setIsOpen] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [unreadCount, setUnreadCount] = useState(0)
+  const [sessionId] = useState(`session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   // Cargar historial del localStorage
@@ -74,7 +79,9 @@ const ChatWidget: React.FC = () => {
         },
         body: JSON.stringify({
           message: userMessage.content,
-          history: messages.slice(-5) // Enviar últimos 5 mensajes para contexto
+          history: messages.slice(-5), // Enviar últimos 5 mensajes para contexto
+          userId: user?.id,
+          sessionId: sessionId
         })
       })
 
@@ -88,10 +95,16 @@ const ChatWidget: React.FC = () => {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: data.response,
-        timestamp: new Date()
+        timestamp: new Date(),
+        products: data.products // Incluir productos si existen
       }
 
       setMessages(prev => [...prev, assistantMessage])
+      
+      // Incrementar contador de no leídos si el chat está cerrado
+      if (!isOpen) {
+        setUnreadCount(prev => prev + 1)
+      }
     } catch (error) {
       console.error('Error sending message:', error)
       const errorMessage: Message = {
@@ -130,13 +143,29 @@ const ChatWidget: React.FC = () => {
       {/* Botón flotante */}
       {!isOpen && (
         <button
-          onClick={() => setIsOpen(true)}
+          onClick={() => {
+            setIsOpen(true)
+            setUnreadCount(0) // Resetear contador al abrir
+          }}
           className="fixed bottom-6 right-6 w-14 h-14 bg-amarillo hover:bg-yellow-500 text-gray-900 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center z-50 group"
           aria-label="Abrir chat"
         >
           <MessageCircle className="w-6 h-6" />
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
-          <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+          
+          {/* Badge de mensajes no leídos */}
+          {unreadCount > 0 && (
+            <span className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center px-1.5">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+          
+          {/* Ping animation solo si no hay mensajes no leídos */}
+          {unreadCount === 0 && (
+            <>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+              <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+            </>
+          )}
         </button>
       )}
 
