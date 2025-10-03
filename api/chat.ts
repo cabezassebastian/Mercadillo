@@ -4,9 +4,9 @@ import { createClient } from '@supabase/supabase-js'
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
-// Inicializar Supabase
+// Inicializar Supabase (usar variables sin prefijo VITE_ para backend)
 const supabase = createClient(
-  process.env.VITE_SUPABASE_URL!,
+  process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL!,
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
