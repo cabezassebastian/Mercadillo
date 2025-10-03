@@ -8,6 +8,7 @@ import { NotificationProvider } from './contexts/NotificationContext'
 import Layout from './components/Layout/Layout'
 import ClerkDarkMode from './components/ClerkDarkMode'
 import NotificationContainer from './components/common/NotificationContainer'
+import ChatWidget from './components/ChatBot/ChatWidget'
 
 function App() {
   return (
@@ -29,6 +30,7 @@ const AuthContent: React.FC = () => {
           <Outlet />
         </Layout>
         <NotificationContainer />
+        <ChatWidget />
       </CartProvider>
     </NotificationProvider>
   )
