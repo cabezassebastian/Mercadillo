@@ -1,6 +1,315 @@
-# Mercadillo Lima Peru - E-commerce
+# 🛒 Mercadillo - E-commerce Platform
 
-Un e-commerce moderno y escalable para Lima, Peru, construido con las mejores tecnologias del mercado.
+> Plataforma de e-commerce moderna y completa para Perú, con chatbot AI integrado y panel de administración.
+
+**🌐 En producción:** [https://www.mercadillo.app](https://www.mercadillo.app)
+
+---
+
+## 🚀 Tecnologías Utilizadas
+
+### Frontend
+- **React 18** - Biblioteca de UI
+- **Vite** - Build tool ultrarrápido
+- **TypeScript** - Tipado estático
+- **TailwindCSS** - Framework de CSS utility-first
+- **React Router DOM** - Enrutamiento SPA
+- **Framer Motion** - Animaciones fluidas
+- **React Query** - Gestión de estado del servidor
+
+### Backend & Servicios
+- **Clerk** - Autenticación y gestión de usuarios
+- **Supabase** - Base de datos PostgreSQL con API REST
+- **MercadoPago** - Pasarela de pagos para LATAM
+- **Cloudinary** - CDN y gestión de imágenes optimizadas
+- **Vercel** - Hosting y serverless functions
+- **Google Gemini AI** - Chatbot inteligente con búsqueda de productos
+
+### Características Destacadas
+- ✅ **Chatbot AI** con Google Gemini 2.0 Flash
+  - Búsqueda inteligente de productos
+  - Agregar al carrito desde el chat
+  - Persistencia de conversaciones
+  - Contador de mensajes sin leer
+  - Dashboard de analytics
+- ✅ **Panel de Admin** completo con Service Role Key
+- ✅ **Pagos** con MercadoPago (producción)
+- ✅ **RLS Desactivado** para simplificar autenticación
+- ✅ **Sincronización** Clerk ↔ Supabase
+- ✅ **Diseño Responsive** - Mobile-first
+
+---
+
+## 📁 Estructura del Proyecto
+
+```
+Mercadillo/
+├── api/                      # Vercel Serverless Functions
+│   ├── chat.ts              # Endpoint del chatbot AI (Gemini)
+│   ├── checkout.ts          # Procesamiento de pagos
+│   └── mercadopago/         # Webhooks de MercadoPago
+├── src/
+│   ├── components/
+│   │   ├── Admin/           # Panel de administración
+│   │   ├── Auth/            # Autenticación (Clerk)
+│   │   ├── Cart/            # Carrito de compras
+│   │   ├── ChatBot/         # Chatbot AI ⭐ NUEVO
+│   │   ├── Layout/          # Header, Footer, Navbar
+│   │   ├── Product/         # Cards, detalles, filtros
+│   │   └── User/            # Perfil, pedidos, direcciones
+│   ├── contexts/
+│   │   ├── AuthContext.tsx  # Clerk + Supabase sync
+│   │   └── CartContext.tsx  # Estado del carrito
+│   ├── lib/
+│   │   ├── supabase.ts      # Cliente público (ANON_KEY)
+│   │   ├── supabaseAdmin.ts # Cliente admin (SERVICE_ROLE_KEY) ⭐
+│   │   └── mercadopago.ts   # SDK de MercadoPago
+│   └── pages/               # Rutas de la aplicación
+├── supabase/                # Configuración local (opcional)
+├── fix-rls-DISABLE.sql      # Script para desactivar RLS ⭐
+├── supabase-schema.sql      # Schema completo de la DB
+└── supabase-chat-migrations.sql  # Migraciones del chatbot
+```
+
+---
+
+## 🛠️ Instalación y Configuración
+
+### 1. Clonar el repositorio
+```bash
+git clone https://github.com/cabezassebastian/Mercadillo.git
+cd Mercadillo
+```
+
+### 2. Instalar dependencias
+```bash
+pnpm install
+```
+
+### 3. Configurar variables de entorno
+
+Crea `.env.local` en la raíz:
+
+```env
+# Clerk Authentication
+VITE_CLERK_PUBLISHABLE_KEY=pk_live_Y2xlcmsubWVyY2FkaWxsby5hcHAk
+VITE_CLERK_SECRET_KEY=sk_live_...
+
+# Supabase Database
+VITE_SUPABASE_URL=https://xwubnuokmfghtyyfpgtl.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJhbGci...
+VITE_SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...  # ⭐ Para admin panel
+
+# Cloudinary Images
+VITE_CLOUDINARY_CLOUD_NAME=ddbjhpjri
+VITE_CLOUDINARY_UPLOAD_PRESET=mercadillo_upload
+
+# MercadoPago - PRODUCCIÓN
+VITE_MERCADOPAGO_PUBLIC_KEY=APP_USR-4ec080b8-74c5-4558-b6c2-0b0dcc31bda8
+MERCADOPAGO_ACCESS_TOKEN=APP_USR-5101834776453209-092922-...
+
+# Google Gemini AI (Chatbot)
+GEMINI_API_KEY=AIzaSyB0iMvubBq3yp3ZC8UiI86p5pAxhvylX7U
+
+# Variables para Vercel Backend
+SUPABASE_URL=https://xwubnuokmfghtyyfpgtl.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGci...
+```
+
+### 4. Configurar Supabase
+
+1. **Crear proyecto** en [Supabase](https://supabase.com)
+2. **Ejecutar scripts SQL** en orden:
+   ```sql
+   -- 1. Schema principal
+   supabase-schema.sql
+   
+   -- 2. Migraciones del chatbot
+   supabase-chat-migrations.sql
+   
+   -- 3. Desactivar RLS (IMPORTANTE)
+   fix-rls-DISABLE.sql
+   ```
+
+3. **Verificar que RLS esté desactivado**:
+   ```sql
+   SELECT tablename, rowsecurity 
+   FROM pg_tables 
+   WHERE tablename IN ('productos', 'usuarios', 'pedidos');
+   -- rowsecurity debe ser 'false'
+   ```
+
+### 5. Configurar roles de usuario
+
+Para hacer admin a un usuario:
+
+```sql
+UPDATE usuarios 
+SET rol = 'admin' 
+WHERE email = 'tu-email@example.com';
+```
+
+---
+
+## 🚀 Comandos Disponibles
+
+```bash
+# Desarrollo local (http://localhost:5173)
+pnpm dev
+
+# Build para producción
+pnpm build
+
+# Preview del build
+pnpm preview
+
+# Linting
+pnpm lint
+```
+
+---
+
+## 📱 Funcionalidades
+
+### 🛍️ Para Clientes
+- ✅ Registro/Login con Clerk (email, Google, GitHub)
+- ✅ Explorar catálogo con filtros avanzados
+- ✅ Búsqueda de productos
+- ✅ Agregar productos al carrito
+- ✅ Checkout con MercadoPago
+- ✅ **Chatbot AI** - Buscar productos y agregar al carrito
+- ✅ Historial de pedidos
+- ✅ Gestión de direcciones
+- ✅ Sistema de reseñas
+- ✅ Modo oscuro
+
+### 👨‍💼 Para Administradores
+- ✅ Panel de admin completo (`/admin`)
+- ✅ **Botón de admin en menú de usuario** (solo para admins)
+- ✅ CRUD de productos con Cloudinary
+- ✅ Gestión de usuarios y roles
+- ✅ Gestión de pedidos y estados
+- ✅ Dashboard con estadísticas
+- ✅ **Analytics del chatbot** (`/admin/chat-analytics`)
+- ✅ Vista de conversaciones
+
+### 🤖 Chatbot AI (Google Gemini)
+- ✅ Búsqueda inteligente de productos
+- ✅ Recomendaciones personalizadas
+- ✅ Agregar productos al carrito desde el chat
+- ✅ Persistencia de conversaciones en DB
+- ✅ Contador de mensajes sin leer
+- ✅ Dashboard de analytics para admins
+- ✅ Soporte multiidioma (español)
+
+---
+
+## 🗄️ Base de Datos (Supabase)
+
+### Tablas Principales
+| Tabla | Descripción |
+|-------|-------------|
+| `usuarios` | Usuarios sincronizados con Clerk |
+| `productos` | Catálogo de productos |
+| `pedidos` | Pedidos de clientes |
+| `reseñas` | Reseñas de productos |
+| `chat_conversations` | Historial del chatbot ⭐ |
+| `direcciones` | Direcciones de envío |
+
+### ⚠️ RLS Desactivado
+Por decisión de arquitectura, **RLS está desactivado** en todas las tablas principales (`productos`, `usuarios`, `pedidos`). La seguridad se maneja mediante:
+- **Clerk** para autenticación a nivel de aplicación
+- **Service Role Key** para operaciones de admin
+- **Validación** en API routes de Vercel
+
+---
+
+## 🔒 Seguridad
+
+- ✅ Autenticación con **Clerk** (JWT tokens)
+- ✅ Panel de admin usa **Service Role Key**
+- ✅ Variables de entorno protegidas
+- ✅ HTTPS en producción (Vercel)
+- ✅ Validación de datos en frontend y backend
+- ✅ CORS configurado correctamente
+
+---
+
+## 🚀 Despliegue en Vercel
+
+### Variables de Entorno Requeridas
+
+En **Vercel Dashboard** → **Settings** → **Environment Variables**:
+
+```env
+# Frontend (VITE_*)
+VITE_CLERK_PUBLISHABLE_KEY
+VITE_SUPABASE_URL
+VITE_SUPABASE_ANON_KEY
+VITE_SUPABASE_SERVICE_ROLE_KEY  # ⭐ IMPORTANTE
+VITE_CLOUDINARY_CLOUD_NAME
+VITE_CLOUDINARY_UPLOAD_PRESET
+VITE_MERCADOPAGO_PUBLIC_KEY
+
+# Backend (sin VITE_)
+SUPABASE_URL
+SUPABASE_SERVICE_ROLE_KEY
+GEMINI_API_KEY
+MERCADOPAGO_ACCESS_TOKEN
+```
+
+### Deploy Automático
+- Push a `main` → Deploy automático en Vercel
+- Preview deployments en PRs
+- Rollback con un click
+
+---
+
+## 📊 Monitoreo
+
+- **Vercel Analytics** - Performance y visitas
+- **Supabase Dashboard** - Queries y logs de DB
+- **MercadoPago Dashboard** - Pagos y transacciones
+- **Clerk Dashboard** - Usuarios y sesiones
+- **Chatbot Analytics** - Métricas del chatbot AI
+
+---
+
+## 🎯 Roadmap Completado
+
+- [x] ~~Integración con MercadoPago~~ ✅
+- [x] ~~Panel de administración~~ ✅
+- [x] ~~Chatbot AI con Google Gemini~~ ✅
+- [x] ~~Analytics del chatbot~~ ✅
+- [x] ~~Botón de admin en menú de usuario~~ ✅
+- [x] ~~Desactivar RLS para simplificar~~ ✅
+
+### Próximas Mejoras
+- [ ] Sistema de cupones y descuentos
+- [ ] Notificaciones push
+- [ ] Integración con WhatsApp Business
+- [ ] App móvil (React Native)
+- [ ] Sistema de inventario avanzado
+- [ ] Multi-tenant para vendedores
+
+---
+
+## 📞 Contacto y Soporte
+
+**Desarrollador:** Sebastian CQ  
+**Email:** cabezassebastian08@gmail.com  
+**WhatsApp:** +51 957 037 207  
+**Website:** [https://www.mercadillo.app](https://www.mercadillo.app)
+
+---
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT.
+
+---
+
+**Mercadillo** - Tu tienda online de confianza en Perú 🇵🇪 🛒
 
 ## 🚀 Tecnologias Utilizadas
 
