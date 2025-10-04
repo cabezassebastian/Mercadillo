@@ -21,8 +21,8 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
             headers
           })
           
-          // Solo log de errores
-          if (!response.ok) {
+          // Solo log de errores críticos (500+), silenciar 401/400
+          if (!response.ok && response.status >= 500) {
             const clonedResponse = response.clone()
             clonedResponse.text().then(text => {
               console.error('❌ Supabase Error:', {

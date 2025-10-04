@@ -54,15 +54,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     if (isClerkLoaded) {
       if (isAuthenticated) {
         setSupabaseAuthenticatedClient(globalSupabase); // Si esta autenticado en Clerk, usa el cliente global
-        console.log("AuthContext: Cliente Supabase conectado.");
+        // console.log("AuthContext: Cliente Supabase conectado.");
       } else {
         setSupabaseAuthenticatedClient(null); // Si no esta autenticado, no hay cliente autenticado
         setUser(null); // Limpiar usuario también
-        console.log("AuthContext: Cliente Supabase desconectado.");
+        // console.log("AuthContext: Cliente Supabase desconectado.");
       }
     } else {
       setSupabaseAuthenticatedClient(null); // Mientras Clerk carga, no hay cliente autenticado
-      console.log("AuthContext: Cliente Supabase desconectado (Clerk no cargado).");
+      // console.log("AuthContext: Cliente Supabase desconectado (Clerk no cargado).");
     }
   }, [isClerkLoaded, isAuthenticated]);
 
@@ -162,7 +162,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return
         } else {
           setUser(existingUser)
-          console.log('AuthContext: Usuario cargado exitosamente desde Supabase.')
+          // console.log('AuthContext: Usuario cargado exitosamente desde Supabase.')
         }
       } catch (err) {
         console.error('Error inesperado en fetchUser:', err)

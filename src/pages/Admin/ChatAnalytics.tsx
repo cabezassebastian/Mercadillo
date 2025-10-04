@@ -56,7 +56,7 @@ const ChatAnalytics: React.FC = () => {
       const { data: conversations, error: convError } = await supabase
         .from('chat_conversations')
         .select('*')
-        .gte('timestamp', startDate.toISOString())
+        .gte('created_at', startDate.toISOString())
 
       if (convError) {
         console.error('Error fetching conversations:', convError)
