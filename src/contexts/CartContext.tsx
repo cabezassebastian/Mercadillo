@@ -14,7 +14,6 @@ interface CartContextType {
   clearCart: () => void
   getTotalItems: () => number
   getSubtotal: () => number
-  getIGV: () => number
   getTotal: () => number
 }
 
@@ -118,12 +117,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return items.reduce((total, item) => total + (item.producto.precio * item.cantidad), 0)
   }
 
-  const getIGV = () => {
-    return getSubtotal() * 0.18 // 18% IGV
-  }
-
   const getTotal = () => {
-    return getSubtotal() + getIGV()
+    return getSubtotal()
   }
 
   const value: CartContextType = {
@@ -134,7 +129,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     clearCart,
     getTotalItems,
     getSubtotal,
-    getIGV,
     getTotal,
   }
 

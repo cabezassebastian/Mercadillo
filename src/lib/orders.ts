@@ -12,7 +12,6 @@ export interface CreateOrder {
   usuario_id: string
   items: CartItem[]
   subtotal: number
-  igv: number
   total: number
   direccion_envio: string
   metodo_pago: 'mercadopago' | 'transferencia' | 'efectivo'
@@ -24,7 +23,6 @@ export interface Order {
   usuario_id: string
   items: CartItem[]
   subtotal: number
-  igv: number
   total: number
   estado: 'pendiente' | 'pagado' | 'procesando' | 'enviado' | 'entregado' | 'cancelado' | 'fallido'
   direccion_envio: string
@@ -248,20 +246,17 @@ export function generateExternalReference(): string {
 }
 
 /**
- * Calcular totales del pedido (incluye IGV)
+ * Calcular totales del pedido
  */
 export function calculateOrderTotals(items: CartItem[]): {
   subtotal: number
-  igv: number
   total: number
 } {
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const igv = subtotal * 0.18 // IGV 18% en Perú
-  const total = subtotal + igv
+  const total = subtotal
 
   return {
     subtotal: Math.round(subtotal * 100) / 100,
-    igv: Math.round(igv * 100) / 100,
     total: Math.round(total * 100) / 100
   }
 }

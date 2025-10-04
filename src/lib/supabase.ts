@@ -24,7 +24,6 @@ export interface Pedido {
   usuario_id: string
   items: PedidoItem[]
   subtotal: number
-  igv: number
   total: number
   estado: 'pendiente' | 'procesando' | 'enviado' | 'entregado' | 'cancelado'
   fecha: string

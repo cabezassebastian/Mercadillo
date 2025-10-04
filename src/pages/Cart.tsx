@@ -9,7 +9,6 @@ const Cart = () => {
     updateQuantity, 
     removeFromCart, 
     getSubtotal, 
-    getIGV, 
     getTotal 
   } = useCart()
 
@@ -58,18 +57,26 @@ const Cart = () => {
             {items.map((item) => (
               <div key={item.producto.id} className="card p-6">
                 <div className="flex items-center space-x-4">
-                  <div className="w-20 h-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700">
+                  <Link 
+                    to={`/producto/${item.producto.id}`}
+                    className="w-20 h-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 hover:opacity-80 transition-opacity duration-200"
+                  >
                     <img
                       src={item.producto.imagen}
                       alt={item.producto.nombre}
                       className="w-full h-full object-cover"
                     />
-                  </div>
+                  </Link>
                   
                   <div className="flex-1">
-                    <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-1">
-                      {item.producto.nombre}
-                    </h3>
+                    <Link 
+                      to={`/producto/${item.producto.id}`}
+                      className="hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200"
+                    >
+                      <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-1">
+                        {item.producto.nombre}
+                      </h3>
+                    </Link>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {item.producto.categoria}
                     </p>
@@ -121,10 +128,6 @@ const Cart = () => {
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
                   <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getSubtotal())}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">IGV (18%):</span>
-                  <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getIGV())}</span>
                 </div>
                 <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
                   <div className="flex justify-between">
