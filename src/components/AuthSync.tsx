@@ -66,8 +66,8 @@ const AuthSync = () => {
 								// Check if user already exists in database
 								const { data: existingUser } = await supabase
 									.from('usuarios')
-									.select('usuario_id')
-									.eq('usuario_id', user.id)
+									.select('id')
+									.eq('id', user.id)
 									.single()
 								
 								// If user doesn't exist, create profile and send welcome email

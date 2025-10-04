@@ -148,11 +148,12 @@ export async function createUserProfile(
     const { error: insertError } = await supabase
       .from('usuarios')
       .insert([{
-        usuario_id: userId,
+        id: userId,
         email: userData.email,
         nombre: userData.nombre,
         apellido: userData.apellido || '',
-        telefono: userData.telefono || null
+        telefono: userData.telefono || null,
+        rol: 'cliente'
       }])
 
     if (insertError) {
