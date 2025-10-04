@@ -2,10 +2,9 @@ import React, { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Upload, Search } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
-import { useAuth } from '@/contexts/AuthContext'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 const AdminProducts: React.FC = () => {
-  const { supabaseAuthenticatedClient } = useAuth()
   const [productos, setProductos] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,10 +24,8 @@ const AdminProducts: React.FC = () => {
   }, [])
 
   const fetchProductos = async () => {
-    if (!supabaseAuthenticatedClient) return
-    
     try {
-      const { data, error } = await supabaseAuthenticatedClient
+      const { data, error } = await supabaseAdmin
         .from('productos')
         .select('*')
         .order('created_at', { ascending: false })
@@ -67,11 +64,6 @@ const AdminProducts: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!supabaseAuthenticatedClient) {
-      alert('Error: No hay conexión autenticada a la base de datos')
-      return
-    }
-
     try {
       const productData = {
         nombre: formData.nombre,
@@ -85,7 +77,7 @@ const AdminProducts: React.FC = () => {
 
       if (editingProduct) {
         // Actualizar producto existente
-        const { error } = await supabaseAuthenticatedClient
+        const { error } = await supabaseAdmin
           .from('productos')
           .update(productData)
           .eq('id', editingProduct.id)
@@ -97,7 +89,7 @@ const AdminProducts: React.FC = () => {
         }
       } else {
         // Crear nuevo producto
-        const { error } = await supabaseAuthenticatedClient
+        const { error } = await supabaseAdmin
           .from('productos')
           .insert([productData])
 
@@ -141,13 +133,8 @@ const AdminProducts: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return
 
-    if (!supabaseAuthenticatedClient) {
-      alert('Error: No hay conexión autenticada a la base de datos')
-      return
-    }
-
     try {
-      const { error } = await supabaseAuthenticatedClient
+      const { error } = await supabaseAdmin
         .from('productos')
         .delete()
         .eq('id', id)

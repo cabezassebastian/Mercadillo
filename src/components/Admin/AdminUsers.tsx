@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { Users, UserCheck, UserX, Mail, Calendar } from 'lucide-react'
 import { Usuario } from '@/contexts/AuthContext'
-import { useAuth } from '@/contexts/AuthContext'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 const AdminUsers: React.FC = () => {
-  const { supabaseAuthenticatedClient } = useAuth()
   const [usuarios, setUsuarios] = useState<Usuario[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
@@ -14,10 +13,8 @@ const AdminUsers: React.FC = () => {
   }, [])
 
   const fetchUsuarios = async () => {
-    if (!supabaseAuthenticatedClient) return
-    
     try {
-      const { data, error } = await supabaseAuthenticatedClient
+      const { data, error } = await supabaseAdmin
         .from('usuarios')
         .select('*')
         .order('created_at', { ascending: false })
@@ -36,10 +33,8 @@ const AdminUsers: React.FC = () => {
   }
 
   const updateUserRole = async (userId: string, newRole: 'cliente' | 'admin') => {
-    if (!supabaseAuthenticatedClient) return
-    
     try {
-      const { error } = await supabaseAuthenticatedClient
+      const { error } = await supabaseAdmin
         .from('usuarios')
         .update({ rol: newRole })
         .eq('id', userId)

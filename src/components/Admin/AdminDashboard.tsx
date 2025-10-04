@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp } from 'lucide-react'
-import { useAuth } from '@/contexts/AuthContext'
+import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 interface DashboardStats {
   totalProductos: number
@@ -19,7 +19,6 @@ type Pedido = {
 };
 
 const AdminDashboard: React.FC = () => {
-  const { supabaseAuthenticatedClient } = useAuth()
   const [stats, setStats] = useState<DashboardStats>({
     totalProductos: 0,
     totalPedidos: 0,
@@ -32,14 +31,12 @@ const AdminDashboard: React.FC = () => {
 
   useEffect(() => {
     const fetchStats = async () => {
-      if (!supabaseAuthenticatedClient) return
-      
       try {
         // Obtener estadísticas básicas
         const [productosResult, pedidosResult, usuariosResult] = await Promise.all([
-          supabaseAuthenticatedClient.from('productos').select('id', { count: 'exact' }),
-          supabaseAuthenticatedClient.from('pedidos').select('id, total, created_at, estado', { count: 'exact' }),
-          supabaseAuthenticatedClient.from('usuarios').select('id', { count: 'exact' })
+          supabaseAdmin.from('productos').select('id', { count: 'exact' }),
+          supabaseAdmin.from('pedidos').select('id, total, created_at, estado', { count: 'exact' }),
+          supabaseAdmin.from('usuarios').select('id', { count: 'exact' })
         ])
 
         const typedPedidosData = (pedidosResult.data || []) as Pedido[]
