@@ -132,7 +132,8 @@ export async function createUserProfile(
   userId: string, 
   userData: {
     email: string
-    nombre_completo: string
+    nombre: string
+    apellido?: string
     telefono?: string
   }
 ): Promise<{ success: boolean; error: string | null }> {
@@ -149,7 +150,8 @@ export async function createUserProfile(
       .insert([{
         usuario_id: userId,
         email: userData.email,
-        nombre_completo: userData.nombre_completo,
+        nombre: userData.nombre,
+        apellido: userData.apellido || '',
         telefono: userData.telefono || null
       }])
 
@@ -162,7 +164,7 @@ export async function createUserProfile(
     try {
       await enviarEmailBienvenida({
         email: userData.email,
-        nombre: userData.nombre_completo
+        nombre: userData.nombre
       })
       console.log('✅ Welcome email sent to:', userData.email)
     } catch (emailError) {

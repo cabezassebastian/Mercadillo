@@ -76,7 +76,8 @@ const AuthSync = () => {
 									
 									const result = await createUserProfile(user.id, {
 										email: user.primaryEmailAddress?.emailAddress || '',
-										nombre_completo: user.fullName || user.firstName || 'Usuario',
+										nombre: user.firstName || 'Usuario',
+										apellido: user.lastName || '',
 										telefono: user.primaryPhoneNumber?.phoneNumber || undefined
 									})
 									
