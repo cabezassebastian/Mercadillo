@@ -3,6 +3,7 @@ import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { findOrderByExternalReference, updateOrderWithMercadoPago } from '../../src/lib/orders'
 import { registrarUsoCupon } from '../../src/lib/cupones'
+import { enviarEmailConfirmacionPedido } from '../../src/lib/emails'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -182,7 +183,62 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           // Enviar email de confirmación si el pago fue aprobado
           if (paymentInfo.status === 'approved' && order) {
             console.log('Payment approved - order completed:', order.id)
-            // Aquí podrías agregar lógica para enviar emails, actualizar stock, etc.
+            
+            // Enviar email de confirmación
+            try {
+              // Obtener información del usuario
+              const { data: userData, error: userError } = await supabase
+                .from('usuarios')
+                .select('email, nombre_completo')
+                .eq('usuario_id', orderData?.user_id || order.usuario_id)
+                .single()
+
+              if (!userError && userData) {
+                // Parsear dirección de envío (viene como string JSON)
+                let direccionParsed: any
+                try {
+                  direccionParsed = typeof order.direccion_envio === 'string' 
+                    ? JSON.parse(order.direccion_envio)
+                    : order.direccion_envio
+                } catch {
+                  direccionParsed = {
+                    nombre_completo: userData.nombre_completo,
+                    telefono: '',
+                    direccion: order.direccion_envio,
+                    ciudad: '',
+                    codigo_postal: '',
+                    referencia: ''
+                  }
+                }
+
+                await enviarEmailConfirmacionPedido({
+                  email: userData.email,
+                  nombre: userData.nombre_completo,
+                  pedido: {
+                    id: order.id,
+                    fecha_creacion: order.created_at,
+                    total: order.total,
+                    subtotal: order.subtotal,
+                    descuento: order.descuento || 0,
+                    cupon_codigo: order.cupon_codigo
+                  },
+                  items: order.items.map((item: any) => ({
+                    producto_id: item.id || item.producto_id,
+                    nombre: item.title || item.nombre,
+                    cantidad: item.quantity || item.cantidad,
+                    precio_unitario: item.price || item.precio_unitario
+                  })),
+                  direccion: direccionParsed
+                })
+
+                console.log('Confirmation email sent successfully')
+              } else {
+                console.error('Error fetching user data for email:', userError)
+              }
+            } catch (emailError) {
+              console.error('Error sending confirmation email:', emailError)
+              // No fallar el webhook por error en el email
+            }
           }
         } else {
           console.warn('Payment received without external_reference:', paymentId)

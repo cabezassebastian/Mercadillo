@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react'
+import { Eye, Package, Truck, CheckCircle, XCircle, Send, PackageCheck } from 'lucide-react'
 import { Pedido } from '@/lib/supabase'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import { enviarEmailEnvio, enviarEmailEntrega } from '@/lib/emails'
 
 const AdminOrders: React.FC = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
@@ -35,9 +36,20 @@ const AdminOrders: React.FC = () => {
 
   const updateOrderStatus = async (pedidoId: string, newStatus: string) => {
     try {
+      const updateData: any = { estado: newStatus }
+      
+      // Agregar timestamps según el estado
+      if (newStatus === 'confirmado') {
+        updateData.fecha_confirmacion = new Date().toISOString()
+      } else if (newStatus === 'enviado') {
+        updateData.fecha_envio = new Date().toISOString()
+      } else if (newStatus === 'entregado') {
+        updateData.fecha_entrega = new Date().toISOString()
+      }
+
       const { error } = await supabaseAdmin
         .from('pedidos')
-        .update({ estado: newStatus })
+        .update(updateData)
         .eq('id', pedidoId)
 
       if (error) {
@@ -49,6 +61,114 @@ const AdminOrders: React.FC = () => {
       setSelectedPedido(null)
     } catch (error) {
       console.error('Error in updateOrderStatus:', error)
+    }
+  }
+
+  const handleMarcarComoEnviado = async (pedido: Pedido) => {
+    try {
+      // Actualizar estado del pedido
+      const { error: updateError } = await supabaseAdmin
+        .from('pedidos')
+        .update({ 
+          estado: 'enviado',
+          fecha_envio: new Date().toISOString()
+        })
+        .eq('id', pedido.id)
+
+      if (updateError) {
+        console.error('Error updating order:', updateError)
+        alert('Error al actualizar el pedido')
+        return
+      }
+
+      // Obtener información del usuario
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from('usuarios')
+        .select('email, nombre_completo')
+        .eq('usuario_id', pedido.usuario_id)
+        .single()
+
+      if (userError || !userData) {
+        console.error('Error fetching user data:', userError)
+        alert('Pedido actualizado pero no se pudo enviar el email')
+        fetchPedidos()
+        setSelectedPedido(null)
+        return
+      }
+
+      // Enviar email de notificación
+      await enviarEmailEnvio({
+        email: userData.email,
+        nombre: userData.nombre_completo,
+        numero_pedido: pedido.id,
+        fecha_envio: new Date().toISOString(),
+        numero_seguimiento: undefined, // Puedes agregar un campo para esto
+        items: pedido.items.map((item: any) => ({
+          nombre: item.nombre || item.title,
+          cantidad: item.cantidad || item.quantity
+        }))
+      })
+
+      alert('Pedido marcado como enviado y email enviado al cliente')
+      fetchPedidos()
+      setSelectedPedido(null)
+    } catch (error) {
+      console.error('Error in handleMarcarComoEnviado:', error)
+      alert('Error al procesar la acción')
+    }
+  }
+
+  const handleMarcarComoEntregado = async (pedido: Pedido) => {
+    try {
+      // Actualizar estado del pedido
+      const { error: updateError } = await supabaseAdmin
+        .from('pedidos')
+        .update({ 
+          estado: 'entregado',
+          fecha_entrega: new Date().toISOString()
+        })
+        .eq('id', pedido.id)
+
+      if (updateError) {
+        console.error('Error updating order:', updateError)
+        alert('Error al actualizar el pedido')
+        return
+      }
+
+      // Obtener información del usuario
+      const { data: userData, error: userError } = await supabaseAdmin
+        .from('usuarios')
+        .select('email, nombre_completo')
+        .eq('usuario_id', pedido.usuario_id)
+        .single()
+
+      if (userError || !userData) {
+        console.error('Error fetching user data:', userError)
+        alert('Pedido actualizado pero no se pudo enviar el email')
+        fetchPedidos()
+        setSelectedPedido(null)
+        return
+      }
+
+      // Enviar email de confirmación de entrega
+      await enviarEmailEntrega({
+        email: userData.email,
+        nombre: userData.nombre_completo,
+        numero_pedido: pedido.id,
+        fecha_entrega: new Date().toISOString(),
+        items: pedido.items.map((item: any) => ({
+          nombre: item.nombre || item.title,
+          cantidad: item.cantidad || item.quantity,
+          producto_id: item.producto_id || item.id
+        }))
+      })
+
+      alert('Pedido marcado como entregado y email enviado al cliente')
+      fetchPedidos()
+      setSelectedPedido(null)
+    } catch (error) {
+      console.error('Error in handleMarcarComoEntregado:', error)
+      alert('Error al procesar la acción')
     }
   }
 
@@ -299,7 +419,7 @@ const AdminOrders: React.FC = () => {
                     <label className="block text-sm font-medium text-gray-600 mb-2">
                       Actualizar estado:
                     </label>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-wrap gap-2 mb-4">
                       {['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado'].map((status) => (
                         <button
                           key={status}
@@ -314,6 +434,40 @@ const AdminOrders: React.FC = () => {
                           {status}
                         </button>
                       ))}
+                    </div>
+                  </div>
+
+                  {/* Acciones Rápidas con Email */}
+                  <div className="border-t border-gray-200 pt-4">
+                    <label className="block text-sm font-medium text-gray-600 mb-3">
+                      Acciones rápidas (con notificación por email):
+                    </label>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={() => handleMarcarComoEnviado(selectedPedido)}
+                        disabled={selectedPedido.estado === 'enviado' || selectedPedido.estado === 'entregado'}
+                        className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                          selectedPedido.estado === 'enviado' || selectedPedido.estado === 'entregado'
+                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : 'bg-purple-600 text-white hover:bg-purple-700'
+                        }`}
+                      >
+                        <Send className="w-4 h-4" />
+                        <span>Marcar como Enviado</span>
+                      </button>
+                      
+                      <button
+                        onClick={() => handleMarcarComoEntregado(selectedPedido)}
+                        disabled={selectedPedido.estado === 'entregado'}
+                        className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                          selectedPedido.estado === 'entregado'
+                            ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                            : 'bg-green-600 text-white hover:bg-green-700'
+                        }`}
+                      >
+                        <PackageCheck className="w-4 h-4" />
+                        <span>Marcar como Entregado</span>
+                      </button>
                     </div>
                   </div>
                 </div>

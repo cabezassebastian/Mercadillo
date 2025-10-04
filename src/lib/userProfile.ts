@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { enviarEmailBienvenida } from './emails'
 
 // 🎯 NUEVO ENFOQUE SIMPLE: Solo esperar a que el token esté disponible
 let _tokenWaitPromise: Promise<string | null> | null = null
@@ -120,6 +121,60 @@ export interface CreateUserAddress {
   referencia?: string
   telefono_contacto?: string
   es_predeterminada?: boolean
+}
+
+// ==================== PERFIL DE USUARIO ====================
+
+/**
+ * Crear perfil de usuario (llamar después de registro exitoso)
+ */
+export async function createUserProfile(
+  userId: string, 
+  userData: {
+    email: string
+    nombre_completo: string
+    telefono?: string
+  }
+): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('createUserProfile: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
+    }
+
+    // Crear perfil en la tabla usuarios
+    const { error: insertError } = await supabase
+      .from('usuarios')
+      .insert([{
+        usuario_id: userId,
+        email: userData.email,
+        nombre_completo: userData.nombre_completo,
+        telefono: userData.telefono || null
+      }])
+
+    if (insertError) {
+      console.error('Error creating user profile:', insertError)
+      return { success: false, error: insertError.message }
+    }
+
+    // Enviar email de bienvenida
+    try {
+      await enviarEmailBienvenida({
+        email: userData.email,
+        nombre: userData.nombre_completo
+      })
+      console.log('✅ Welcome email sent to:', userData.email)
+    } catch (emailError) {
+      console.error('Error sending welcome email:', emailError)
+      // No fallar la creación del perfil por error en el email
+    }
+
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Unexpected error creating user profile:', error)
+    return { success: false, error: 'Error inesperado al crear perfil' }
+  }
 }
 
 // ==================== LISTA DE DESEOS ====================
