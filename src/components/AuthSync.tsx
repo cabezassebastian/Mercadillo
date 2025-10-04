@@ -83,6 +83,8 @@ const AuthSync = () => {
 									
 									if (result.success) {
 										console.log('✅ User profile created and welcome email sent!')
+										// Dispatch event to notify AuthContext to refetch user
+										window.dispatchEvent(new Event('user-profile-created'))
 									} else {
 										console.error('❌ Error creating user profile:', result.error)
 									}

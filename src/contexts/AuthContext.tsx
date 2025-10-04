@@ -90,75 +90,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .single()
 
         if (supabaseFetchError && supabaseFetchError.code === 'PGRST116') {
-          // Usuario no existe, crearlo
-          const newUser: Omit<Usuario, 'created_at'> = {
-            id: clerkUser.id,
-            email: clerkUser.emailAddresses[0]?.emailAddress || '',
-            nombre: clerkUser.firstName || '',
-            apellido: clerkUser.lastName || '',
-            telefono: clerkUser.phoneNumbers?.[0]?.phoneNumber || undefined,
-            direccion: undefined,
-            rol: 'cliente',
-          }
-
-          const { data: createdUser, error: supabaseCreateError } = await supabaseAuthenticatedClient
-            .from('usuarios')
-            .insert([newUser])
-            .select('id, email, nombre, apellido, telefono, direccion, rol, created_at')
-            .single()
-
-          if (supabaseCreateError) {
-            console.error('Error creating user:', supabaseCreateError)
-            setError('Error al crear el perfil de usuario. Intentalo mas tarde.')
-            return
-          }
-
-          setUser(createdUser)
-          console.log('AuthContext: Usuario creado exitosamente en Supabase.')
+          // Usuario no existe - AuthSync lo creará
+          console.log('AuthContext: Usuario no encontrado, esperando a que AuthSync lo cree...')
+          setUser(null)
+          setIsLoading(false)
+          return
         } else if (supabaseFetchError) {
           console.error('Error fetching user:', supabaseFetchError)
-          
-          // Si hay un error de autenticación, intentar crear el usuario de todas formas
-          if (supabaseFetchError.code === '401' || supabaseFetchError.message?.includes('JWT')) {
-            console.log('AuthContext: Error de JWT, intentando crear usuario directamente...')
-            
-            const newUser: Omit<Usuario, 'created_at'> = {
-              id: clerkUser.id,
-              email: clerkUser.emailAddresses[0]?.emailAddress || '',
-              nombre: clerkUser.firstName || '',
-              apellido: clerkUser.lastName || '',
-              telefono: clerkUser.phoneNumbers?.[0]?.phoneNumber || undefined,
-              direccion: undefined,
-              rol: 'cliente',
-            }
-
-            const { data: createdUser, error: createError } = await supabaseAuthenticatedClient
-              .from('usuarios')
-              .upsert([newUser], { onConflict: 'id' })
-              .select('id, email, nombre, apellido, telefono, direccion, rol, created_at')
-              .single()
-
-            if (!createError && createdUser) {
-              setUser(createdUser)
-              console.log('AuthContext: Usuario creado/actualizado exitosamente saltando JWT.')
-              return
-            }
-          }
-          
-          setError('Error al cargar la informacion del usuario. La app funcionará con datos limitados.')
-          
-          // Crear un usuario temporal para que la app funcione
-          setUser({
-            id: clerkUser.id,
-            email: clerkUser.emailAddresses[0]?.emailAddress || '',
-            nombre: clerkUser.firstName || '',
-            apellido: clerkUser.lastName || '',
-            telefono: clerkUser.phoneNumbers?.[0]?.phoneNumber || undefined,
-            direccion: undefined,
-            rol: 'cliente',
-            created_at: new Date().toISOString()
-          })
-          
+          setError('Error al obtener el perfil de usuario.')
+          setUser(null)
+          setIsLoading(false)
           return
         } else {
           setUser(existingUser)
@@ -174,6 +115,32 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     fetchUser()
   }, [clerkUser, isLoaded, supabaseAuthenticatedClient])
+
+  // Listen for user profile creation event from AuthSync
+  useEffect(() => {
+    const handleProfileCreated = () => {
+      console.log('AuthContext: User profile created event received, refetching...')
+      // Trigger a refetch by updating a dependency
+      if (clerkUser && supabaseAuthenticatedClient) {
+        const fetchUser = async () => {
+          const { data: existingUser } = await supabaseAuthenticatedClient
+            .from('usuarios')
+            .select('id, email, nombre, apellido, telefono, direccion, rol, created_at')
+            .eq('id', clerkUser.id)
+            .single()
+          
+          if (existingUser) {
+            setUser(existingUser)
+            setIsLoading(false)
+          }
+        }
+        fetchUser()
+      }
+    }
+
+    window.addEventListener('user-profile-created', handleProfileCreated)
+    return () => window.removeEventListener('user-profile-created', handleProfileCreated)
+  }, [clerkUser, supabaseAuthenticatedClient])
 
   const updateUser = async (userData: Partial<Usuario>) => {
     if (!user || !supabaseAuthenticatedClient) return // Usar user
