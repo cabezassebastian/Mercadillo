@@ -12,32 +12,27 @@ const getWelcomeEmailHTML = (nombre: string) => `
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Bienvenido a Mercadillo</title>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
-    <h1 style="color: white; margin: 0; font-size: 28px;">🎉 ¡Bienvenido a Mercadillo!</h1>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa;">
+  <div style="background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%); padding: 40px 20px; text-align: center; border-radius: 10px 10px 0 0;">
+    <h1 style="color: #333333; margin: 0; font-size: 28px; font-weight: bold;">🎉 ¡Bienvenido a Mercadillo!</h1>
   </div>
   
   <div style="background: white; padding: 40px 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 10px 10px;">
-    <p style="font-size: 18px; margin-top: 0;">Hola <strong>${nombre}</strong>,</p>
+    <p style="font-size: 18px; margin-top: 0; color: #333333;">Hola <strong>${nombre}</strong>,</p>
     
-    <p>Nos alegra mucho que te hayas unido a nuestra comunidad. En Mercadillo encontrarás los mejores productos al mejor precio.</p>
+    <p style="color: #333333;">Nos alegra mucho que te hayas unido a nuestra comunidad. En Mercadillo encontrarás los mejores productos al mejor precio.</p>
     
-    <div style="background: #f9fafb; border-left: 4px solid #667eea; padding: 20px; margin: 30px 0; border-radius: 5px;">
-      <p style="margin: 0 0 10px 0; font-size: 16px;"><strong>🎁 Regalo de Bienvenida</strong></p>
-      <p style="margin: 0; font-size: 14px;">Usa el cupón <code style="background: #667eea; color: white; padding: 5px 10px; border-radius: 4px; font-size: 16px; font-weight: bold;">BIENVENIDA10</code> para obtener <strong>10% de descuento</strong> en tu primera compra.</p>
-    </div>
-    
-    <p>¿Qué puedes hacer ahora?</p>
-    <ul style="line-height: 2;">
+    <p style="color: #333333; margin-top: 30px;"><strong>¿Qué puedes hacer ahora?</strong></p>
+    <ul style="line-height: 2; color: #333333;">
       <li>🛍️ Explora nuestro catálogo de productos</li>
-      <li>💳 Completa tu perfil para una experiencia más rápida</li>
-      <li>📦 Realiza tu primera compra con descuento</li>
+      <li>� Completa tu perfil para una experiencia más rápida</li>
+      <li>⭐ Descubre nuestros productos más vendidos</li>
     </ul>
     
     <div style="text-align: center; margin: 40px 0;">
-      <a href="${process.env.VITE_APP_URL || 'https://mercadillo.app'}/catalog" 
-         style="background: #667eea; color: white; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block;">
-        Ver Productos
+      <a href="${process.env.VITE_APP_URL || 'https://mercadillo.app'}/catalogo" 
+         style="background: #FFD700; color: #333333; padding: 14px 30px; text-decoration: none; border-radius: 6px; font-weight: 600; display: inline-block; transition: background 0.2s;">
+        Ver Catálogo
       </a>
     </div>
     
@@ -47,8 +42,8 @@ const getWelcomeEmailHTML = (nombre: string) => `
   </div>
   
   <div style="text-align: center; padding: 20px; color: #9ca3af; font-size: 12px;">
-    <p>© ${new Date().getFullYear()} Mercadillo. Todos los derechos reservados.</p>
-    <p>Lima, Perú</p>
+    <p style="margin: 5px 0;">© ${new Date().getFullYear()} Mercadillo. Todos los derechos reservados.</p>
+    <p style="margin: 5px 0;">Lima, Perú</p>
   </div>
 </body>
 </html>
