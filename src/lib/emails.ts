@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { render } from '@react-email/render'
 import { 
   OrderConfirmationEmail, 
   ShippingNotificationEmail, 
@@ -86,7 +87,7 @@ export async function enviarEmailConfirmacionPedido(data: EmailConfirmacionPedid
       from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
       to: data.email,
       subject: `✅ Pedido Confirmado #${data.pedido.id.slice(0, 8).toUpperCase()}`,
-      react: OrderConfirmationEmail(data),
+      html: await render(OrderConfirmationEmail(data)),
     })
 
     if (error) {
@@ -111,7 +112,7 @@ export async function enviarEmailEnvio(data: EmailEnvio) {
       from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
       to: data.email,
       subject: `📦 Tu pedido #${data.numero_pedido.slice(0, 8).toUpperCase()} está en camino`,
-      react: ShippingNotificationEmail(data),
+      html: await render(ShippingNotificationEmail(data)),
     })
 
     if (error) {
@@ -136,7 +137,7 @@ export async function enviarEmailEntrega(data: EmailEntrega) {
       from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
       to: data.email,
       subject: `🎉 Tu pedido #${data.numero_pedido.slice(0, 8).toUpperCase()} fue entregado`,
-      react: DeliveryConfirmationEmail(data),
+      html: await render(DeliveryConfirmationEmail(data)),
     })
 
     if (error) {
@@ -161,7 +162,7 @@ export async function enviarEmailBienvenida(data: EmailBienvenida) {
       from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
       to: data.email,
       subject: `👋 ¡Bienvenido a ${EMAIL_FROM_NAME}!`,
-      react: WelcomeEmail(data),
+      html: await render(WelcomeEmail(data)),
     })
 
     if (error) {
