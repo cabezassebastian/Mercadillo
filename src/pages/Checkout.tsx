@@ -60,6 +60,30 @@ const Checkout: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target
+    
+    // Validación especial para el campo de teléfono
+    if (name === 'telefono') {
+      // Solo permitir números, espacios y el símbolo +
+      const phoneRegex = /^[\d\s+]*$/
+      if (!phoneRegex.test(value)) {
+        return // No actualizar si contiene caracteres inválidos
+      }
+      // Limitar a 25 caracteres
+      if (value.length > 25) {
+        return
+      }
+    }
+    
+    // Validación para nombre (máximo 100 caracteres)
+    if (name === 'nombre' && value.length > 100) {
+      return
+    }
+    
+    // Validación para dirección (máximo 255 caracteres)
+    if (name === 'direccion' && value.length > 255) {
+      return
+    }
+    
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
@@ -170,9 +194,13 @@ const Checkout: React.FC = () => {
                     value={formData.nombre}
                     onChange={handleInputChange}
                     required
+                    maxLength={100}
                     className="input-field"
                     placeholder="Ingresa tu nombre completo"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.nombre.length}/100 caracteres
+                  </p>
                 </div>
 
                 <div>
@@ -197,9 +225,14 @@ const Checkout: React.FC = () => {
                     value={formData.telefono}
                     onChange={handleInputChange}
                     required
+                    maxLength={25}
+                    pattern="[\d\s+]*"
                     className="input-field"
                     placeholder="+51 999 999 999"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.telefono.length}/25 caracteres (solo números y +)
+                  </p>
                 </div>
 
                 <div>
@@ -287,15 +320,21 @@ const Checkout: React.FC = () => {
 
                   {/* Campo de dirección manual */}
                   {(useNewAddress || addresses.length === 0) && (
-                    <textarea
-                      name="direccion"
-                      value={formData.direccion}
-                      onChange={handleInputChange}
-                      required
-                      rows={3}
-                      className="input-field"
-                      placeholder="Ingresa tu dirección completa de entrega"
-                    />
+                    <div>
+                      <textarea
+                        name="direccion"
+                        value={formData.direccion}
+                        onChange={handleInputChange}
+                        required
+                        rows={3}
+                        maxLength={255}
+                        className="input-field"
+                        placeholder="Ingresa tu dirección completa de entrega"
+                      />
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                        {formData.direccion.length}/255 caracteres
+                      </p>
+                    </div>
                   )}
 
                   {/* Link para gestionar direcciones */}

@@ -22,7 +22,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   onError,
   shippingAddress = "Lima, Perú" // Dirección por defecto
 }) => {
-  const { items, cuponAplicado, getDescuento } = useCart()
+  const { items, cuponAplicado, getDescuento, getSubtotal, getTotal } = useCart()
   const { user } = useUser()
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -150,11 +150,33 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
               </span>
             </div>
           ))}
-          <div className="border-t pt-2 mt-2">
-            <div className="flex justify-between font-semibold text-gray-900 dark:text-gray-100">
-              <span>Total:</span>
-              <span>
-                S/ {items.reduce((sum, item) => sum + (item.producto.precio * item.cantidad), 0).toFixed(2)}
+          
+          <div className="border-t pt-2 mt-2 space-y-2">
+            {/* Subtotal */}
+            <div className="flex justify-between text-sm">
+              <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
+              <span className="text-gray-900 dark:text-gray-100">
+                S/ {getSubtotal().toFixed(2)}
+              </span>
+            </div>
+            
+            {/* Descuento por cupón (si existe) */}
+            {getDescuento() > 0 && (
+              <div className="flex justify-between text-sm">
+                <span className="text-green-600 dark:text-green-400 flex items-center">
+                  Descuento {cuponAplicado?.tipo === 'porcentaje' && `(${cuponAplicado.valor}%)`}:
+                </span>
+                <span className="text-green-600 dark:text-green-400 font-medium">
+                  -S/ {getDescuento().toFixed(2)}
+                </span>
+              </div>
+            )}
+            
+            {/* Total */}
+            <div className="flex justify-between font-semibold text-lg border-t pt-2">
+              <span className="text-gray-900 dark:text-gray-100">Total:</span>
+              <span className="text-gray-900 dark:text-gray-100">
+                S/ {getTotal().toFixed(2)}
               </span>
             </div>
           </div>
