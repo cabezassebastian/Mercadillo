@@ -2,13 +2,15 @@ import { Link } from 'react-router-dom'
 import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import CheckoutButton from '@/components/Cart/CheckoutButton'
+import CouponInput from '@/components/Cart/CouponInput'
 
 const Cart = () => {
   const { 
     items, 
     updateQuantity, 
     removeFromCart, 
-    getSubtotal, 
+    getSubtotal,
+    getDescuento,
     getTotal 
   } = useCart()
 
@@ -124,11 +126,25 @@ const Cart = () => {
                 Resumen del Pedido
               </h2>
 
+              {/* Cupón de descuento */}
+              <div className="mb-6 pb-6 border-b border-gray-200 dark:border-gray-600">
+                <CouponInput />
+              </div>
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-400">Subtotal:</span>
                   <span className="font-medium text-gris-oscuro dark:text-gray-200">{formatPrice(getSubtotal())}</span>
                 </div>
+                
+                {/* Mostrar descuento si hay cupón aplicado */}
+                {getDescuento() > 0 && (
+                  <div className="flex justify-between text-green-600 dark:text-green-400">
+                    <span className="font-medium">Descuento:</span>
+                    <span className="font-medium">-{formatPrice(getDescuento())}</span>
+                  </div>
+                )}
+                
                 <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
                   <div className="flex justify-between">
                     <span className="text-lg font-bold text-gris-oscuro dark:text-gray-100">Total:</span>

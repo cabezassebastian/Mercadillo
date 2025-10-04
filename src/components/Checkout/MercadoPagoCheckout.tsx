@@ -22,7 +22,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   onError,
   shippingAddress = "Lima, Perú" // Dirección por defecto
 }) => {
-  const { items } = useCart()
+  const { items, cuponAplicado, getDescuento } = useCart()
   const { user } = useUser()
   const [preferenceId, setPreferenceId] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -68,6 +68,9 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         // Nuevos campos para integración con Supabase
         user_id: user.id,
         shipping_address: shippingAddress,
+        // Campos de cupón
+        descuento: getDescuento(),
+        cupon_codigo: cuponAplicado?.codigo || null,
         metadata: {
           user_id: user.id,
           order_total: totals.total

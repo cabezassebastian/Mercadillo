@@ -2,6 +2,7 @@ import { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Payment } from 'mercadopago'
 import { createClient } from '@supabase/supabase-js'
 import { findOrderByExternalReference, updateOrderWithMercadoPago } from '../../src/lib/orders'
+import { registrarUsoCupon } from '../../src/lib/cupones'
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -78,7 +79,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 usuario_id: orderData.user_id,
                 items: orderData.items,
                 subtotal: orderData.subtotal,
-                igv: orderData.igv,
+                descuento: orderData.descuento || 0,
+                cupon_codigo: orderData.cupon_codigo || null,
                 total: orderData.total,
                 estado: 'completado',
                 direccion_envio: orderData.shipping_address,
@@ -106,6 +108,45 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               orderId: newOrder.id,
               status: newOrder.estado
             })
+
+            // Registrar uso del cupón si se aplicó uno
+            if (orderData.cupon_codigo && orderData.descuento > 0) {
+              console.log('Registering coupon usage:', {
+                cupon_codigo: orderData.cupon_codigo,
+                descuento: orderData.descuento,
+                orderId: newOrder.id
+              })
+
+              try {
+                // Obtener el ID del cupón desde la base de datos
+                const { data: cuponData, error: cuponError } = await supabase
+                  .from('cupones')
+                  .select('id')
+                  .eq('codigo', orderData.cupon_codigo)
+                  .single()
+
+                if (cuponError) {
+                  console.error('Error fetching coupon:', cuponError)
+                } else if (cuponData) {
+                  // Registrar el uso del cupón
+                  const registrado = await registrarUsoCupon(
+                    cuponData.id,
+                    orderData.user_id,
+                    newOrder.id,
+                    orderData.descuento
+                  )
+
+                  if (registrado) {
+                    console.log('Coupon usage registered successfully')
+                  } else {
+                    console.error('Failed to register coupon usage')
+                  }
+                }
+              } catch (cuponRegisterError) {
+                console.error('Error registering coupon usage:', cuponRegisterError)
+                // No fallar el webhook por error en el cupón
+              }
+            }
 
           } else if (order) {
             // Si el pedido ya existe, actualizarlo con la información del pago

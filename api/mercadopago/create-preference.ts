@@ -16,18 +16,17 @@ function generateExternalReference(): string {
   return `order_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
 }
 
-function calculateOrderTotals(items: CartItem[]): {
+function calculateOrderTotals(items: CartItem[], descuento: number = 0): {
   subtotal: number
-  igv: number
+  descuento: number
   total: number
 } {
   const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0)
-  const igv = subtotal * 0.18 // IGV 18% en Perú
-  const total = subtotal + igv
+  const total = Math.max(0, subtotal - descuento) // No puede ser negativo
 
   return {
     subtotal: Math.round(subtotal * 100) / 100,
-    igv: Math.round(igv * 100) / 100,
+    descuento: Math.round(descuento * 100) / 100,
     total: Math.round(total * 100) / 100
   }
 }
@@ -63,8 +62,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       back_urls, 
       auto_return, 
       notification_url,
-      shipping_address, // Nueva: dirección de envío
-      user_id // Nueva: ID del usuario
+      shipping_address, // Dirección de envío
+      user_id, // ID del usuario
+      descuento = 0, // Descuento por cupón (opcional)
+      cupon_codigo = null // Código del cupón aplicado (opcional)
     } = req.body
 
     // Validar datos requeridos
@@ -87,7 +88,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // Generar referencia externa única con los datos del pedido
     const externalReference = generateExternalReference()
 
-    // Calcular totales
+    // Calcular totales con descuento
     const cartItems: CartItem[] = items.map(item => ({
       id: item.id,
       title: item.title,
@@ -96,14 +97,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       image: item.picture_url || ''
     }))
 
-    const { subtotal, igv, total } = calculateOrderTotals(cartItems)
+    const { subtotal, descuento: descuentoFinal, total } = calculateOrderTotals(cartItems, descuento)
 
     // Guardar datos del pedido en el external_reference para crear el pedido después del pago
     const orderData = {
       user_id,
       items: cartItems,
       subtotal,
-      igv,
+      descuento: descuentoFinal,
+      cupon_codigo,
       total,
       shipping_address,
       external_reference: externalReference

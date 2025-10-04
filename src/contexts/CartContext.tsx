@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import { Producto } from '@/lib/supabase'
+import { validarCupon, type ValidacionCupon } from '@/lib/cupones'
 
 export interface CartItem {
   producto: Producto
@@ -8,12 +9,16 @@ export interface CartItem {
 
 interface CartContextType {
   items: CartItem[]
+  cuponAplicado: ValidacionCupon | null
   addToCart: (producto: Producto, cantidad?: number) => void
   removeFromCart: (productoId: string) => void
   updateQuantity: (productoId: string, cantidad: number) => void
   clearCart: () => void
+  aplicarCupon: (codigo: string, usuarioId: string) => Promise<ValidacionCupon>
+  removerCupon: () => void
   getTotalItems: () => number
   getSubtotal: () => number
+  getDescuento: () => number
   getTotal: () => number
 }
 
@@ -29,6 +34,7 @@ export const useCart = () => {
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [items, setItems] = useState<CartItem[]>([])
+  const [cuponAplicado, setCuponAplicado] = useState<ValidacionCupon | null>(null)
 
   // Cargar carrito desde localStorage al inicializar
   useEffect(() => {
@@ -107,6 +113,22 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearCart = () => {
     setItems([])
+    setCuponAplicado(null) // Limpiar cupón también
+  }
+
+  const aplicarCupon = async (codigo: string, usuarioId: string): Promise<ValidacionCupon> => {
+    const subtotal = getSubtotal()
+    const resultado = await validarCupon(codigo, usuarioId, subtotal)
+    
+    if (resultado.valido) {
+      setCuponAplicado(resultado)
+    }
+    
+    return resultado
+  }
+
+  const removerCupon = () => {
+    setCuponAplicado(null)
   }
 
   const getTotalItems = () => {
@@ -117,18 +139,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return items.reduce((total, item) => total + (item.producto.precio * item.cantidad), 0)
   }
 
+  const getDescuento = () => {
+    return cuponAplicado?.descuento || 0
+  }
+
   const getTotal = () => {
-    return getSubtotal()
+    return getSubtotal() - getDescuento()
   }
 
   const value: CartContextType = {
     items,
+    cuponAplicado,
     addToCart,
     removeFromCart,
     updateQuantity,
     clearCart,
+    aplicarCupon,
+    removerCupon,
     getTotalItems,
     getSubtotal,
+    getDescuento,
     getTotal,
   }
 

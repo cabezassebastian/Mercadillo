@@ -12,6 +12,8 @@ export interface CreateOrder {
   usuario_id: string
   items: CartItem[]
   subtotal: number
+  descuento?: number
+  cupon_codigo?: string
   total: number
   direccion_envio: string
   metodo_pago: 'mercadopago' | 'transferencia' | 'efectivo'
@@ -23,6 +25,8 @@ export interface Order {
   usuario_id: string
   items: CartItem[]
   subtotal: number
+  descuento?: number
+  cupon_codigo?: string
   total: number
   estado: 'pendiente' | 'pagado' | 'procesando' | 'enviado' | 'entregado' | 'cancelado' | 'fallido'
   direccion_envio: string
