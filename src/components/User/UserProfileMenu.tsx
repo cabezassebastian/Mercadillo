@@ -10,8 +10,10 @@ import {
   Clock, 
   MapPin, 
   LogOut,
-  Settings
+  Settings,
+  Shield
 } from 'lucide-react'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface UserProfileMenuProps {
   className?: string
@@ -20,6 +22,7 @@ interface UserProfileMenuProps {
 const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ className = '' }) => {
   const { user, isLoaded } = useUser()
   const { signOut } = useClerk()
+  const { isAdmin } = useAuth()
   const [isOpen, setIsOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -205,6 +208,26 @@ const UserProfileMenu: React.FC<UserProfileMenuProps> = ({ className = '' }) => 
                 <Settings className="w-5 h-5 mr-3 text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
                 <span className="font-medium">Configuración</span>
               </Link>
+
+              {/* Botón de Panel de Admin - Solo visible para administradores */}
+              {isAdmin && (
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="
+                    flex items-center px-4 py-2
+                    text-gray-700 dark:text-gray-200
+                    hover:bg-yellow-50 dark:hover:bg-yellow-900/20
+                    transition-colors duration-200
+                    group
+                  "
+                >
+                  <Shield className="w-5 h-5 mr-3 text-gray-400 group-hover:text-yellow-600 dark:group-hover:text-yellow-400" />
+                  <span className="font-medium group-hover:text-yellow-600 dark:group-hover:text-yellow-400">
+                    Panel de Admin
+                  </span>
+                </Link>
+              )}
 
               <button
                 onClick={handleSignOut}
