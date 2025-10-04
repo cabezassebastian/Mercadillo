@@ -20,7 +20,7 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_estado ON pedidos(estado);
 -- Actualizar pedidos existentes al estado 'confirmado' si tienen fecha de creación
 UPDATE pedidos 
 SET estado = 'confirmado', 
-    fecha_confirmacion = fecha_creacion
+    fecha_confirmacion = created_at
 WHERE estado IS NULL OR estado = 'pendiente';
 
 -- Comentarios para documentación
