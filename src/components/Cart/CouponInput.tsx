@@ -59,7 +59,7 @@ const CouponInput: React.FC = () => {
             onChange={(e) => setCodigo(e.target.value.toUpperCase())}
             onKeyPress={(e) => e.key === 'Enter' && handleAplicar()}
             placeholder="Código de cupón"
-            className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-dorado focus:border-transparent dark:bg-gray-700 dark:text-gray-100 transition-colors duration-200"
+            className="flex-1 px-2 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-dorado focus:border-transparent dark:bg-gray-700 dark:text-gray-100 transition-colors duration-200"
             disabled={loading}
           />
           <button
