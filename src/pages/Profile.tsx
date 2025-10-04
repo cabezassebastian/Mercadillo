@@ -246,10 +246,6 @@ const Profile: React.FC = () => {
                           <span>Subtotal:</span>
                           <span>{formatPrice(pedido.subtotal)}</span>
                         </div>
-                        <div className="flex justify-between text-sm">
-                          <span>IGV (18%):</span>
-                          <span>{formatPrice(pedido.igv)}</span>
-                        </div>
                         <div className="flex justify-between font-semibold">
                           <span>Total:</span>
                           <span>{formatPrice(pedido.total)}</span>

@@ -288,10 +288,6 @@ const AdminOrders: React.FC = () => {
                       <span className="text-gray-600">Subtotal:</span>
                       <span className="font-medium">{formatPrice(selectedPedido.subtotal)}</span>
                     </div>
-                    <div className="flex justify-between mb-2">
-                      <span className="text-gray-600">IGV (18%):</span>
-                      <span className="font-medium">{formatPrice(selectedPedido.igv)}</span>
-                    </div>
                     <div className="flex justify-between text-lg font-bold">
                       <span className="text-gris-oscuro">Total:</span>
                       <span className="text-dorado">{formatPrice(selectedPedido.total)}</span>
