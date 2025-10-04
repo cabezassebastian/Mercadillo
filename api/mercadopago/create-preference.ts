@@ -115,13 +115,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const encodedOrderData = Buffer.from(JSON.stringify(orderData)).toString('base64')
     const fullExternalReference = `${externalReference}|${encodedOrderData}`
 
+    // Calcular el factor de descuento para aplicar proporcionalmente
+    const discountFactor = descuentoFinal > 0 ? (subtotal - descuentoFinal) / subtotal : 1
+
     // Crear la preferencia de pago SIN crear el pedido todavía
     const preferenceData = {
       items: items.map(item => ({
         id: item.id,
         title: item.title,
         quantity: Number(item.quantity),
-        unit_price: Number(item.unit_price),
+        // Aplicar descuento proporcionalmente a cada item si hay cupón
+        unit_price: descuentoFinal > 0 
+          ? Math.round(Number(item.unit_price) * discountFactor * 100) / 100
+          : Number(item.unit_price),
         currency_id: 'PEN',
         picture_url: item.picture_url
       })),
