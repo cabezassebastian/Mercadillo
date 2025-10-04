@@ -78,8 +78,8 @@ BEGIN
 
   -- Verificar si el usuario ya usó este cupón
   SELECT COUNT(*) INTO v_usos_usuario
-  FROM cupones_usados
-  WHERE cupon_id = v_cupon.id AND usuario_id = p_usuario_id;
+  FROM cupones_usados cu
+  WHERE cu.cupon_id = v_cupon.id AND cu.usuario_id = p_usuario_id;
 
   IF v_usos_usuario > 0 THEN
     RETURN QUERY SELECT false, 'Ya has usado este cupón'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;

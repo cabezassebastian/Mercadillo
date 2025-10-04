@@ -49,8 +49,8 @@ BEGIN
 
   -- Verificar si el usuario ya usó este cupón
   SELECT COUNT(*) INTO v_usos_usuario
-  FROM cupones_usados
-  WHERE cupon_id = v_cupon.id AND usuario_id = p_usuario_id;
+  FROM cupones_usados cu
+  WHERE cu.cupon_id = v_cupon.id AND cu.usuario_id = p_usuario_id;
 
   IF v_usos_usuario > 0 THEN
     RETURN QUERY SELECT false, 'Ya has usado este cupón'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
@@ -88,8 +88,10 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Verificar que la función se creó correctamente
-SELECT routine_name, data_type 
-FROM information_schema.parameters 
-WHERE specific_schema = 'public' 
-AND routine_name = 'validar_cupon'
-ORDER BY ordinal_position;
+-- Debería devolver información sobre la función
+SELECT proname, pronargs, proargtypes 
+FROM pg_proc 
+WHERE proname = 'validar_cupon';
+
+-- Prueba simple: validar un cupón inexistente (debe devolver false)
+SELECT * FROM validar_cupon('TEST123', 'user_test', 100.00);
