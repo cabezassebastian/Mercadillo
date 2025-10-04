@@ -1,19 +1,3 @@
-import { Resend } from 'resend'
-import { render } from '@react-email/render'
-import { 
-  OrderConfirmationEmail, 
-  ShippingNotificationEmail, 
-  DeliveryConfirmationEmail, 
-  WelcomeEmail 
-} from '../templates/emails/index'
-
-// Inicializar cliente de Resend
-const resend = new Resend(import.meta.env.VITE_RESEND_API_KEY)
-
-// Configuración de email
-const EMAIL_FROM = import.meta.env.VITE_EMAIL_FROM || 'noreply@mercadillo.com'
-const EMAIL_FROM_NAME = import.meta.env.VITE_EMAIL_FROM_NAME || 'Mercadillo'
-
 // ============================================
 // INTERFACES
 // ============================================
@@ -83,22 +67,25 @@ export interface EmailBienvenida {
  */
 export async function enviarEmailConfirmacionPedido(data: EmailConfirmacionPedido) {
   try {
-    const { data: emailData, error } = await resend.emails.send({
-      from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
-      to: data.email,
-      subject: `✅ Pedido Confirmado #${data.pedido.id.slice(0, 8).toUpperCase()}`,
-      html: await render(OrderConfirmationEmail(data)),
+    const response = await fetch('/api/emails/send-order-confirmation', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     })
 
-    if (error) {
-      console.error('❌ Error enviando email de confirmación:', error)
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('❌ Error sending order confirmation:', error)
       return { success: false, error }
     }
 
-    console.log('✅ Email de confirmación enviado:', emailData?.id)
-    return { success: true, data: emailData }
+    const result = await response.json()
+    console.log('✅ Order confirmation sent:', result.id)
+    return { success: true, data: result }
   } catch (error) {
-    console.error('❌ Error en enviarEmailConfirmacionPedido:', error)
+    console.error('❌ Error in enviarEmailConfirmacionPedido:', error)
     return { success: false, error }
   }
 }
@@ -108,22 +95,25 @@ export async function enviarEmailConfirmacionPedido(data: EmailConfirmacionPedid
  */
 export async function enviarEmailEnvio(data: EmailEnvio) {
   try {
-    const { data: emailData, error } = await resend.emails.send({
-      from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
-      to: data.email,
-      subject: `📦 Tu pedido #${data.numero_pedido.slice(0, 8).toUpperCase()} está en camino`,
-      html: await render(ShippingNotificationEmail(data)),
+    const response = await fetch('/api/emails/send-shipping', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     })
 
-    if (error) {
-      console.error('❌ Error enviando email de envío:', error)
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('❌ Error sending shipping notification:', error)
       return { success: false, error }
     }
 
-    console.log('✅ Email de envío enviado:', emailData?.id)
-    return { success: true, data: emailData }
+    const result = await response.json()
+    console.log('✅ Shipping notification sent:', result.id)
+    return { success: true, data: result }
   } catch (error) {
-    console.error('❌ Error en enviarEmailEnvio:', error)
+    console.error('❌ Error in enviarEmailEnvio:', error)
     return { success: false, error }
   }
 }
@@ -133,22 +123,25 @@ export async function enviarEmailEnvio(data: EmailEnvio) {
  */
 export async function enviarEmailEntrega(data: EmailEntrega) {
   try {
-    const { data: emailData, error } = await resend.emails.send({
-      from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
-      to: data.email,
-      subject: `🎉 Tu pedido #${data.numero_pedido.slice(0, 8).toUpperCase()} fue entregado`,
-      html: await render(DeliveryConfirmationEmail(data)),
+    const response = await fetch('/api/emails/send-delivery', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
     })
 
-    if (error) {
-      console.error('❌ Error enviando email de entrega:', error)
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('❌ Error sending delivery confirmation:', error)
       return { success: false, error }
     }
 
-    console.log('✅ Email de entrega enviado:', emailData?.id)
-    return { success: true, data: emailData }
+    const result = await response.json()
+    console.log('✅ Delivery confirmation sent:', result.id)
+    return { success: true, data: result }
   } catch (error) {
-    console.error('❌ Error en enviarEmailEntrega:', error)
+    console.error('❌ Error in enviarEmailEntrega:', error)
     return { success: false, error }
   }
 }
@@ -158,22 +151,28 @@ export async function enviarEmailEntrega(data: EmailEntrega) {
  */
 export async function enviarEmailBienvenida(data: EmailBienvenida) {
   try {
-    const { data: emailData, error } = await resend.emails.send({
-      from: `${EMAIL_FROM_NAME} <${EMAIL_FROM}>`,
-      to: data.email,
-      subject: `👋 ¡Bienvenido a ${EMAIL_FROM_NAME}!`,
-      html: await render(WelcomeEmail(data)),
+    const response = await fetch('/api/emails/send-welcome', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: data.email,
+        nombre: data.nombre,
+      }),
     })
 
-    if (error) {
-      console.error('❌ Error enviando email de bienvenida:', error)
+    if (!response.ok) {
+      const error = await response.json()
+      console.error('❌ Error sending welcome email:', error)
       return { success: false, error }
     }
 
-    console.log('✅ Email de bienvenida enviado:', emailData?.id)
-    return { success: true, data: emailData }
+    const result = await response.json()
+    console.log('✅ Welcome email sent to:', data.email)
+    return { success: true, data: result }
   } catch (error) {
-    console.error('❌ Error en enviarEmailBienvenida:', error)
+    console.error('❌ Error in enviarEmailBienvenida:', error)
     return { success: false, error }
   }
 }
