@@ -6,13 +6,13 @@ CREATE TABLE IF NOT EXISTS cupones (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   codigo VARCHAR(50) UNIQUE NOT NULL,
   tipo VARCHAR(20) NOT NULL CHECK (tipo IN ('porcentaje', 'monto_fijo')),
-  valor DECIMAL(10,2) NOT NULL CHECK (valor > 0),
+  valor NUMERIC(10,2) NOT NULL CHECK (valor > 0),
   descripcion TEXT,
   fecha_inicio TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   fecha_expiracion TIMESTAMP WITH TIME ZONE,
   usos_maximos INTEGER DEFAULT NULL,
   usos_actuales INTEGER DEFAULT 0,
-  monto_minimo DECIMAL(10,2) DEFAULT 0,
+  monto_minimo NUMERIC(10,2) DEFAULT 0,
   activo BOOLEAN DEFAULT true,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS cupones_usados (
   cupon_id UUID REFERENCES cupones(id) ON DELETE CASCADE,
   usuario_id TEXT NOT NULL,
   pedido_id UUID REFERENCES pedidos(id) ON DELETE SET NULL,
-  descuento_aplicado DECIMAL(10,2) NOT NULL,
+  descuento_aplicado NUMERIC(10,2) NOT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -38,20 +38,20 @@ CREATE INDEX IF NOT EXISTS idx_cupones_usados_cupon ON cupones_usados(cupon_id);
 CREATE OR REPLACE FUNCTION validar_cupon(
   p_codigo VARCHAR(50),
   p_usuario_id TEXT,
-  p_subtotal DECIMAL(10,2)
+  p_subtotal NUMERIC
 )
 RETURNS TABLE(
   valido BOOLEAN,
   mensaje TEXT,
   cupon_id UUID,
   tipo VARCHAR(20),
-  valor DECIMAL(10,2),
-  descuento DECIMAL(10,2)
+  valor NUMERIC,
+  descuento NUMERIC
 ) AS $$
 DECLARE
   v_cupon RECORD;
   v_usos_usuario INTEGER;
-  v_descuento DECIMAL(10,2);
+  v_descuento NUMERIC;
 BEGIN
   -- Buscar cupón
   SELECT * INTO v_cupon
@@ -60,19 +60,19 @@ BEGIN
 
   -- Cupón no existe o inactivo
   IF NOT FOUND THEN
-    RETURN QUERY SELECT false, 'Cupón inválido o expirado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::DECIMAL, 0::DECIMAL;
+    RETURN QUERY SELECT false, 'Cupón inválido o expirado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
     RETURN;
   END IF;
 
   -- Verificar fecha de expiración
   IF v_cupon.fecha_expiracion IS NOT NULL AND v_cupon.fecha_expiracion < NOW() THEN
-    RETURN QUERY SELECT false, 'Cupón expirado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::DECIMAL, 0::DECIMAL;
+    RETURN QUERY SELECT false, 'Cupón expirado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
     RETURN;
   END IF;
 
   -- Verificar usos máximos globales
   IF v_cupon.usos_maximos IS NOT NULL AND v_cupon.usos_actuales >= v_cupon.usos_maximos THEN
-    RETURN QUERY SELECT false, 'Cupón agotado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::DECIMAL, 0::DECIMAL;
+    RETURN QUERY SELECT false, 'Cupón agotado'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
     RETURN;
   END IF;
 
@@ -82,7 +82,7 @@ BEGIN
   WHERE cupon_id = v_cupon.id AND usuario_id = p_usuario_id;
 
   IF v_usos_usuario > 0 THEN
-    RETURN QUERY SELECT false, 'Ya has usado este cupón'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::DECIMAL, 0::DECIMAL;
+    RETURN QUERY SELECT false, 'Ya has usado este cupón'::TEXT, NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
     RETURN;
   END IF;
 
@@ -91,7 +91,7 @@ BEGIN
     RETURN QUERY SELECT 
       false, 
       ('Compra mínima de S/ ' || v_cupon.monto_minimo || ' requerida')::TEXT, 
-      NULL::UUID, NULL::VARCHAR, NULL::DECIMAL, 0::DECIMAL;
+      NULL::UUID, NULL::VARCHAR, NULL::NUMERIC, 0::NUMERIC;
     RETURN;
   END IF;
 
@@ -121,7 +121,7 @@ CREATE OR REPLACE FUNCTION registrar_uso_cupon(
   p_cupon_id UUID,
   p_usuario_id TEXT,
   p_pedido_id UUID,
-  p_descuento DECIMAL(10,2)
+  p_descuento NUMERIC
 )
 RETURNS BOOLEAN AS $$
 BEGIN

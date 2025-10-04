@@ -3,7 +3,7 @@
 
 -- Agregar columnas para cupones en la tabla pedidos
 ALTER TABLE pedidos 
-ADD COLUMN IF NOT EXISTS descuento DECIMAL(10,2) DEFAULT 0,
+ADD COLUMN IF NOT EXISTS descuento NUMERIC(10,2) DEFAULT 0,
 ADD COLUMN IF NOT EXISTS cupon_codigo VARCHAR(50) DEFAULT NULL;
 
 -- Índice para búsquedas por cupón
