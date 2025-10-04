@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react'
 import { Eye, Package, Truck, CheckCircle, XCircle } from 'lucide-react'
-import { supabase, Pedido } from '@/lib/supabase'
+import { Pedido } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
 
 const AdminOrders: React.FC = () => {
+  const { supabaseAuthenticatedClient } = useAuth()
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
@@ -13,8 +15,10 @@ const AdminOrders: React.FC = () => {
   }, [])
 
   const fetchPedidos = async () => {
+    if (!supabaseAuthenticatedClient) return
+    
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAuthenticatedClient
         .from('pedidos')
         .select('*')
         .order('created_at', { ascending: false })
@@ -33,8 +37,10 @@ const AdminOrders: React.FC = () => {
   }
 
   const updateOrderStatus = async (pedidoId: string, newStatus: string) => {
+    if (!supabaseAuthenticatedClient) return
+    
     try {
-      const { error } = await supabase
+      const { error } = await supabaseAuthenticatedClient
         .from('pedidos')
         .update({ estado: newStatus })
         .eq('id', pedidoId)

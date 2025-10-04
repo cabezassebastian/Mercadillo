@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Upload, Search } from 'lucide-react'
-import { supabase, Producto } from '@/lib/supabase'
+import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
+import { useAuth } from '@/contexts/AuthContext'
 
 const AdminProducts: React.FC = () => {
+  const { supabaseAuthenticatedClient } = useAuth()
   const [productos, setProductos] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -23,8 +25,10 @@ const AdminProducts: React.FC = () => {
   }, [])
 
   const fetchProductos = async () => {
+    if (!supabaseAuthenticatedClient) return
+    
     try {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseAuthenticatedClient
         .from('productos')
         .select('*')
         .order('created_at', { ascending: false })
@@ -63,6 +67,11 @@ const AdminProducts: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!supabaseAuthenticatedClient) {
+      alert('Error: No hay conexión autenticada a la base de datos')
+      return
+    }
+
     try {
       const productData = {
         nombre: formData.nombre,
@@ -70,28 +79,31 @@ const AdminProducts: React.FC = () => {
         precio: parseFloat(formData.precio),
         stock: parseInt(formData.stock),
         categoria: formData.categoria,
-        imagen: formData.imagen
+        imagen: formData.imagen,
+        activo: true
       }
 
       if (editingProduct) {
         // Actualizar producto existente
-        const { error } = await supabase
+        const { error } = await supabaseAuthenticatedClient
           .from('productos')
           .update(productData)
           .eq('id', editingProduct.id)
 
         if (error) {
           console.error('Error updating product:', error)
+          alert(`Error al actualizar: ${error.message}`)
           return
         }
       } else {
         // Crear nuevo producto
-        const { error } = await supabase
+        const { error } = await supabaseAuthenticatedClient
           .from('productos')
           .insert([productData])
 
         if (error) {
           console.error('Error creating product:', error)
+          alert(`Error al crear: ${error.message}`)
           return
         }
       }
@@ -129,20 +141,27 @@ const AdminProducts: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) return
 
+    if (!supabaseAuthenticatedClient) {
+      alert('Error: No hay conexión autenticada a la base de datos')
+      return
+    }
+
     try {
-      const { error } = await supabase
+      const { error } = await supabaseAuthenticatedClient
         .from('productos')
         .delete()
         .eq('id', id)
 
       if (error) {
         console.error('Error deleting product:', error)
+        alert(`Error al eliminar: ${error.message}`)
         return
       }
 
       fetchProductos()
     } catch (error) {
       console.error('Error in handleDelete:', error)
+      alert('Error inesperado al eliminar producto')
     }
   }
 
