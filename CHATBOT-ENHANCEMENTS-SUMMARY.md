@@ -63,7 +63,7 @@ async function searchProducts(query: string, limit = 5) {
 **Integración:**
 - `api/chat.ts`: Detecta búsqueda, ejecuta query, incluye productos en respuesta JSON
 - SYSTEM_PROMPT actualizado para informar al bot de esta capacidad
-- Respuesta incluye `products` array si hay resultados
+- Respuesta incluye `products` array si hay resultadoos
 
 ---
 
