@@ -4,13 +4,15 @@ import {
   ShoppingCart, 
   Users, 
   BarChart3,
-  MessageSquare
+  MessageSquare,
+  Ticket
 } from 'lucide-react'
 import AdminProducts from '../components/Admin/AdminProducts'
 import AdminOrders from '../components/Admin/AdminOrders'
 import AdminUsers from '../components/Admin/AdminUsers'
 import AdminDashboard from '../components/Admin/AdminDashboard'
 import ChatAnalytics from './Admin/ChatAnalytics'
+import AdminCoupons from '../components/Admin/AdminCoupons'
 
 const Admin = () => {
   const location = useLocation()
@@ -19,6 +21,7 @@ const Admin = () => {
     { path: '/admin', icon: BarChart3, label: 'Dashboard' },
     { path: '/admin/productos', icon: Package, label: 'Productos' },
     { path: '/admin/pedidos', icon: ShoppingCart, label: 'Pedidos' },
+    { path: '/admin/cupones', icon: Ticket, label: 'Cupones' },
     { path: '/admin/usuarios', icon: Users, label: 'Usuarios' },
     { path: '/admin/chat-analytics', icon: MessageSquare, label: 'Analíticas Chat' },
   ]
@@ -70,6 +73,7 @@ const Admin = () => {
               <Route path="/" element={<AdminDashboard />} />
               <Route path="/productos" element={<AdminProducts />} />
               <Route path="/pedidos" element={<AdminOrders />} />
+              <Route path="/cupones" element={<AdminCoupons />} />
               <Route path="/usuarios" element={<AdminUsers />} />
               <Route path="/chat-analytics" element={<ChatAnalytics />} />
             </Routes>
