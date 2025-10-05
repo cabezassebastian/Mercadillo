@@ -82,7 +82,7 @@
     "api/checkout.ts": {
       "maxDuration": 30
     },
-    "api/clerk-webhook.ts": {
+    "api/clerk.ts": {
       "maxDuration": 30
     },
     "api/orders.ts": {
