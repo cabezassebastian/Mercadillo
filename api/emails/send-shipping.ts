@@ -331,14 +331,14 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       </div>
 
       <center>
-        <a href="https://mercadillo.app/orders" class="cta-button">
+        <a href="https://www.mercadillo.app/perfil/pedidos" class="cta-button">
           Ver Mis Pedidos
         </a>
       </center>
     </div>
 
     <div class="footer">
-      <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">
+      <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #FFD700;">
         ¿Necesitas ayuda?
       </p>
       <p style="margin: 0 0 10px 0;">

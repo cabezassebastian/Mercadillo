@@ -327,7 +327,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
     </div>
 
     <div class="footer">
-      <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600;">
+      <p style="margin: 0 0 15px 0; font-size: 16px; font-weight: 600; color: #FFD700;">
         ¿Algún problema con tu pedido?
       </p>
       <p style="margin: 0 0 10px 0;">

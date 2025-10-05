@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react'
-import { Eye, Package, Truck, CheckCircle, XCircle, Send, PackageCheck } from 'lucide-react'
+import React, { useEffect, useState, useRef } from 'react'
+import { Eye, Package, Truck, CheckCircle, XCircle, Send, PackageCheck, ChevronDown, X } from 'lucide-react'
 import { Pedido } from '@/lib/supabase'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { enviarEmailEnvio, enviarEmailEntrega } from '@/lib/emails'
@@ -9,6 +9,31 @@ const AdminOrders: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [selectedPedido, setSelectedPedido] = useState<Pedido | null>(null)
   const [filterStatus, setFilterStatus] = useState('')
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false)
+  const [isClosing, setIsClosing] = useState({ filter: false, modal: false })
+  const filterDropdownRef = useRef<HTMLDivElement>(null)
+
+  // Helper para cerrar con animación
+  const closeWithAnimation = (type: 'filter' | 'modal') => {
+    setIsClosing(prev => ({ ...prev, [type]: true }))
+    const duration = 150
+    setTimeout(() => {
+      if (type === 'filter') setShowFilterDropdown(false)
+      else if (type === 'modal') setSelectedPedido(null)
+      setIsClosing(prev => ({ ...prev, [type]: false }))
+    }, duration)
+  }
+
+  // Click fuera para cerrar dropdown de filtros
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (filterDropdownRef.current && !filterDropdownRef.current.contains(event.target as Node)) {
+        if (showFilterDropdown) closeWithAnimation('filter')
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [showFilterDropdown])
 
   useEffect(() => {
     fetchPedidos()
@@ -31,36 +56,6 @@ const AdminOrders: React.FC = () => {
       console.error('Error in fetchPedidos:', error)
     } finally {
       setIsLoading(false)
-    }
-  }
-
-  const updateOrderStatus = async (pedidoId: string, newStatus: string) => {
-    try {
-      const updateData: any = { estado: newStatus }
-      
-      // Agregar timestamps según el estado
-      if (newStatus === 'confirmado') {
-        updateData.fecha_confirmacion = new Date().toISOString()
-      } else if (newStatus === 'enviado') {
-        updateData.fecha_envio = new Date().toISOString()
-      } else if (newStatus === 'entregado') {
-        updateData.fecha_entrega = new Date().toISOString()
-      }
-
-      const { error } = await supabaseAdmin
-        .from('pedidos')
-        .update(updateData)
-        .eq('id', pedidoId)
-
-      if (error) {
-        console.error('Error updating order status:', error)
-        return
-      }
-
-      fetchPedidos()
-      setSelectedPedido(null)
-    } catch (error) {
-      console.error('Error in updateOrderStatus:', error)
     }
   }
 
@@ -256,19 +251,55 @@ const AdminOrders: React.FC = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-wrap gap-4">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="input-field"
+      <div className="relative" ref={filterDropdownRef}>
+        <button
+          onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+          className="w-full sm:w-auto px-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg flex items-center justify-between space-x-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200 shadow-sm"
         >
-          <option value="">Todos los estados</option>
-          <option value="pendiente">Pendiente</option>
-          <option value="procesando">Procesando</option>
-          <option value="enviado">Enviado</option>
-          <option value="entregado">Entregado</option>
-          <option value="cancelado">Cancelado</option>
-        </select>
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {filterStatus === '' ? 'Todos los estados' : 
+             filterStatus === 'pendiente' ? 'Pendiente' :
+             filterStatus === 'procesando' ? 'Procesando' :
+             filterStatus === 'enviado' ? 'Enviado' :
+             filterStatus === 'entregado' ? 'Entregado' :
+             'Cancelado'}
+          </span>
+          <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Filter Dropdown */}
+        {showFilterDropdown && (
+          <div className={`absolute top-full left-0 mt-2 w-full sm:w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden ${
+            isClosing.filter ? 'animate-slide-down-closing' : 'animate-slide-up'
+          }`}>
+            {[
+              { value: '', label: 'Todos los estados' },
+              { value: 'pendiente', label: 'Pendiente' },
+              { value: 'procesando', label: 'Procesando' },
+              { value: 'enviado', label: 'Enviado' },
+              { value: 'entregado', label: 'Entregado' },
+              { value: 'cancelado', label: 'Cancelado' }
+            ].map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  setFilterStatus(option.value)
+                  closeWithAnimation('filter')
+                }}
+                className={`w-full px-4 py-3 text-left transition-all duration-150 ${
+                  filterStatus === option.value
+                    ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                }`}
+              >
+                {option.label}
+                {filterStatus === option.value && (
+                  <span className="ml-2">✓</span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Orders Table */}
@@ -342,21 +373,29 @@ const AdminOrders: React.FC = () => {
 
       {/* Order Detail Modal */}
       {selectedPedido && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-xl font-bold text-gris-oscuro">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div 
+            className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
+              isClosing.modal ? 'animate-backdrop-closing' : 'animate-backdrop'
+            }`}
+            onClick={() => closeWithAnimation('modal')}
+          />
+          <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto ${
+            isClosing.modal ? 'animate-scale-down-closing' : 'animate-scale-up'
+          }`}>
+            <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center z-10">
+              <h3 className="text-xl font-bold text-gris-oscuro dark:text-gray-100">
                 Pedido #{selectedPedido.id.slice(-8)}
               </h3>
               <button
-                onClick={() => setSelectedPedido(null)}
-                className="text-gray-400 hover:text-gray-600"
+                onClick={() => closeWithAnimation('modal')}
+                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
               >
-                <XCircle className="w-6 h-6" />
+                <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
               </button>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Order Items */}
               <div>
                 <h4 className="text-lg font-semibold text-gris-oscuro mb-4">
@@ -540,28 +579,7 @@ const AdminOrders: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Status Update */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-600 mb-2">
-                      Actualizar estado:
-                    </label>
-                    <div className="flex flex-wrap gap-2 mb-4">
-                      {['pendiente', 'procesando', 'enviado', 'entregado', 'cancelado'].map((status) => (
-                        <button
-                          key={status}
-                          onClick={() => updateOrderStatus(selectedPedido.id, status)}
-                          disabled={selectedPedido.estado === status}
-                          className={`px-3 py-1 text-xs font-medium rounded-full transition-colors duration-200 ${
-                            selectedPedido.estado === status
-                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
-                              : 'bg-amarillo text-gris-oscuro hover:bg-dorado'
-                          }`}
-                        >
-                          {status}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  {/* Status Update - ELIMINADO - Usar solo Acciones Rápidas */}
 
                   {/* Acciones Rápidas con Email */}
                   <div className="border-t border-gray-200 pt-4">
