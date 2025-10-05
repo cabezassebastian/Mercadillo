@@ -16,7 +16,7 @@ const AdminOrders: React.FC = () => {
   // Helper para cerrar con animación
   const closeWithAnimation = (type: 'filter' | 'modal') => {
     setIsClosing(prev => ({ ...prev, [type]: true }))
-    const duration = 150
+    const duration = type === 'filter' ? 150 : 200
     setTimeout(() => {
       if (type === 'filter') setShowFilterDropdown(false)
       else if (type === 'modal') setSelectedPedido(null)
@@ -267,38 +267,49 @@ const AdminOrders: React.FC = () => {
           <ChevronDown className={`w-4 h-4 text-gray-500 dark:text-gray-400 transition-transform duration-200 ${showFilterDropdown ? 'rotate-180' : ''}`} />
         </button>
 
-        {/* Filter Dropdown */}
+        {/* Filter Dropdown with backdrop for mobile */}
         {showFilterDropdown && (
-          <div className={`absolute top-full left-0 mt-2 w-full sm:w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden ${
-            isClosing.filter ? 'animate-slide-down-closing' : 'animate-slide-up'
-          }`}>
-            {[
-              { value: '', label: 'Todos los estados' },
-              { value: 'pendiente', label: 'Pendiente' },
-              { value: 'procesando', label: 'Procesando' },
-              { value: 'enviado', label: 'Enviado' },
-              { value: 'entregado', label: 'Entregado' },
-              { value: 'cancelado', label: 'Cancelado' }
-            ].map((option) => (
-              <button
-                key={option.value}
-                onClick={() => {
-                  setFilterStatus(option.value)
-                  closeWithAnimation('filter')
-                }}
-                className={`w-full px-4 py-3 text-left transition-all duration-150 ${
-                  filterStatus === option.value
-                    ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
-                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
-                }`}
-              >
-                {option.label}
-                {filterStatus === option.value && (
-                  <span className="ml-2">✓</span>
-                )}
-              </button>
-            ))}
-          </div>
+          <>
+            {/* Backdrop móvil */}
+            <div 
+              className={`sm:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-sm ${
+                isClosing.filter ? 'animate-backdrop-closing' : 'animate-backdrop'
+              }`}
+              onClick={() => closeWithAnimation('filter')}
+            />
+            
+            {/* Dropdown */}
+            <div className={`absolute sm:relative top-full left-0 mt-2 w-full sm:w-64 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden ${
+              isClosing.filter ? 'animate-slide-down-closing' : 'animate-slide-up'
+            }`}>
+              {[
+                { value: '', label: 'Todos los estados' },
+                { value: 'pendiente', label: 'Pendiente' },
+                { value: 'procesando', label: 'Procesando' },
+                { value: 'enviado', label: 'Enviado' },
+                { value: 'entregado', label: 'Entregado' },
+                { value: 'cancelado', label: 'Cancelado' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => {
+                    setFilterStatus(option.value)
+                    closeWithAnimation('filter')
+                  }}
+                  className={`w-full px-4 py-3 text-left transition-all duration-150 ${
+                    filterStatus === option.value
+                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                  }`}
+                >
+                  {option.label}
+                  {filterStatus === option.value && (
+                    <span className="ml-2">✓</span>
+                  )}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
 
@@ -579,14 +590,66 @@ const AdminOrders: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Status Update - ELIMINADO - Usar solo Acciones Rápidas */}
+                  {/* Acciones Rápidas con Email y cambios de estado */}
+                  <div className="border-t border-gray-200 pt-4 space-y-4">
+                    {/* Cambios de estado básicos */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-3">
+                        Cambiar estado:
+                      </label>
+                      <div className="grid grid-cols-2 gap-2">
+                        <button
+                          onClick={() => {
+                            supabaseAdmin
+                              .from('pedidos')
+                              .update({ estado: 'pendiente' })
+                              .eq('id', selectedPedido.id)
+                              .then(() => {
+                                fetchPedidos()
+                                closeWithAnimation('modal')
+                              })
+                          }}
+                          disabled={selectedPedido.estado === 'pendiente'}
+                          className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                            selectedPedido.estado === 'pendiente'
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              : 'bg-orange-600 text-white hover:bg-orange-700'
+                          }`}
+                        >
+                          <Package className="w-4 h-4" />
+                          <span>Pendiente</span>
+                        </button>
+                        
+                        <button
+                          onClick={() => {
+                            supabaseAdmin
+                              .from('pedidos')
+                              .update({ estado: 'cancelado' })
+                              .eq('id', selectedPedido.id)
+                              .then(() => {
+                                fetchPedidos()
+                                closeWithAnimation('modal')
+                              })
+                          }}
+                          disabled={selectedPedido.estado === 'cancelado'}
+                          className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
+                            selectedPedido.estado === 'cancelado'
+                              ? 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                              : 'bg-red-600 text-white hover:bg-red-700'
+                          }`}
+                        >
+                          <XCircle className="w-4 h-4" />
+                          <span>Cancelar</span>
+                        </button>
+                      </div>
+                    </div>
 
-                  {/* Acciones Rápidas con Email */}
-                  <div className="border-t border-gray-200 pt-4">
-                    <label className="block text-sm font-medium text-gray-600 mb-3">
-                      Acciones rápidas (con notificación por email):
-                    </label>
-                    <div className="flex flex-col gap-2">
+                    {/* Acciones con email */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-3">
+                        Acciones con notificación por email:
+                      </label>
+                      <div className="flex flex-col gap-2">
                       <button
                         onClick={() => handleMarcarComoEnviado(selectedPedido)}
                         disabled={selectedPedido.estado === 'enviado' || selectedPedido.estado === 'entregado'}
@@ -612,6 +675,7 @@ const AdminOrders: React.FC = () => {
                         <PackageCheck className="w-4 h-4" />
                         <span>Marcar como Entregado</span>
                       </button>
+                    </div>
                     </div>
                   </div>
                 </div>
