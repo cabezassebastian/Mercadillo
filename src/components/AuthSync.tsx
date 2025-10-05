@@ -9,6 +9,7 @@ let tokenPromise: Promise<string | null> | null = null
 
 // 🎯 Track if we've already created the user profile to avoid duplicates
 const processedUsers = new Set<string>()
+const lastSyncedData = new Map<string, string>() // Track last synced data to detect changes
 
 const AuthSync = () => {
 	const { session, isLoaded } = useSession()
@@ -57,41 +58,86 @@ const AuthSync = () => {
 							// If setSession fails, that's OK - we'll use the token directly
 						}
 						
-						// 🎉 Check if user exists in database, if not create profile and send welcome email
+						// 🎉 Check and sync user profile
 						if (!hasProcessedUser.current && !processedUsers.has(user.id)) {
 							hasProcessedUser.current = true
 							processedUsers.add(user.id)
+						}
+						
+						try {
+							// Always check user data for changes
+							const clerkFirstName = user.firstName || ''
+							const clerkLastName = user.lastName || ''
+							const clerkEmail = user.primaryEmailAddress?.emailAddress || ''
+							const dataKey = `${clerkFirstName}|${clerkLastName}|${clerkEmail}`
 							
-							try {
-								// Check if user already exists in database
-								const { data: existingUser } = await supabase
-									.from('usuarios')
-									.select('id')
-									.eq('id', user.id)
-									.single()
-								
-								// If user doesn't exist, create profile and send welcome email
-								if (!existingUser) {
-									console.log('📧 New user detected, creating profile and sending welcome email...')
-									
-									const result = await createUserProfile(user.id, {
-										email: user.primaryEmailAddress?.emailAddress || '',
-										nombre: user.firstName || 'Usuario',
-										apellido: user.lastName || '',
-										telefono: user.primaryPhoneNumber?.phoneNumber || undefined
-									})
-									
-									if (result.success) {
-										console.log('✅ User profile created and welcome email sent!')
-										// Dispatch event to notify AuthContext to refetch user
-										window.dispatchEvent(new Event('user-profile-created'))
-									} else {
-										console.error('❌ Error creating user profile:', result.error)
-									}
-								}
-							} catch (error) {
-								console.error('Error checking/creating user profile:', error)
+							// Check if we've already synced this exact data
+							if (lastSyncedData.get(user.id) === dataKey) {
+								// Data hasn't changed, skip sync
+								return
 							}
+							
+							// Check if user exists in database
+							const { data: existingUser } = await supabase
+								.from('usuarios')
+								.select('id, nombre, apellido, email')
+								.eq('id', user.id)
+								.single()
+							
+							// If user doesn't exist, create profile and send welcome email
+							if (!existingUser) {
+								console.log('📧 New user detected, creating profile and sending welcome email...')
+								
+								const result = await createUserProfile(user.id, {
+									email: clerkEmail,
+									nombre: clerkFirstName || 'Usuario',
+									apellido: clerkLastName,
+									telefono: user.primaryPhoneNumber?.phoneNumber || undefined
+								})
+								
+								if (result.success) {
+									console.log('✅ User profile created and welcome email sent!')
+									lastSyncedData.set(user.id, dataKey)
+									window.dispatchEvent(new Event('user-profile-created'))
+								} else {
+									console.error('❌ Error creating user profile:', result.error)
+								}
+							} else {
+								// User exists - check if profile needs updating
+								const needsUpdate = 
+									existingUser.nombre !== clerkFirstName ||
+									existingUser.apellido !== clerkLastName ||
+									existingUser.email !== clerkEmail
+								
+								if (needsUpdate) {
+									console.log('🔄 User profile changed in Clerk, syncing to Supabase...')
+									console.log('  Old:', { nombre: existingUser.nombre, apellido: existingUser.apellido })
+									console.log('  New:', { nombre: clerkFirstName, apellido: clerkLastName })
+									
+									const { error: updateError } = await supabase
+										.from('usuarios')
+										.update({
+											nombre: clerkFirstName,
+											apellido: clerkLastName,
+											email: clerkEmail,
+											telefono: user.primaryPhoneNumber?.phoneNumber || null
+										})
+										.eq('id', user.id)
+									
+									if (updateError) {
+										console.error('❌ Error updating user profile:', updateError)
+									} else {
+										console.log('✅ User profile synced to Supabase!')
+										lastSyncedData.set(user.id, dataKey)
+										window.dispatchEvent(new Event('user-profile-updated'))
+									}
+								} else {
+									// Data is the same, just update cache
+									lastSyncedData.set(user.id, dataKey)
+								}
+							}
+						} catch (error) {
+							console.error('Error syncing user profile:', error)
 						}
 						
 						// Dispatch event so waiting code knows token is ready
