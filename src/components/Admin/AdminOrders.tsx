@@ -399,46 +399,117 @@ const AdminOrders: React.FC = () => {
                   </div>
 
                   {/* Información de Entrega */}
-                  <div className="border-t border-gray-200 pt-4 space-y-3">
-                    <h4 className="text-sm font-semibold text-gris-oscuro">Información de Entrega</h4>
+                  <div className="border-t border-gray-200 pt-4 space-y-4">
+                    <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 flex items-center space-x-2">
+                      <span>📋 Información de Entrega</span>
+                    </h4>
                     
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">Método de entrega:</label>
-                        <p className="text-gris-oscuro capitalize">
-                          {selectedPedido.metodo_entrega === 'envio' ? '📦 Envío domicilio (Olva Courier)' :
-                           selectedPedido.metodo_entrega === 'contraentrega' ? '🚇 Pago contra entrega - Tren Línea 1' :
-                           selectedPedido.metodo_entrega === 'tienda' ? '🏪 Recojo en tienda' :
-                           selectedPedido.metodo_entrega || 'No especificado'}
-                        </p>
-                      </div>
-
-                      {selectedPedido.dni_cliente && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600">DNI:</label>
-                          <p className="text-gris-oscuro">{selectedPedido.dni_cliente}</p>
+                    {/* Badge del método de entrega */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+                        Método de entrega:
+                      </label>
+                      {selectedPedido.metodo_entrega === 'envio' ? (
+                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-blue-50 dark:bg-blue-900/30 border-2 border-blue-200 dark:border-blue-700 rounded-lg">
+                          <span className="text-2xl">📦</span>
+                          <div>
+                            <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Envío a domicilio</p>
+                            <p className="text-xs text-blue-700 dark:text-blue-300">Olva Courier (3-5 días hábiles)</p>
+                          </div>
                         </div>
-                      )}
-
-                      {selectedPedido.nombre_completo && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600">Nombre completo:</label>
-                          <p className="text-gris-oscuro">{selectedPedido.nombre_completo}</p>
+                      ) : selectedPedido.metodo_entrega === 'contraentrega' ? (
+                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-200 dark:border-purple-700 rounded-lg">
+                          <span className="text-2xl">🚇</span>
+                          <div>
+                            <p className="text-sm font-semibold text-purple-900 dark:text-purple-100">Pago contra entrega</p>
+                            <p className="text-xs text-purple-700 dark:text-purple-300">Tren Línea 1</p>
+                          </div>
                         </div>
-                      )}
-
-                      {selectedPedido.telefono_contacto && (
-                        <div>
-                          <label className="block text-sm font-medium text-gray-600">Teléfono:</label>
-                          <p className="text-gris-oscuro">{selectedPedido.telefono_contacto}</p>
+                      ) : selectedPedido.metodo_entrega === 'tienda' ? (
+                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-green-50 dark:bg-green-900/30 border-2 border-green-200 dark:border-green-700 rounded-lg">
+                          <span className="text-2xl">🏪</span>
+                          <div>
+                            <p className="text-sm font-semibold text-green-900 dark:text-green-100">Recojo en tienda</p>
+                            <p className="text-xs text-green-700 dark:text-green-300">Retiro en local</p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="inline-flex items-center space-x-2 px-4 py-2 bg-gray-50 dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg">
+                          <span className="text-2xl">❓</span>
+                          <div>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">No especificado</p>
+                            <p className="text-xs text-gray-700 dark:text-gray-400">Sin método definido</p>
+                          </div>
                         </div>
                       )}
                     </div>
 
+                    {/* Grid de información del cliente */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {selectedPedido.nombre_completo && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            👤 Nombre completo
+                          </label>
+                          <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100">
+                            {selectedPedido.nombre_completo}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedPedido.dni_cliente && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            🆔 DNI
+                          </label>
+                          <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100 font-mono">
+                            {selectedPedido.dni_cliente}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedPedido.telefono_contacto && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700">
+                          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            📱 Teléfono de contacto
+                          </label>
+                          <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100 font-mono">
+                            {selectedPedido.telefono_contacto}
+                          </p>
+                        </div>
+                      )}
+
+                      {selectedPedido.direccion_envio && (
+                        <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg border border-gray-200 dark:border-gray-700 md:col-span-2">
+                          <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">
+                            📍 {selectedPedido.metodo_entrega === 'contraentrega' ? 'Estación de entrega' : 'Dirección de entrega'}
+                          </label>
+                          <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100">
+                            {selectedPedido.direccion_envio}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Notas de entrega */}
                     {selectedPedido.notas_entrega && (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-600">Notas de entrega:</label>
-                        <p className="text-gris-oscuro text-sm">{selectedPedido.notas_entrega}</p>
+                      <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg border-l-4 border-yellow-400 dark:border-yellow-500">
+                        <label className="flex items-center space-x-1 text-xs font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                          <span>📝</span>
+                          <span>Notas de entrega</span>
+                        </label>
+                        <p className="text-sm text-yellow-900 dark:text-yellow-100">
+                          {selectedPedido.notas_entrega}
+                        </p>
+                      </div>
+                    )}
+
+                    {/* Alerta si no hay información de entrega */}
+                    {!selectedPedido.metodo_entrega && !selectedPedido.telefono_contacto && (
+                      <div className="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg border-l-4 border-orange-400 dark:border-orange-500">
+                        <p className="text-sm text-orange-800 dark:text-orange-200">
+                          ⚠️ Este pedido no tiene información de entrega registrada (pedido antiguo).
+                        </p>
                       </div>
                     )}
                   </div>
