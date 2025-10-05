@@ -84,7 +84,7 @@ const AdminOrders: React.FC = () => {
       // Obtener información del usuario
       const { data: userData, error: userError } = await supabaseAdmin
         .from('usuarios')
-        .select('email, nombre_completo')
+        .select('email, nombre, apellido')
         .eq('id', pedido.usuario_id)
         .single()
 
@@ -99,7 +99,7 @@ const AdminOrders: React.FC = () => {
       // Enviar email de notificación
       await enviarEmailEnvio({
         email: userData.email,
-        nombre: userData.nombre_completo,
+        nombre: `${userData.nombre} ${userData.apellido}`,
         numero_pedido: pedido.id,
         fecha_envio: new Date().toISOString(),
         numero_seguimiento: undefined, // Puedes agregar un campo para esto
@@ -138,7 +138,7 @@ const AdminOrders: React.FC = () => {
       // Obtener información del usuario
       const { data: userData, error: userError } = await supabaseAdmin
         .from('usuarios')
-        .select('email, nombre_completo')
+        .select('email, nombre, apellido')
         .eq('id', pedido.usuario_id)
         .single()
 
@@ -153,7 +153,7 @@ const AdminOrders: React.FC = () => {
       // Enviar email de confirmación de entrega
       await enviarEmailEntrega({
         email: userData.email,
-        nombre: userData.nombre_completo,
+        nombre: `${userData.nombre} ${userData.apellido}`,
         numero_pedido: pedido.id,
         fecha_entrega: new Date().toISOString(),
         items: pedido.items.map((item: any) => ({
