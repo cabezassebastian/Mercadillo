@@ -190,27 +190,27 @@ const AdminProducts: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gris-oscuro">Gestión de Productos</h2>
-          <p className="text-gray-600">Administra tu catálogo de productos</p>
+          <h2 className="text-3xl font-bold text-gris-oscuro">Gestión de Productos</h2>
+          <p className="text-gray-600 text-lg">Administra tu catálogo de productos</p>
         </div>
         <button
           onClick={openModal}
-          className="btn-primary flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2 px-6 py-3 text-base"
         >
-          <Plus className="w-5 h-5" />
+          <Plus className="w-6 h-6" />
           <span>Nuevo Producto</span>
         </button>
       </div>
 
       {/* Search */}
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
         <input
           type="text"
           placeholder="Buscar productos..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="input-field pl-10"
+          className="input-field pl-12 py-3 text-base"
         />
       </div>
 
@@ -220,29 +220,29 @@ const AdminProducts: React.FC = () => {
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Producto
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Categoría
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Precio
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Stock
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-8 py-4 text-left text-sm font-medium text-gray-500 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
               {filteredProductos.map((producto) => (
-                <tr key={producto.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                <tr key={producto.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-8 py-5 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-12 h-12 overflow-hidden rounded-lg bg-gray-100">
+                      <div className="w-16 h-16 overflow-hidden rounded-lg bg-gray-100 flex-shrink-0">
                         <img
                           src={producto.imagen}
                           alt={producto.nombre}
@@ -250,25 +250,27 @@ const AdminProducts: React.FC = () => {
                         />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gris-oscuro">
+                        <div className="text-base font-medium text-gris-oscuro">
                           {producto.nombre}
                         </div>
-                        <div className="text-sm text-gray-500 line-clamp-1">
-                          {producto.descripcion}
+                        <div className="text-sm text-gray-500">
+                          {producto.descripcion.length > 15 
+                            ? `${producto.descripcion.substring(0, 15)}...` 
+                            : producto.descripcion}
                         </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="px-2 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
+                  <td className="px-8 py-5 whitespace-nowrap">
+                    <span className="px-3 py-1.5 text-sm font-medium bg-gray-100 text-gray-800 rounded-full">
                       {producto.categoria}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-dorado">
+                  <td className="px-8 py-5 whitespace-nowrap text-base font-semibold text-dorado">
                     {formatPrice(producto.precio)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                  <td className="px-8 py-5 whitespace-nowrap">
+                    <span className={`px-3 py-1.5 text-sm font-medium rounded-full ${
                       producto.stock > 10 
                         ? 'bg-green-100 text-green-800' 
                         : producto.stock > 0 
@@ -278,19 +280,19 @@ const AdminProducts: React.FC = () => {
                       {producto.stock}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex space-x-2">
+                  <td className="px-8 py-5 whitespace-nowrap text-sm font-medium">
+                    <div className="flex space-x-3">
                       <button
                         onClick={() => handleEdit(producto)}
-                        className="text-amarillo hover:text-dorado transition-colors duration-200"
+                        className="p-2 text-amarillo hover:text-dorado hover:bg-yellow-50 rounded-lg transition-all duration-200"
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-5 h-5" />
                       </button>
                       <button
                         onClick={() => handleDelete(producto.id)}
-                        className="text-red-500 hover:text-red-700 transition-colors duration-200"
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                   </td>
