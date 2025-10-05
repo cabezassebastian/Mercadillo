@@ -83,9 +83,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'ID de usuario es requerido' })
     }
 
-    if (!shipping_address) {
-      return res.status(400).json({ error: 'Dirección de envío es requerida' })
-    }
+    // Dirección de envío es opcional si el método es "recojo en tienda"
+    const metodoEntrega = delivery_data?.metodo_entrega || metadata?.metodo_entrega || 'envio'
+    const direccionFinal = shipping_address || 
+                          (metodoEntrega === 'tienda' ? 'Recojo en tienda' : 'Lima, Perú')
 
     // Generar referencia externa única con los datos del pedido
     const externalReference = generateExternalReference()
@@ -109,15 +110,15 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       descuento: descuentoFinal,
       cupon_codigo,
       total,
-      shipping_address,
+      shipping_address: direccionFinal,
       external_reference: externalReference,
       // Incluir datos de entrega si están disponibles
       delivery_data: delivery_data ? {
         metodo_entrega: delivery_data.metodo_entrega || 'envio',
         nombre_completo: delivery_data.nombre_completo || '',
-        dni: delivery_data.dni || '',
+        dni: delivery_data.dni || null, // null si no se proporciona
         telefono: delivery_data.telefono || '',
-        direccion: delivery_data.direccion || shipping_address
+        direccion: delivery_data.direccion || direccionFinal // usar direccionFinal como fallback
       } : null,
       metadata
     }

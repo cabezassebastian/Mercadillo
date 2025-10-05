@@ -75,23 +75,23 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         notification_url: `${baseUrl}/api/mercadopago/webhook`,
         // Nuevos campos para integración con Supabase
         user_id: user.id,
-        shipping_address: shippingAddress,
+        shipping_address: shippingAddress || 'Lima, Perú',
         // Campos de cupón
         descuento: getDescuento(),
         cupon_codigo: cuponAplicado?.codigo || null,
-        // Datos de entrega
+        // Datos de entrega (solo incluir si existen)
         delivery_data: deliveryData ? {
-          nombre_completo: deliveryData.nombreCompleto,
-          dni: deliveryData.dni,
-          telefono: deliveryData.telefono,
-          direccion: deliveryData.direccion,
+          nombre_completo: deliveryData.nombreCompleto || '',
+          dni: deliveryData.dni || null, // null si está vacío
+          telefono: deliveryData.telefono || '',
+          direccion: deliveryData.direccion || null, // null si está vacío para tienda
           metodo_entrega: deliveryData.metodoEntrega
         } : null,
         metadata: {
           user_id: user.id,
           order_total: totals.total,
           metodo_entrega: deliveryData?.metodoEntrega || 'envio',
-          dni_cliente: deliveryData?.dni || '',
+          dni_cliente: deliveryData?.dni || null, // null en lugar de string vacío
           telefono_contacto: deliveryData?.telefono || ''
         }
       }

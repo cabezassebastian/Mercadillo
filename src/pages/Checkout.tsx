@@ -3,9 +3,39 @@ import { useCart } from '@/contexts/CartContext'
 import { useUser } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import MercadoPagoCheckout from '@/components/Checkout/MercadoPagoCheckout'
-import { CreditCard, User, ShoppingBag, MapPin, Plus } from 'lucide-react'
+import { CreditCard, User, ShoppingBag, MapPin, Plus, ChevronDown, Train } from 'lucide-react'
 import { getUserAddresses, type UserAddress, updateUserDNI } from '@/lib/userProfile'
 import { useNotificationHelpers } from '@/contexts/NotificationContext'
+
+// Lista de estaciones del Tren Línea 1 (orden sur a norte)
+const ESTACIONES_TREN = [
+  'Bayóvar',
+  'Santa Rosa',
+  'San Martín',
+  'San Carlos',
+  'Los Postes',
+  'Los Jardines',
+  'Pirámide del Sol',
+  'Caja de Agua',
+  'Presbítero Maestro',
+  'El Ángel',
+  'Miguel Grau',
+  'Gamarra',
+  'Arriola',
+  'La Cultura',
+  'San Borja Sur',
+  'Angamos',
+  'Cabitos',
+  'Ayacucho',
+  'Jorge Chávez',
+  'Atocongo',
+  'San Juan',
+  'María Auxiliadora',
+  'Villa María',
+  'Pumacahua',
+  'Parque Industrial',
+  'Villa El Salvador'
+]
 
 const Checkout: React.FC = () => {
   const { items } = useCart()
@@ -16,6 +46,7 @@ const Checkout: React.FC = () => {
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(null)
   const [useNewAddress, setUseNewAddress] = useState(false)
   const [dniSaved, setDniSaved] = useState(false)
+  const [showEstacionesDropdown, setShowEstacionesDropdown] = useState(false)
   const [formData, setFormData] = useState<{
     nombre: string
     dni: string
@@ -91,6 +122,21 @@ const Checkout: React.FC = () => {
       }))
     }
   }, [user])
+
+  // Cerrar dropdown de estaciones cuando se hace clic fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement
+      if (showEstacionesDropdown && !target.closest('.relative')) {
+        setShowEstacionesDropdown(false)
+      }
+    }
+
+    if (showEstacionesDropdown) {
+      document.addEventListener('mousedown', handleClickOutside)
+      return () => document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showEstacionesDropdown])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -495,26 +541,75 @@ const Checkout: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Campo de dirección manual */}
+                  {/* Campo de dirección manual o selector de estaciones */}
                   {(useNewAddress || addresses.length === 0) && (
                     <div>
-                      <textarea
-                        name="direccion"
-                        value={formData.direccion}
-                        onChange={handleInputChange}
-                        required
-                        rows={3}
-                        maxLength={255}
-                        className="input-field"
-                        placeholder={
-                          formData.metodoEntrega === 'envio' 
-                            ? "Ingresa tu dirección completa de entrega" 
-                            : "Indica la estación del Tren Línea 1 (ej: Villa El Salvador, San Juan, etc.)"
-                        }
-                      />
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {formData.direccion.length}/255 caracteres
-                      </p>
+                      {/* Selector de estaciones para contra entrega */}
+                      {formData.metodoEntrega === 'contraentrega' ? (
+                        <div className="relative">
+                          <button
+                            type="button"
+                            onClick={() => setShowEstacionesDropdown(!showEstacionesDropdown)}
+                            className="w-full input-field flex items-center justify-between text-left"
+                          >
+                            <div className="flex items-center space-x-2">
+                              <Train className="w-5 h-5 text-amarillo dark:text-yellow-400" />
+                              <span className={formData.direccion ? 'text-gray-900 dark:text-gray-100' : 'text-gray-400 dark:text-gray-500'}>
+                                {formData.direccion || 'Selecciona una estación del Tren Línea 1'}
+                              </span>
+                            </div>
+                            <ChevronDown className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${showEstacionesDropdown ? 'rotate-180' : ''}`} />
+                          </button>
+
+                          {/* Dropdown de estaciones */}
+                          {showEstacionesDropdown && (
+                            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                              {ESTACIONES_TREN.map((estacion) => (
+                                <button
+                                  key={estacion}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData(prev => ({ ...prev, direccion: `Estación ${estacion}` }))
+                                    setShowEstacionesDropdown(false)
+                                  }}
+                                  className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors duration-150 ${
+                                    formData.direccion === `Estación ${estacion}`
+                                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-medium'
+                                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
+                                  }`}
+                                >
+                                  <Train className={`w-4 h-4 ${
+                                    formData.direccion === `Estación ${estacion}` 
+                                      ? 'text-gris-oscuro dark:text-gray-900' 
+                                      : 'text-amarillo dark:text-yellow-400'
+                                  }`} />
+                                  <span className="flex-1">Estación {estacion}</span>
+                                  {formData.direccion === `Estación ${estacion}` && (
+                                    <div className="w-2 h-2 rounded-full bg-gris-oscuro dark:bg-gray-900" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        /* Textarea para envío a domicilio */
+                        <>
+                          <textarea
+                            name="direccion"
+                            value={formData.direccion}
+                            onChange={handleInputChange}
+                            required
+                            rows={3}
+                            maxLength={255}
+                            className="input-field"
+                            placeholder="Ingresa tu dirección completa de entrega"
+                          />
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                            {formData.direccion.length}/255 caracteres
+                          </p>
+                        </>
+                      )}
                     </div>
                   )}
 
