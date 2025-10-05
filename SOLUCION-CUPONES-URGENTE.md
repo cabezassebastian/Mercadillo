@@ -14,6 +14,8 @@ Multiple GoTrueClient instances detected
 
 ### 🔥 PASO 1: Ejecutar SQL en Supabase (URGENTE)
 
+**IMPORTANTE:** Este SQL está corregido para funcionar con **Clerk** (que usa STRING IDs, no UUIDs).
+
 1. **Abre Supabase Dashboard**
 2. **Ve a SQL Editor** (icono de terminal en el menú izquierdo)
 3. **Copia y pega** este SQL completo:
