@@ -85,7 +85,7 @@ const AdminOrders: React.FC = () => {
       const { data: userData, error: userError } = await supabaseAdmin
         .from('usuarios')
         .select('email, nombre_completo')
-        .eq('usuario_id', pedido.usuario_id)
+        .eq('id', pedido.usuario_id)
         .single()
 
       if (userError || !userData) {
@@ -139,7 +139,7 @@ const AdminOrders: React.FC = () => {
       const { data: userData, error: userError } = await supabaseAdmin
         .from('usuarios')
         .select('email, nombre_completo')
-        .eq('usuario_id', pedido.usuario_id)
+        .eq('id', pedido.usuario_id)
         .single()
 
       if (userError || !userData) {
