@@ -65,8 +65,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const { data, error } = await resend.emails.send({
       from: `${process.env.VITE_EMAIL_FROM_NAME || 'Mercadillo'} <${process.env.VITE_EMAIL_FROM || 'pedidos@mercadillo.app'}>`,
       to: email,
-      subject: `🎉 ¡Bienvenido a Mercadillo!`,
+      subject: `Bienvenido a Mercadillo ${nombre}`,
       html: getWelcomeEmailHTML(nombre),
+      headers: {
+        'X-Entity-Ref-ID': `welcome-${Date.now()}`,
+      },
+      tags: [
+        {
+          name: 'category',
+          value: 'welcome'
+        }
+      ],
     })
 
     if (error) {

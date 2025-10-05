@@ -28,7 +28,8 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.20.1",
-    "resend": "^6.1.2"
+    "resend": "^6.1.2",
+    "svix": "^1.76.1"
   },
   "devDependencies": {
     "@clerk/types": "^4.84.1",
