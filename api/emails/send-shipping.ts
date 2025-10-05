@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
-import { ShippingNotificationEmail } from '../../src/templates/emails/ShippingNotification.tsx'
+import { ShippingNotificationEmail } from '../../src/templates/emails/ShippingNotification'
 
 const resend = new Resend(process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY)
 

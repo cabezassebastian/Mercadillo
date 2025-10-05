@@ -82,6 +82,10 @@
     },
     "api/orders.ts": {
       "maxDuration": 30
+    },
+    "api/emails/*.ts": {
+      "maxDuration": 30,
+      "includeFiles": "src/templates/emails/**"
     }
   },
   "env": {
