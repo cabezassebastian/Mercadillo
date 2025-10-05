@@ -27,7 +27,7 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       box-shadow: 0 10px 40px rgba(184, 134, 11, 0.15);
     }
     .header { 
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%); 
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%); 
       color: #333333; 
       padding: 40px 30px; 
       text-align: center; 
@@ -73,7 +73,7 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       font-weight: 600;
     }
     .greeting span {
-      color: #b8860b;
+      color: #FFD700;
     }
     .message {
       font-size: 15px;
@@ -84,7 +84,7 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
     }
     .order-number {
       display: inline-block;
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%);
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%);
       color: #333333;
       padding: 4px 12px;
       border-radius: 20px;
@@ -103,7 +103,7 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
     }
     .tracking-label {
       font-size: 13px;
-      color: #b8860b;
+      color: #FFD700;
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 1px;
@@ -194,11 +194,11 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       height: 14px;
       border-radius: 50%;
       background: #fff;
-      border: 3px solid #b8860b;
+      border: 3px solid #FFD700;
     }
     .timeline-item.completed::after {
       background: #FFD700;
-      border-color: #b8860b;
+      border-color: #FFD700;
     }
     .timeline-title {
       font-weight: 600;
@@ -206,7 +206,7 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       margin-bottom: 5px;
     }
     .timeline-item.completed .timeline-title {
-      color: #b8860b;
+      color: #FFD700;
     }
     .timeline-date {
       font-size: 13px;
@@ -216,19 +216,19 @@ const generateShippingEmailHTML = (nombre: string, numero_pedido: string, fecha_
       background: linear-gradient(135deg, #fff8dc 0%, #ffeaa7 100%);
       padding: 20px;
       border-radius: 12px;
-      border-left: 4px solid #b8860b;
+      border-left: 4px solid #FFD700;
       font-size: 14px;
       color: #333333;
       margin: 30px 0;
       line-height: 1.8;
     }
     .info-box strong {
-      color: #b8860b;
+      color: #FFD700;
       font-size: 15px;
     }
     .cta-button {
       display: inline-block;
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%);
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%);
       color: #333333;
       padding: 15px 35px;
       border-radius: 25px;

@@ -27,7 +27,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
       box-shadow: 0 10px 40px rgba(184, 134, 11, 0.15);
     }
     .header { 
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%); 
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%); 
       color: #333333; 
       padding: 40px 30px; 
       text-align: center; 
@@ -85,7 +85,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
       font-weight: 600;
     }
     .greeting span {
-      color: #b8860b;
+      color: #FFD700;
     }
     .message {
       font-size: 15px;
@@ -96,7 +96,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
     }
     .order-number {
       display: inline-block;
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%);
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%);
       color: #333333;
       padding: 4px 12px;
       border-radius: 20px;
@@ -116,7 +116,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
     .success-title {
       font-size: 20px;
       font-weight: 700;
-      color: #b8860b;
+      color: #FFD700;
       margin-bottom: 10px;
     }
     .success-subtitle {
@@ -169,7 +169,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
       background: linear-gradient(135deg, #fff8dc 0%, #ffeaa7 100%);
       padding: 25px;
       border-radius: 12px;
-      border-left: 4px solid #b8860b;
+      border-left: 4px solid #FFD700;
       margin: 30px 0;
       text-align: center;
     }
@@ -193,7 +193,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
     }
     .cta-button {
       display: inline-block;
-      background: linear-gradient(135deg, #FFD700 0%, #b8860b 100%);
+      background: linear-gradient(135deg, #FFD700 0%, #FFD700 100%);
       color: #333333;
       padding: 15px 35px;
       border-radius: 25px;
@@ -218,7 +218,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
     .thank-you-title {
       font-size: 20px;
       font-weight: 700;
-      color: #b8860b;
+      color: #FFD700;
       margin-bottom: 10px;
     }
     .thank-you-text {
@@ -305,7 +305,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
         </div>
         <div class="stars">⭐⭐⭐⭐⭐</div>
         <center>
-          <a href="https://mercadillo.app/reviews" class="cta-button">
+          <a href="https://www.mercadillo.app/perfil/reseñas" class="cta-button">
             Dejar una Reseña
           </a>
         </center>
@@ -320,7 +320,7 @@ const generateDeliveryEmailHTML = (nombre: string, numero_pedido: string, fecha_
       </div>
 
       <center>
-        <a href="https://mercadillo.app/catalog" class="cta-button">
+        <a href="https://mercadillo.app/catalogo" class="cta-button">
           Seguir Comprando
         </a>
       </center>
