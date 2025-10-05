@@ -8,12 +8,18 @@ const supabase = createClient(
 )
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  console.log('🔔 Webhook endpoint called:', req.method)
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
   // Verificar la firma del webhook de Clerk
   const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET
+
+  console.log('🔑 CLERK_WEBHOOK_SECRET exists:', !!WEBHOOK_SECRET)
+  console.log('🔑 VITE_SUPABASE_URL exists:', !!process.env.VITE_SUPABASE_URL)
+  console.log('🔑 VITE_SUPABASE_SERVICE_ROLE_KEY exists:', !!process.env.VITE_SUPABASE_SERVICE_ROLE_KEY)
 
   if (!WEBHOOK_SECRET) {
     console.error('❌ Missing CLERK_WEBHOOK_SECRET')
@@ -51,6 +57,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const eventType = evt.type
 
   console.log('📥 Clerk webhook received:', eventType)
+  console.log('📦 Event data:', JSON.stringify(evt.data, null, 2))
 
   try {
     switch (eventType) {
@@ -74,24 +81,32 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       case 'user.updated':
         // Usuario actualizado - AQUÍ ES LO IMPORTANTE
         const updatedUser = evt.data
-        console.log('📝 User updated:', updatedUser.id)
+        console.log('📝 User updated - ID:', updatedUser.id)
+        console.log('📝 First name:', updatedUser.first_name)
+        console.log('📝 Last name:', updatedUser.last_name)
+        console.log('📝 Email:', updatedUser.email_addresses[0]?.email_address)
         
-        const { error: updateError } = await supabase
+        const updateData = {
+          email: updatedUser.email_addresses[0]?.email_address || '',
+          nombre: updatedUser.first_name || '',
+          apellido: updatedUser.last_name || '',
+          telefono: updatedUser.phone_numbers[0]?.phone_number || null,
+        }
+        
+        console.log('🔄 Updating Supabase with data:', updateData)
+        
+        const { data: updatedData, error: updateError } = await supabase
           .from('usuarios')
-          .update({
-            email: updatedUser.email_addresses[0]?.email_address || '',
-            nombre: updatedUser.first_name || '',
-            apellido: updatedUser.last_name || '',
-            telefono: updatedUser.phone_numbers[0]?.phone_number || null,
-          })
+          .update(updateData)
           .eq('id', updatedUser.id)
+          .select()
 
         if (updateError) {
           console.error('❌ Error updating user in Supabase:', updateError)
           return res.status(500).json({ error: updateError.message })
         }
 
-        console.log('✅ User profile updated in Supabase')
+        console.log('✅ User profile updated in Supabase:', updatedData)
         break
 
       case 'user.deleted':
