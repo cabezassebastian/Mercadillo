@@ -11,6 +11,7 @@ export interface Usuario {
   apellido: string
   telefono?: string
   direccion?: string
+  dni?: string
   rol: 'cliente' | 'admin'
   created_at: string
 }

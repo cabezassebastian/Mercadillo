@@ -16,11 +16,19 @@ interface MercadoPagoCheckoutProps {
   onSuccess?: (paymentData: any) => void
   onError?: (error: any) => void
   shippingAddress?: string
+  deliveryData?: {
+    nombreCompleto: string
+    dni: string
+    telefono: string
+    direccion: string
+    metodoEntrega: 'envio' | 'contraentrega' | 'tienda'
+  }
 }
 
 const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
   onError,
-  shippingAddress = "Lima, Perú" // Dirección por defecto
+  shippingAddress = "Lima, Perú",
+  deliveryData
 }) => {
   const { items, cuponAplicado, getDescuento, getSubtotal, getTotal } = useCart()
   const { user } = useUser()
@@ -71,9 +79,20 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
         // Campos de cupón
         descuento: getDescuento(),
         cupon_codigo: cuponAplicado?.codigo || null,
+        // Datos de entrega
+        delivery_data: deliveryData ? {
+          nombre_completo: deliveryData.nombreCompleto,
+          dni: deliveryData.dni,
+          telefono: deliveryData.telefono,
+          direccion: deliveryData.direccion,
+          metodo_entrega: deliveryData.metodoEntrega
+        } : null,
         metadata: {
           user_id: user.id,
-          order_total: totals.total
+          order_total: totals.total,
+          metodo_entrega: deliveryData?.metodoEntrega || 'envio',
+          dni_cliente: deliveryData?.dni || '',
+          telefono_contacto: deliveryData?.telefono || ''
         }
       }
 

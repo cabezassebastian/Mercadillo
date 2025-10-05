@@ -32,6 +32,12 @@ export interface Pedido {
   direccion_envio: string
   metodo_pago: string
   created_at: string
+  // Campos de entrega
+  metodo_entrega?: 'envio' | 'contraentrega' | 'tienda'
+  telefono_contacto?: string
+  dni_cliente?: string
+  nombre_completo?: string
+  notas_entrega?: string
 }
 
 export interface PedidoItem {

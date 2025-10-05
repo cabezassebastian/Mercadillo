@@ -4,7 +4,7 @@ import { useUser } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import MercadoPagoCheckout from '@/components/Checkout/MercadoPagoCheckout'
 import { CreditCard, User, ShoppingBag, MapPin, Plus } from 'lucide-react'
-import { getUserAddresses, type UserAddress } from '@/lib/userProfile'
+import { getUserAddresses, type UserAddress, updateUserDNI } from '@/lib/userProfile'
 import { useNotificationHelpers } from '@/contexts/NotificationContext'
 
 const Checkout: React.FC = () => {
@@ -15,12 +15,38 @@ const Checkout: React.FC = () => {
   const [addresses, setAddresses] = useState<UserAddress[]>([])
   const [selectedAddress, setSelectedAddress] = useState<UserAddress | null>(null)
   const [useNewAddress, setUseNewAddress] = useState(false)
-  const [formData, setFormData] = useState({
+  const [dniSaved, setDniSaved] = useState(false)
+  const [formData, setFormData] = useState<{
+    nombre: string
+    dni: string
+    telefono: string
+    direccion: string
+    metodoEntrega: 'envio' | 'contraentrega' | 'tienda'
+    terminos: boolean
+  }>({
     nombre: '',
+    dni: '',
     telefono: '',
     direccion: '',
+    metodoEntrega: 'envio', // 'envio', 'contraentrega', 'tienda'
     terminos: false
   })
+
+  // Guardar DNI cuando esté completo
+  useEffect(() => {
+    const saveDNI = async () => {
+      if (user?.id && formData.dni.length === 8 && !dniSaved) {
+        const result = await updateUserDNI(user.id, formData.dni)
+        if (result.success) {
+          setDniSaved(true)
+          console.log('✅ DNI guardado en la base de datos')
+        } else {
+          console.error('Error al guardar DNI:', result.error)
+        }
+      }
+    }
+    saveDNI()
+  }, [user?.id, formData.dni, dniSaved])
 
   // Cargar direcciones del usuario
   useEffect(() => {
@@ -58,8 +84,21 @@ const Checkout: React.FC = () => {
     }
   }, [user])
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
+    
+    // Validación especial para DNI
+    if (name === 'dni') {
+      // Solo permitir números
+      const dniRegex = /^\d*$/
+      if (!dniRegex.test(value)) {
+        return // No actualizar si contiene caracteres no numéricos
+      }
+      // Limitar a 8 dígitos
+      if (value.length > 8) {
+        return
+      }
+    }
     
     // Validación especial para el campo de teléfono
     if (name === 'telefono') {
@@ -205,6 +244,26 @@ const Checkout: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                    DNI
+                  </label>
+                  <input
+                    type="text"
+                    name="dni"
+                    value={formData.dni}
+                    onChange={handleInputChange}
+                    required
+                    maxLength={8}
+                    pattern="\d{8}"
+                    className="input-field"
+                    placeholder="12345678"
+                  />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {formData.dni.length}/8 dígitos
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Email
                   </label>
                   <input
@@ -235,9 +294,113 @@ const Checkout: React.FC = () => {
                   </p>
                 </div>
 
+                {/* Método de Entrega */}
+                <div>
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-3">
+                    Método de Entrega
+                  </label>
+                  <div className="space-y-3">
+                    {/* Envío a domicilio */}
+                    <div
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        formData.metodoEntrega === 'envio'
+                          ? 'border-amarillo dark:border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, metodoEntrega: 'envio' }))}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <MapPin className="w-5 h-5 text-amarillo dark:text-yellow-400" />
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              Envío a domicilio
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Entrega a través de Olva Courier (3-5 días hábiles)
+                          </p>
+                        </div>
+                        <input
+                          type="radio"
+                          name="metodoEntrega"
+                          value="envio"
+                          checked={formData.metodoEntrega === 'envio'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, metodoEntrega: e.target.value as 'envio' | 'contraentrega' | 'tienda' }))}
+                          className="mt-1 text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Pago contra entrega - Tren Línea 1 */}
+                    <div
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        formData.metodoEntrega === 'contraentrega'
+                          ? 'border-amarillo dark:border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, metodoEntrega: 'contraentrega' }))}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <CreditCard className="w-5 h-5 text-amarillo dark:text-yellow-400" />
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              Pago contra entrega - Tren Línea 1
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Pagas cuando recibes el producto en estación del tren
+                          </p>
+                        </div>
+                        <input
+                          type="radio"
+                          name="metodoEntrega"
+                          value="contraentrega"
+                          checked={formData.metodoEntrega === 'contraentrega'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, metodoEntrega: e.target.value as 'envio' | 'contraentrega' | 'tienda' }))}
+                          className="mt-1 text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Recojo en tienda */}
+                    <div
+                      className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        formData.metodoEntrega === 'tienda'
+                          ? 'border-amarillo dark:border-yellow-400 bg-yellow-50 dark:bg-yellow-900/20'
+                          : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                      onClick={() => setFormData(prev => ({ ...prev, metodoEntrega: 'tienda' }))}
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-2 mb-1">
+                            <ShoppingBag className="w-5 h-5 text-amarillo dark:text-yellow-400" />
+                            <span className="font-semibold text-gray-900 dark:text-gray-100">
+                              Recojo en tienda
+                            </span>
+                          </div>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Retira tu pedido en nuestra tienda física
+                          </p>
+                        </div>
+                        <input
+                          type="radio"
+                          name="metodoEntrega"
+                          value="tienda"
+                          checked={formData.metodoEntrega === 'tienda'}
+                          onChange={(e) => setFormData(prev => ({ ...prev, metodoEntrega: e.target.value as 'envio' | 'contraentrega' | 'tienda' }))}
+                          className="mt-1 text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    Dirección de Envío
+                    {formData.metodoEntrega === 'envio' ? 'Dirección de Envío' : formData.metodoEntrega === 'contraentrega' ? 'Estación de Entrega (Línea 1)' : 'Dirección (Opcional)'}
                   </label>
                   
                   {/* Selector de direcciones guardadas */}
@@ -325,11 +488,17 @@ const Checkout: React.FC = () => {
                         name="direccion"
                         value={formData.direccion}
                         onChange={handleInputChange}
-                        required
+                        required={formData.metodoEntrega !== 'tienda'}
                         rows={3}
                         maxLength={255}
                         className="input-field"
-                        placeholder="Ingresa tu dirección completa de entrega"
+                        placeholder={
+                          formData.metodoEntrega === 'envio' 
+                            ? "Ingresa tu dirección completa de entrega" 
+                            : formData.metodoEntrega === 'contraentrega'
+                            ? "Indica la estación del Tren Línea 1 (ej: Villa El Salvador, San Juan, etc.)"
+                            : "Dirección (opcional para recojo en tienda)"
+                        }
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {formData.direccion.length}/255 caracteres
@@ -381,10 +550,23 @@ const Checkout: React.FC = () => {
 
           {/* Componente de Mercado Pago */}
           <div className="space-y-6">
-            {formData.terminos && formData.nombre && formData.telefono && formData.direccion ? (
+            {formData.terminos && 
+             formData.nombre && 
+             formData.dni && 
+             formData.dni.length === 8 &&
+             formData.telefono && 
+             (formData.metodoEntrega === 'tienda' || formData.direccion) ? (
               <MercadoPagoCheckout
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}
+                shippingAddress={formData.direccion}
+                deliveryData={{
+                  nombreCompleto: formData.nombre,
+                  dni: formData.dni,
+                  telefono: formData.telefono,
+                  direccion: formData.direccion,
+                  metodoEntrega: formData.metodoEntrega
+                }}
               />
             ) : (
               <div className="card p-6">
@@ -395,6 +577,11 @@ const Checkout: React.FC = () => {
                 <p className="text-gray-600 dark:text-gray-400">
                   Completa todos los campos requeridos y acepta los términos para continuar con el pago.
                 </p>
+                {formData.dni && formData.dni.length !== 8 && (
+                  <p className="text-red-500 dark:text-red-400 text-sm mt-2">
+                    El DNI debe tener exactamente 8 dígitos.
+                  </p>
+                )}
               </div>
             )}
           </div>

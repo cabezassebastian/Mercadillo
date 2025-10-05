@@ -91,7 +91,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
                 mercadopago_payment_id: paymentInfo.id?.toString(),
                 mercadopago_status: paymentInfo.status,
                 mercadopago_status_detail: paymentInfo.status_detail || '',
-                mercadopago_payment_type: paymentInfo.payment_type_id || ''
+                mercadopago_payment_type: paymentInfo.payment_type_id || '',
+                // Datos de entrega
+                metodo_entrega: orderData.delivery_data?.metodo_entrega || orderData.metadata?.metodo_entrega || 'envio',
+                telefono_contacto: orderData.delivery_data?.telefono || orderData.metadata?.telefono_contacto || '',
+                dni_cliente: orderData.delivery_data?.dni || orderData.metadata?.dni_cliente || '',
+                nombre_completo: orderData.delivery_data?.nombre_completo || '',
+                notas_entrega: null
               }])
               .select()
               .single()

@@ -135,6 +135,7 @@ export async function createUserProfile(
     nombre: string
     apellido?: string
     telefono?: string
+    dni?: string
   }
 ): Promise<{ success: boolean; error: string | null }> {
   try {
@@ -153,6 +154,7 @@ export async function createUserProfile(
         nombre: userData.nombre,
         apellido: userData.apellido || '',
         telefono: userData.telefono || null,
+        dni: userData.dni || null,
         rol: 'cliente'
       }])
 
@@ -607,5 +609,70 @@ export async function getDefaultAddress(userId: string): Promise<{ data: UserAdd
   } catch (error) {
     console.error('Unexpected error fetching default address:', error)
     return { data: null, error: 'Error inesperado al obtener dirección predeterminada' }
+  }
+}
+
+// ==================== ACTUALIZACIÓN DE PERFIL ====================
+
+/**
+ * Actualizar DNI del usuario
+ */
+export async function updateUserDNI(userId: string, dni: string): Promise<{ success: boolean; error: string | null }> {
+  try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('updateUserDNI: No Clerk token available')
+      return { success: false, error: 'no_clerk_token' }
+    }
+
+    // Validar que el DNI tenga 8 dígitos
+    if (!/^\d{8}$/.test(dni)) {
+      return { success: false, error: 'El DNI debe tener exactamente 8 dígitos' }
+    }
+
+    const { error } = await supabase
+      .from('usuarios')
+      .update({ dni })
+      .eq('id', userId)
+
+    if (error) {
+      console.error('Error updating user DNI:', error)
+      return { success: false, error: error.message }
+    }
+
+    console.log('✅ User DNI updated successfully')
+    return { success: true, error: null }
+  } catch (error) {
+    console.error('Unexpected error updating DNI:', error)
+    return { success: false, error: 'Error inesperado al actualizar DNI' }
+  }
+}
+
+/**
+ * Obtener datos del usuario incluyendo DNI
+ */
+export async function getUserProfile(userId: string): Promise<{ data: any | null; error: string | null }> {
+  try {
+    const token = await getClerkToken()
+    if (!token) {
+      console.warn('getUserProfile: No Clerk token available')
+      return { data: null, error: 'no_clerk_token' }
+    }
+
+    const { data, error } = await supabase
+      .from('usuarios')
+      .select('*')
+      .eq('id', userId)
+      .single()
+
+    if (error) {
+      console.error('Error fetching user profile:', error)
+      return { data: null, error: error.message }
+    }
+
+    return { data, error: null }
+  } catch (error) {
+    console.error('Unexpected error fetching user profile:', error)
+    return { data: null, error: 'Error inesperado al obtener perfil de usuario' }
   }
 }

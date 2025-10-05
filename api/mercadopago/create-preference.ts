@@ -65,7 +65,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       shipping_address, // Dirección de envío
       user_id, // ID del usuario
       descuento = 0, // Descuento por cupón (opcional)
-      cupon_codigo = null // Código del cupón aplicado (opcional)
+      cupon_codigo = null, // Código del cupón aplicado (opcional)
+      delivery_data = null, // Datos de entrega (opcional)
+      metadata = {} // Metadata adicional (opcional)
     } = req.body
 
     // Validar datos requeridos
@@ -108,7 +110,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       cupon_codigo,
       total,
       shipping_address,
-      external_reference: externalReference
+      external_reference: externalReference,
+      // Incluir datos de entrega si están disponibles
+      delivery_data: delivery_data ? {
+        metodo_entrega: delivery_data.metodo_entrega || 'envio',
+        nombre_completo: delivery_data.nombre_completo || '',
+        dni: delivery_data.dni || '',
+        telefono: delivery_data.telefono || '',
+        direccion: delivery_data.direccion || shipping_address
+      } : null,
+      metadata
     }
 
     // Codificar los datos como base64 para incluirlos en external_reference

@@ -18,6 +18,12 @@ export interface CreateOrder {
   direccion_envio: string
   metodo_pago: 'mercadopago' | 'transferencia' | 'efectivo'
   mercadopago_external_reference?: string
+  // Campos de entrega
+  metodo_entrega?: 'envio' | 'contraentrega' | 'tienda'
+  telefono_contacto?: string
+  dni_cliente?: string
+  nombre_completo?: string
+  notas_entrega?: string
 }
 
 export interface Order {
@@ -38,6 +44,12 @@ export interface Order {
   mercadopago_payment_type?: string
   mercadopago_external_reference?: string
   fecha_pago?: string
+  // Campos de entrega
+  metodo_entrega?: 'envio' | 'contraentrega' | 'tienda'
+  telefono_contacto?: string
+  dni_cliente?: string
+  nombre_completo?: string
+  notas_entrega?: string
   created_at: string
   updated_at: string
 }

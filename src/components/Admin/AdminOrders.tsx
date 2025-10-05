@@ -398,6 +398,51 @@ const AdminOrders: React.FC = () => {
                     <p className="text-gris-oscuro">{selectedPedido.direccion_envio}</p>
                   </div>
 
+                  {/* Información de Entrega */}
+                  <div className="border-t border-gray-200 pt-4 space-y-3">
+                    <h4 className="text-sm font-semibold text-gris-oscuro">Información de Entrega</h4>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">Método de entrega:</label>
+                        <p className="text-gris-oscuro capitalize">
+                          {selectedPedido.metodo_entrega === 'envio' ? '📦 Envío domicilio (Olva Courier)' :
+                           selectedPedido.metodo_entrega === 'contraentrega' ? '🚇 Pago contra entrega - Tren Línea 1' :
+                           selectedPedido.metodo_entrega === 'tienda' ? '🏪 Recojo en tienda' :
+                           selectedPedido.metodo_entrega || 'No especificado'}
+                        </p>
+                      </div>
+
+                      {selectedPedido.dni_cliente && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">DNI:</label>
+                          <p className="text-gris-oscuro">{selectedPedido.dni_cliente}</p>
+                        </div>
+                      )}
+
+                      {selectedPedido.nombre_completo && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Nombre completo:</label>
+                          <p className="text-gris-oscuro">{selectedPedido.nombre_completo}</p>
+                        </div>
+                      )}
+
+                      {selectedPedido.telefono_contacto && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-600">Teléfono:</label>
+                          <p className="text-gris-oscuro">{selectedPedido.telefono_contacto}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    {selectedPedido.notas_entrega && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-600">Notas de entrega:</label>
+                        <p className="text-gris-oscuro text-sm">{selectedPedido.notas_entrega}</p>
+                      </div>
+                    )}
+                  </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Método de pago:</label>
                     <p className="text-gris-oscuro capitalize">{selectedPedido.metodo_pago}</p>
