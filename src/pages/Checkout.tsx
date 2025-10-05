@@ -47,6 +47,7 @@ const Checkout: React.FC = () => {
   const [useNewAddress, setUseNewAddress] = useState(false)
   const [dniSaved, setDniSaved] = useState(false)
   const [showEstacionesDropdown, setShowEstacionesDropdown] = useState(false)
+  const [isClosingEstaciones, setIsClosingEstaciones] = useState(false)
   const [formData, setFormData] = useState<{
     nombre: string
     dni: string
@@ -70,6 +71,15 @@ const Checkout: React.FC = () => {
       setDniSaved(false)
     }
   }, [formData.metodoEntrega])
+
+  // Función helper para cerrar dropdown con animación
+  const closeEstacionesWithAnimation = () => {
+    setIsClosingEstaciones(true)
+    setTimeout(() => {
+      setShowEstacionesDropdown(false)
+      setIsClosingEstaciones(false)
+    }, 150) // 150ms para dropdown (mismo tiempo que en Catalog)
+  }
 
   // Guardar DNI cuando esté completo (solo para envío a domicilio)
   useEffect(() => {
@@ -128,7 +138,7 @@ const Checkout: React.FC = () => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement
       if (showEstacionesDropdown && !target.closest('.relative')) {
-        setShowEstacionesDropdown(false)
+        closeEstacionesWithAnimation()
       }
     }
 
@@ -549,7 +559,13 @@ const Checkout: React.FC = () => {
                         <div className="relative">
                           <button
                             type="button"
-                            onClick={() => setShowEstacionesDropdown(!showEstacionesDropdown)}
+                            onClick={() => {
+                              if (showEstacionesDropdown) {
+                                closeEstacionesWithAnimation()
+                              } else {
+                                setShowEstacionesDropdown(true)
+                              }
+                            }}
                             className="w-full input-field flex items-center justify-between text-left"
                           >
                             <div className="flex items-center space-x-2">
@@ -563,14 +579,16 @@ const Checkout: React.FC = () => {
 
                           {/* Dropdown de estaciones */}
                           {showEstacionesDropdown && (
-                            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto">
+                            <div className={`absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl max-h-64 overflow-y-auto ${
+                              isClosingEstaciones ? 'animate-dropdown-closing' : 'animate-dropdown'
+                            }`}>
                               {ESTACIONES_TREN.map((estacion) => (
                                 <button
                                   key={estacion}
                                   type="button"
                                   onClick={() => {
                                     setFormData(prev => ({ ...prev, direccion: `Estación ${estacion}` }))
-                                    setShowEstacionesDropdown(false)
+                                    closeEstacionesWithAnimation()
                                   }}
                                   className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-colors duration-150 ${
                                     formData.direccion === `Estación ${estacion}`
