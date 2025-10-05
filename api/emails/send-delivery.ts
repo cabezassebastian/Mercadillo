@@ -1,9 +1,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { Resend } from 'resend'
 import { render } from '@react-email/render'
-import { DeliveryConfirmationEmail } from '../../src/templates/emails/DeliveryConfirmation'
+import { DeliveryConfirmationEmail } from '../../src/templates/emails/DeliveryConfirmation.tsx'
 
-const resend = new Resend(process.env.VITE_RESEND_API_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY)
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const { data, error } = await resend.emails.send({
-      from: `${process.env.VITE_EMAIL_FROM_NAME || 'Mercadillo'} <${process.env.VITE_EMAIL_FROM || 'pedidos@mercadillo.app'}>`,
+      from: `${process.env.EMAIL_FROM_NAME || process.env.VITE_EMAIL_FROM_NAME || 'Mercadillo'} <${process.env.EMAIL_FROM || process.env.VITE_EMAIL_FROM || 'pedidos@mercadillo.app'}>`,
       to: email,
       subject: `🎉 ¡Tu pedido ha sido entregado! #${numero_pedido.slice(0, 8).toUpperCase()}`,
       html: await render(DeliveryConfirmationEmail({ 

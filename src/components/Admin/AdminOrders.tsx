@@ -96,20 +96,25 @@ const AdminOrders: React.FC = () => {
         return
       }
 
-      // Enviar email de notificación
-      await enviarEmailEnvio({
-        email: userData.email,
-        nombre: `${userData.nombre} ${userData.apellido}`,
-        numero_pedido: pedido.id,
-        fecha_envio: new Date().toISOString(),
-        numero_seguimiento: undefined, // Puedes agregar un campo para esto
-        items: pedido.items.map((item: any) => ({
-          nombre: item.nombre || item.title,
-          cantidad: item.cantidad || item.quantity
-        }))
-      })
+      // Enviar email de notificación (solo en producción)
+      try {
+        await enviarEmailEnvio({
+          email: userData.email,
+          nombre: `${userData.nombre} ${userData.apellido}`,
+          numero_pedido: pedido.id,
+          fecha_envio: new Date().toISOString(),
+          numero_seguimiento: undefined, // Puedes agregar un campo para esto
+          items: pedido.items.map((item: any) => ({
+            nombre: item.nombre || item.title,
+            cantidad: item.cantidad || item.quantity
+          }))
+        })
+        alert('Pedido marcado como enviado y email enviado al cliente')
+      } catch (emailError) {
+        console.error('❌ Error enviando email (normal en desarrollo):', emailError)
+        alert('Pedido marcado como enviado (email no enviado - requiere Vercel)')
+      }
 
-      alert('Pedido marcado como enviado y email enviado al cliente')
       fetchPedidos()
       setSelectedPedido(null)
     } catch (error) {
@@ -150,20 +155,25 @@ const AdminOrders: React.FC = () => {
         return
       }
 
-      // Enviar email de confirmación de entrega
-      await enviarEmailEntrega({
-        email: userData.email,
-        nombre: `${userData.nombre} ${userData.apellido}`,
-        numero_pedido: pedido.id,
-        fecha_entrega: new Date().toISOString(),
-        items: pedido.items.map((item: any) => ({
-          nombre: item.nombre || item.title,
-          cantidad: item.cantidad || item.quantity,
-          producto_id: item.producto_id || item.id
-        }))
-      })
+      // Enviar email de confirmación de entrega (solo en producción)
+      try {
+        await enviarEmailEntrega({
+          email: userData.email,
+          nombre: `${userData.nombre} ${userData.apellido}`,
+          numero_pedido: pedido.id,
+          fecha_entrega: new Date().toISOString(),
+          items: pedido.items.map((item: any) => ({
+            nombre: item.nombre || item.title,
+            cantidad: item.cantidad || item.quantity,
+            producto_id: item.producto_id || item.id
+          }))
+        })
+        alert('Pedido marcado como entregado y email enviado al cliente')
+      } catch (emailError) {
+        console.error('❌ Error enviando email (normal en desarrollo):', emailError)
+        alert('Pedido marcado como entregado (email no enviado - requiere Vercel)')
+      }
 
-      alert('Pedido marcado como entregado y email enviado al cliente')
       fetchPedidos()
       setSelectedPedido(null)
     } catch (error) {
