@@ -282,7 +282,8 @@ const Product: React.FC = () => {
                 <WishlistButton 
                   productId={producto.id}
                   productName={producto.nombre}
-                  className="sm:w-auto w-full px-6 py-4 text-lg rounded-lg border-2 justify-center" 
+                  showText={true}
+                  className="sm:w-auto w-full px-6 py-4 text-lg rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
                 />
               </div>
             </div>

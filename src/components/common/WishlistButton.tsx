@@ -9,9 +9,15 @@ interface Props {
   productId: string
   className?: string
   productName?: string // Optional: para evitar fetch si ya tenemos el nombre
+  showText?: boolean // Opcional: mostrar texto junto al icono
 }
 
-const WishlistButton: React.FC<Props> = ({ productId, className = '', productName }) => {
+const WishlistButton: React.FC<Props> = ({ 
+  productId, 
+  className = '', 
+  productName,
+  showText = false 
+}) => {
   const { user } = useUser()
   const { showWishlistAdded, showWishlistRemoved } = useNotificationHelpers()
   const [isWished, setIsWished] = useState<boolean>(false)
@@ -128,20 +134,27 @@ const WishlistButton: React.FC<Props> = ({ productId, className = '', productNam
       onClick={toggle}
       disabled={!user?.id || loading || sessionAvailable === null}
       aria-pressed={isWished}
-      title={isWished ? 'Remove from wishlist' : 'Add to wishlist'}
-      className={`${className} group transition-transform duration-200 ease-out hover:scale-110 active:scale-95 disabled:hover:scale-100`}
+      title={isWished ? 'Remover de lista de deseos' : 'Agregar a lista de deseos'}
+      className={`${className} group/wishlist transition-all duration-300 ease-in-out hover:scale-110 hover:border-red-400 dark:hover:border-red-500 active:scale-95 disabled:hover:scale-100 disabled:opacity-50`}
     >
-      <Heart 
-        className={`
-          w-5 h-5 
-          transition-all duration-300 ease-in-out
-          ${isWished 
-            ? 'text-red-600 fill-red-600' 
-            : 'text-gray-400 group-hover:text-red-400 group-hover:fill-red-100'
-          }
-          ${loading ? 'opacity-70' : 'opacity-100'}
-        `} 
-      />
+      <div className="flex items-center justify-center gap-2">
+        <Heart 
+          className={`
+            w-5 h-5 
+            transition-all duration-300 ease-in-out
+            ${isWished 
+              ? 'text-red-600 fill-red-600 dark:text-red-500 dark:fill-red-500' 
+              : 'text-gray-400 dark:text-gray-500 group-hover/wishlist:text-red-400 dark:group-hover/wishlist:text-red-400 group-hover/wishlist:fill-red-100 dark:group-hover/wishlist:fill-red-900'
+            }
+            ${loading ? 'opacity-70' : 'opacity-100'}
+          `} 
+        />
+        {showText && (
+          <span className="text-sm font-medium">
+            {isWished ? 'En lista de deseos' : 'Agregar a lista de deseos'}
+          </span>
+        )}
+      </div>
     </button>
   )
 }

@@ -88,10 +88,32 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 
   const defaultPlaceholder = `data:image/svg+xml;base64,${btoa(`
     <svg width="${width || 300}" height="${height || 200}" xmlns="http://www.w3.org/2000/svg">
-      <rect width="100%" height="100%" fill="#f3f4f6"/>
-      <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle" dy=".3em">
+      <defs>
+        <linearGradient id="shimmer" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:#f3f4f6;stop-opacity:1">
+            <animate attributeName="stop-opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="50%" style="stop-color:#e5e7eb;stop-opacity:1">
+            <animate attributeName="stop-opacity" values="0.5;1;0.5" dur="1.5s" repeatCount="indefinite"/>
+          </stop>
+          <stop offset="100%" style="stop-color:#f3f4f6;stop-opacity:1">
+            <animate attributeName="stop-opacity" values="1;0.5;1" dur="1.5s" repeatCount="indefinite"/>
+          </stop>
+        </linearGradient>
+      </defs>
+      <rect width="100%" height="100%" fill="url(#shimmer)"/>
+      <text x="50%" y="50%" font-family="Arial, sans-serif" font-size="16" fill="#9ca3af" text-anchor="middle" dy=".3em" font-weight="500">
         Cargando...
       </text>
+      <circle cx="50%" cy="60%" r="3" fill="#9ca3af">
+        <animate attributeName="opacity" values="1;0.3;1" dur="1s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="50%" cy="60%" r="3" fill="#9ca3af" transform="translate(-10, 0)">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite" begin="0.2s"/>
+      </circle>
+      <circle cx="50%" cy="60%" r="3" fill="#9ca3af" transform="translate(10, 0)">
+        <animate attributeName="opacity" values="0.3;1;0.3" dur="1s" repeatCount="indefinite" begin="0.4s"/>
+      </circle>
     </svg>
   `)}`
 
@@ -107,11 +129,11 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     >
       {/* Placeholder mientras carga */}
       {!isLoaded && !hasError && (
-        <div className="absolute inset-0 bg-gray-100 dark:bg-gray-800 flex items-center justify-center transition-opacity duration-300">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 flex items-center justify-center transition-opacity duration-300 animate-pulse">
           <img
             src={placeholder || defaultPlaceholder}
             alt="Cargando..."
-            className="w-full h-full object-cover opacity-50"
+            className="w-full h-full object-cover"
           />
         </div>
       )}

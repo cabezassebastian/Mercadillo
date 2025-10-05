@@ -140,13 +140,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         } : undefined
       },
       back_urls: {
-        success: back_urls?.success || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/success`,
-        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/failure`,
-        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'http://localhost:5173'}/checkout/pending`
+        success: back_urls?.success || `${process.env.FRONTEND_URL || 'https://mercadillo.app'}/checkout/success`,
+        failure: back_urls?.failure || `${process.env.FRONTEND_URL || 'https://mercadillo.app'}/checkout/failure`,
+        pending: back_urls?.pending || `${process.env.FRONTEND_URL || 'https://mercadillo.app'}/checkout/pending`
       },
       auto_return: 'all', // Cambiar de 'approved' a 'all' para redirigir en todos los casos
       back_urls_enabled: true, // Habilitar URLs de retorno en todos los casos
-      notification_url: notification_url || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:5173'}/api/mercadopago/webhook`,
+      notification_url: notification_url || `${process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://mercadillo.app'}/api/mercadopago/webhook`,
       statement_descriptor: 'MERCADILLO',
       external_reference: fullExternalReference,
       expires: true,

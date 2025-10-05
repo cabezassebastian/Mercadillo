@@ -61,11 +61,11 @@ const Home: React.FC = () => {
   return (
     <div className="min-h-screen bg-hueso dark:bg-gray-900 transition-colors duration-200">
       {/* Seccion Hero */}
-      <section className="relative w-full h-96 overflow-hidden">
+      <section className="relative w-full h-64 sm:h-80 md:h-96 overflow-hidden">
         <img 
           src="https://res.cloudinary.com/ddbjhpjri/image/upload/f_auto,q_auto,w_1920,h_400,c_fill,g_center/v1759101989/mercadillo/banner_v1.webp" 
           alt="Mercadillo Lima Peru Banner" 
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
             const fallback = e.currentTarget.nextElementSibling as HTMLElement;
@@ -83,23 +83,23 @@ const Home: React.FC = () => {
         </div>
         <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 dark:bg-black dark:bg-opacity-60 flex items-center justify-center text-center p-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-bold text-blanco mb-4">
-              Bienvenido a Mercadillo El Agustino
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-blanco mb-2 sm:mb-4">
+              Bienvenido a Mercadillo Lima Perú
             </h1>
-            <p className="text-xl md:text-2xl text-hueso dark:text-gray-200 mb-8">
-              Descubre los mejores productos de El Agustino, Lima Este. Calidad garantizada y envio rapido a toda Lima.
+            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-hueso dark:text-gray-200 mb-4 sm:mb-6 md:mb-8">
+              Descubre los mejores productos de Lima. Calidad garantizada y envio rapido a toda la ciudad.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
               <Link
                 to="/catalogo"
-                className="btn-primary text-lg px-8 py-3 flex items-center justify-center space-x-2"
+                className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-center space-x-2"
               >
                 <span>Ver Catalogo</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </Link>
               <Link
                 to="/carrito"
-                className="bg-blanco dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 hover:bg-hueso dark:hover:bg-gray-700 font-semibold py-3 px-8 rounded-lg transition-colors duration-200 text-lg"
+                className="bg-blanco dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 hover:bg-hueso dark:hover:bg-gray-700 font-semibold py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg transition-colors duration-200 text-base sm:text-lg"
               >
                 Mi Carrito
               </Link>
