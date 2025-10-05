@@ -11,9 +11,16 @@ if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables for admin client')
 }
 
+// ⚠️ IMPORTANTE: Este cliente se crea SOLO cuando se importa en componentes de admin
+// Para evitar múltiples instancias, no lo importes en código regular
 export const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
   auth: {
     autoRefreshToken: false,
     persistSession: false
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-admin' // Identificador para debugging
+    }
   }
 })

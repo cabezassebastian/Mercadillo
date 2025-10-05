@@ -72,8 +72,9 @@ const AuthSync = () => {
 							const dataKey = `${clerkFirstName}|${clerkLastName}|${clerkEmail}`
 							
 							// Check if we've already synced this exact data
-							if (lastSyncedData.get(user.id) === dataKey) {
-								// Data hasn't changed, skip sync
+							const lastSynced = lastSyncedData.get(user.id)
+							if (lastSynced === dataKey) {
+								// Data hasn't changed since last sync, skip
 								return
 							}
 							
@@ -110,9 +111,7 @@ const AuthSync = () => {
 									existingUser.email !== clerkEmail
 								
 								if (needsUpdate) {
-									console.log('🔄 User profile changed in Clerk, syncing to Supabase...')
-									console.log('  Old:', { nombre: existingUser.nombre, apellido: existingUser.apellido })
-									console.log('  New:', { nombre: clerkFirstName, apellido: clerkLastName })
+									console.log('🔄 User profile changed, syncing to Supabase...')
 									
 									const { error: updateError } = await supabase
 										.from('usuarios')
@@ -127,12 +126,12 @@ const AuthSync = () => {
 									if (updateError) {
 										console.error('❌ Error updating user profile:', updateError)
 									} else {
-										console.log('✅ User profile synced to Supabase!')
+										console.log('✅ User profile synced!')
 										lastSyncedData.set(user.id, dataKey)
 										window.dispatchEvent(new Event('user-profile-updated'))
 									}
 								} else {
-									// Data is the same, just update cache
+									// Data matches DB, just update cache to prevent re-checking
 									lastSyncedData.set(user.id, dataKey)
 								}
 							}
