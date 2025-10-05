@@ -51,6 +51,27 @@ const Catalog: React.FC = () => {
   const ratingDropdownRef = useRef<HTMLDivElement>(null)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
 
+  // Estado para animaciones de cierre
+  const [isClosing, setIsClosing] = useState({
+    sort: false,
+    rating: false,
+    category: false,
+    mobileFilters: false
+  })
+
+  // Helper para cerrar con animación
+  const closeWithAnimation = (type: 'sort' | 'rating' | 'category' | 'mobileFilters') => {
+    setIsClosing(prev => ({ ...prev, [type]: true }))
+    const duration = type === 'mobileFilters' ? 250 : 150
+    setTimeout(() => {
+      if (type === 'sort') setShowSortDropdown(false)
+      else if (type === 'rating') setShowRatingDropdown(false)
+      else if (type === 'category') setShowCategoryDropdown(false)
+      else if (type === 'mobileFilters') setShowMobileFilters(false)
+      setIsClosing(prev => ({ ...prev, [type]: false }))
+    }, duration)
+  }
+
   // Definir categorías con iconos
   const categoriesConfig = [
     { name: 'Todos', icon: ShoppingBag, value: '' },
@@ -111,19 +132,19 @@ const Catalog: React.FC = () => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (sortDropdownRef.current && !sortDropdownRef.current.contains(event.target as Node)) {
-        setShowSortDropdown(false)
+        if (showSortDropdown) closeWithAnimation('sort')
       }
       if (ratingDropdownRef.current && !ratingDropdownRef.current.contains(event.target as Node)) {
-        setShowRatingDropdown(false)
+        if (showRatingDropdown) closeWithAnimation('rating')
       }
       if (categoryDropdownRef.current && !categoryDropdownRef.current.contains(event.target as Node)) {
-        setShowCategoryDropdown(false)
+        if (showCategoryDropdown) closeWithAnimation('category')
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [showSortDropdown, showRatingDropdown, showCategoryDropdown])
 
   useEffect(() => {
     let filtered = productos
@@ -334,15 +355,19 @@ const Catalog: React.FC = () => {
         {showSortDropdown && (
           <div className="lg:hidden fixed inset-0 z-50 flex items-end">
             <div 
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setShowSortDropdown(false)}
+              className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
+                isClosing.sort ? 'animate-backdrop-closing' : 'animate-backdrop'
+              }`}
+              onClick={() => closeWithAnimation('sort')}
             />
-            <div className="relative w-full bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl max-h-[70vh] overflow-y-auto">
+            <div className={`relative w-full bg-white dark:bg-gray-800 rounded-t-3xl shadow-2xl max-h-[70vh] overflow-y-auto ${
+              isClosing.sort ? 'animate-slide-down-closing' : 'animate-slide-up'
+            }`}>
               <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 p-4">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-gris-oscuro dark:text-gray-100">Ordenar por</h3>
                   <button
-                    onClick={() => setShowSortDropdown(false)}
+                    onClick={() => closeWithAnimation('sort')}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -357,7 +382,7 @@ const Catalog: React.FC = () => {
                       key={option.value}
                       onClick={() => {
                         setSortBy(option.value)
-                        setShowSortDropdown(false)
+                        closeWithAnimation('sort')
                       }}
                       className={`w-full flex items-center space-x-3 px-4 py-4 rounded-xl text-left transition-all duration-150 ${
                         sortBy === option.value
@@ -383,12 +408,16 @@ const Catalog: React.FC = () => {
           <div className="fixed inset-0 z-50 lg:hidden">
             {/* Backdrop */}
             <div 
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setShowMobileFilters(false)}
+              className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
+                isClosing.mobileFilters ? 'animate-backdrop-closing' : 'animate-backdrop'
+              }`}
+              onClick={() => closeWithAnimation('mobileFilters')}
             />
             
             {/* Drawer */}
-            <div className="absolute inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl transform transition-transform duration-300 ease-out overflow-y-auto">
+            <div className={`absolute inset-y-0 right-0 w-full max-w-sm bg-white dark:bg-gray-800 shadow-2xl overflow-y-auto ${
+              isClosing.mobileFilters ? 'animate-slide-out-right-closing' : 'animate-slide-in-right'
+            }`}>
               <div className="p-6">
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200 dark:border-gray-700">
@@ -396,7 +425,7 @@ const Catalog: React.FC = () => {
                     Filtros
                   </h2>
                   <button
-                    onClick={() => setShowMobileFilters(false)}
+                    onClick={() => closeWithAnimation('mobileFilters')}
                     className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
@@ -422,12 +451,16 @@ const Catalog: React.FC = () => {
                   setShowCategoryDropdown={setShowCategoryDropdown}
                   ratingDropdownRef={ratingDropdownRef}
                   categoryDropdownRef={categoryDropdownRef}
+                  isClosingRating={isClosing.rating}
+                  isClosingCategory={isClosing.category}
+                  onCloseRating={() => closeWithAnimation('rating')}
+                  onCloseCategory={() => closeWithAnimation('category')}
                 />
 
                 {/* Apply Button */}
                 <div className="sticky bottom-0 left-0 right-0 bg-white dark:bg-gray-800 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
                   <button
-                    onClick={() => setShowMobileFilters(false)}
+                    onClick={() => closeWithAnimation('mobileFilters')}
                     className="w-full btn-primary py-3 rounded-xl font-semibold"
                   >
                     Aplicar Filtros
@@ -474,6 +507,10 @@ const Catalog: React.FC = () => {
                 setShowCategoryDropdown={setShowCategoryDropdown}
                 ratingDropdownRef={ratingDropdownRef}
                 categoryDropdownRef={categoryDropdownRef}
+                isClosingRating={isClosing.rating}
+                isClosingCategory={isClosing.category}
+                onCloseRating={() => closeWithAnimation('rating')}
+                onCloseCategory={() => closeWithAnimation('category')}
               />
               </div>
             </div>
@@ -493,8 +530,14 @@ const Catalog: React.FC = () => {
                 {/* Custom Dropdown */}
                 <div className="relative flex-1 max-w-xs" ref={sortDropdownRef}>
                   <button
-                    onClick={() => setShowSortDropdown(!showSortDropdown)}
-                    className="w-full flex items-center justify-between px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium text-sm cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200 shadow-sm"
+                    onClick={() => {
+                      if (showSortDropdown) {
+                        closeWithAnimation('sort')
+                      } else {
+                        setShowSortDropdown(true)
+                      }
+                    }}
+                    className="w-full flex items-center justify-between px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 font-medium text-sm cursor-pointer hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200 shadow-sm"
                   >
                     <div className="flex items-center space-x-2">
                       {(() => {
@@ -513,7 +556,9 @@ const Catalog: React.FC = () => {
 
                   {/* Dropdown Menu */}
                   {showSortDropdown && (
-                    <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden">
+                    <div className={`absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden ${
+                      isClosing.sort ? 'animate-dropdown-closing' : 'animate-dropdown'
+                    }`}>
                       {sortOptions.map((option) => {
                         const Icon = option.icon
                         return (
@@ -521,12 +566,12 @@ const Catalog: React.FC = () => {
                             key={option.value}
                             onClick={() => {
                               setSortBy(option.value)
-                              setShowSortDropdown(false)
+                              closeWithAnimation('sort')
                             }}
                             className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-150 ${
                               sortBy === option.value
                                 ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
-                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                                : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md'
                             }`}
                           >
                             <Icon className={`w-5 h-5 ${sortBy === option.value ? 'text-gris-oscuro dark:text-gray-900' : option.color}`} />
@@ -547,20 +592,20 @@ const Catalog: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <button
                   onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-lg transition-colors duration-200 ${
+                  className={`p-2 rounded-lg transition-all duration-200 ${
                     viewMode === 'grid' 
-                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900' 
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-md' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm'
                   }`}
                 >
                   <Grid className="w-5 h-5" />
                 </button>
                 <button
                   onClick={() => setViewMode('list')}
-                  className={`p-2 rounded-lg transition-colors duration-200 ${
+                  className={`p-2 rounded-lg transition-all duration-200 ${
                     viewMode === 'list' 
-                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900' 
-                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600'
+                      ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-md' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-sm'
                   }`}
                 >
                   <List className="w-5 h-5" />
@@ -652,6 +697,10 @@ interface FilterContentProps {
   setShowCategoryDropdown: (value: boolean) => void
   ratingDropdownRef: React.RefObject<HTMLDivElement>
   categoryDropdownRef: React.RefObject<HTMLDivElement>
+  isClosingRating: boolean
+  isClosingCategory: boolean
+  onCloseRating: () => void
+  onCloseCategory: () => void
 }
 
 const FilterContent: React.FC<FilterContentProps> = ({
@@ -672,6 +721,10 @@ const FilterContent: React.FC<FilterContentProps> = ({
   setShowCategoryDropdown,
   ratingDropdownRef,
   categoryDropdownRef,
+  isClosingRating,
+  isClosingCategory,
+  onCloseRating,
+  onCloseCategory,
 }) => {
   return (
     <div className="space-y-6">
@@ -708,8 +761,8 @@ const FilterContent: React.FC<FilterContentProps> = ({
           onClick={() => setOnlyInStock(!onlyInStock)}
           className={`w-full flex items-center justify-between p-3 rounded-xl transition-all duration-200 border-2 ${
             onlyInStock
-              ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-500'
-              : 'bg-gray-50 dark:bg-gray-700/30 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500'
+              ? 'bg-green-50 dark:bg-green-900/20 border-green-500 dark:border-green-500 hover:bg-green-100 dark:hover:bg-green-900/30 hover:shadow-md'
+              : 'bg-gray-50 dark:bg-gray-700/30 border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:shadow-sm'
           }`}
         >
           <div className="flex items-center space-x-3">
@@ -760,7 +813,7 @@ const FilterContent: React.FC<FilterContentProps> = ({
             placeholder="Min"
             value={priceRange.min}
             onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition-all duration-200"
           />
           <span className="text-gray-500 dark:text-gray-400">—</span>
           <input
@@ -768,7 +821,7 @@ const FilterContent: React.FC<FilterContentProps> = ({
             placeholder="Max"
             value={priceRange.max}
             onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition-all duration-200"
           />
         </div>
       </div>
@@ -780,8 +833,14 @@ const FilterContent: React.FC<FilterContentProps> = ({
         </h3>
         <div className="relative" ref={ratingDropdownRef}>
           <button
-            onClick={() => setShowRatingDropdown(!showRatingDropdown)}
-            className="w-full flex items-center justify-between px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm font-medium text-sm hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
+            onClick={() => {
+              if (showRatingDropdown) {
+                onCloseRating()
+              } else {
+                setShowRatingDropdown(true)
+              }
+            }}
+            className="w-full flex items-center justify-between px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm font-medium text-sm hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200"
           >
             <div className="flex items-center space-x-2">
               {(() => {
@@ -800,7 +859,9 @@ const FilterContent: React.FC<FilterContentProps> = ({
 
           {/* Dropdown Menu */}
           {showRatingDropdown && (
-            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden">
+            <div className={`absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden ${
+              isClosingRating ? 'animate-dropdown-closing' : 'animate-dropdown'
+            }`}>
               {ratingOptions.map((option) => {
                 const Icon = option.icon
                 return (
@@ -808,12 +869,12 @@ const FilterContent: React.FC<FilterContentProps> = ({
                     key={option.value}
                     onClick={() => {
                       setMinRating(option.value)
-                      setShowRatingDropdown(false)
+                      onCloseRating()
                     }}
                     className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-150 ${
                       minRating === option.value
                         ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md'
                     }`}
                   >
                     <Icon className={`w-5 h-5 ${minRating === option.value ? 'text-gris-oscuro dark:text-gray-900' : option.color}`} />
@@ -838,8 +899,14 @@ const FilterContent: React.FC<FilterContentProps> = ({
         </h3>
         <div className="relative" ref={categoryDropdownRef}>
           <button
-            onClick={() => setShowCategoryDropdown(!showCategoryDropdown)}
-            className="w-full flex items-center justify-between px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm font-medium text-sm hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200"
+            onClick={() => {
+              if (showCategoryDropdown) {
+                onCloseCategory()
+              } else {
+                setShowCategoryDropdown(true)
+              }
+            }}
+            className="w-full flex items-center justify-between px-3 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm font-medium text-sm hover:border-gray-300 dark:hover:border-gray-500 hover:shadow-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-all duration-200"
           >
             <div className="flex items-center space-x-2">
               {(() => {
@@ -858,7 +925,9 @@ const FilterContent: React.FC<FilterContentProps> = ({
 
           {/* Dropdown Menu */}
           {showCategoryDropdown && (
-            <div className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden max-h-80 overflow-y-auto">
+            <div className={`absolute z-50 w-full mt-2 bg-white dark:bg-gray-700 rounded-xl shadow-2xl border-2 border-gray-200 dark:border-gray-600 overflow-hidden max-h-80 overflow-y-auto ${
+              isClosingCategory ? 'animate-dropdown-closing' : 'animate-dropdown'
+            }`}>
               {categoriesConfig.map((category) => {
                 const Icon = category.icon
                 return (
@@ -866,12 +935,12 @@ const FilterContent: React.FC<FilterContentProps> = ({
                     key={category.value}
                     onClick={() => {
                       setSelectedCategory(category.value)
-                      setShowCategoryDropdown(false)
+                      onCloseCategory()
                     }}
                     className={`w-full flex items-center space-x-3 px-4 py-3 text-left transition-all duration-150 ${
                       selectedCategory === category.value
                         ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 font-semibold'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 hover:shadow-md'
                     }`}
                   >
                     <Icon className={`w-5 h-5 ${selectedCategory === category.value ? 'text-gris-oscuro dark:text-gray-900' : 'text-amarillo dark:text-yellow-400'}`} />
@@ -893,7 +962,7 @@ const FilterContent: React.FC<FilterContentProps> = ({
       {activeFiltersCount > 0 && (
         <button
           onClick={clearAllFilters}
-          className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200 border border-red-200 dark:border-red-800"
+          className="w-full flex items-center justify-center space-x-2 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:border-red-300 dark:hover:border-red-700 hover:shadow-sm rounded-lg transition-all duration-200 border border-red-200 dark:border-red-800"
         >
           <X className="w-4 h-4" />
           <span>Limpiar todos los filtros</span>
