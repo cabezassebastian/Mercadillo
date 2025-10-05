@@ -17,6 +17,8 @@ export interface Producto {
   categoria: string
   created_at: string
   updated_at: string
+  rating_promedio?: number  // Promedio de calificaciones 0-5
+  total_vendidos?: number   // Total de unidades vendidas
 }
 
 export interface Pedido {
