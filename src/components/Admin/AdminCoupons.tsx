@@ -7,7 +7,7 @@ import {
   eliminarCupon,
   type Cupon 
 } from '@/lib/cupones'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/lib/supabase'
 
 interface CouponStats {
   total_usos: number

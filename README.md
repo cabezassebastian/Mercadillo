@@ -24,6 +24,7 @@
 - **Cloudinary** - CDN y gestión de imágenes optimizadas
 - **Vercel** - Hosting y serverless functions
 - **Google Gemini AI** - Chatbot inteligente con búsqueda de productos
+- **Resend** - Emails transaccionales con DMARC configurado
 
 ### Características Destacadas
 - ✅ **Chatbot AI** con Google Gemini 2.0 Flash
@@ -32,10 +33,19 @@
   - Persistencia de conversaciones
   - Contador de mensajes sin leer
   - Dashboard de analytics
+- ✅ **Sistema de Emails** con Resend
+  - Email de bienvenida
+  - Confirmación de pedido
+  - Notificaciones de envío/entrega
+  - Serverless functions en `/api/emails/`
+  - DMARC configurado para deliverability
+- ✅ **AuthSync** - Sincronización Clerk ↔ Supabase
+  - Detección automática de cambios de perfil
+  - Cache inteligente para evitar updates redundantes
+  - Eventos del DOM para notificar cambios
 - ✅ **Panel de Admin** completo con Service Role Key
 - ✅ **Pagos** con MercadoPago (producción)
 - ✅ **RLS Desactivado** para simplificar autenticación
-- ✅ **Sincronización** Clerk ↔ Supabase
 - ✅ **Diseño Responsive** - Mobile-first
 
 ---
@@ -47,13 +57,19 @@ Mercadillo/
 ├── api/                      # Vercel Serverless Functions
 │   ├── chat.ts              # Endpoint del chatbot AI (Gemini)
 │   ├── checkout.ts          # Procesamiento de pagos
+│   ├── emails/              # Serverless email functions ⭐ NUEVO
+│   │   ├── send-welcome.ts
+│   │   ├── send-order-confirmation.ts
+│   │   ├── send-shipping.ts
+│   │   └── send-delivery.ts
 │   └── mercadopago/         # Webhooks de MercadoPago
 ├── src/
 │   ├── components/
 │   │   ├── Admin/           # Panel de administración
 │   │   ├── Auth/            # Autenticación (Clerk)
+│   │   ├── AuthSync.tsx     # Sincronización Clerk ↔ Supabase ⭐
 │   │   ├── Cart/            # Carrito de compras
-│   │   ├── ChatBot/         # Chatbot AI ⭐ NUEVO
+│   │   ├── ChatBot/         # Chatbot AI
 │   │   ├── Layout/          # Header, Footer, Navbar
 │   │   ├── Product/         # Cards, detalles, filtros
 │   │   └── User/            # Perfil, pedidos, direcciones
@@ -63,11 +79,17 @@ Mercadillo/
 │   ├── lib/
 │   │   ├── supabase.ts      # Cliente público (ANON_KEY)
 │   │   ├── supabaseAdmin.ts # Cliente admin (SERVICE_ROLE_KEY) ⭐
-│   │   └── mercadopago.ts   # SDK de MercadoPago
+│   │   ├── mercadopago.ts   # SDK de MercadoPago
+│   │   └── userProfile.ts   # Creación de perfil + email bienvenida
 │   └── pages/               # Rutas de la aplicación
-├── supabase/                # Configuración local (opcional)
-├── fix-rls-DISABLE.sql      # Script para desactivar RLS ⭐
-├── supabase-schema.sql      # Schema completo de la DB
+├── sql-migrations/          # Migraciones SQL aplicadas ⭐ NUEVO
+│   ├── supabase-schema.sql
+│   ├── supabase-chat-migrations.sql
+│   ├── migration-cupones.sql
+│   └── ...
+├── SISTEMA-EMAILS.md        # Documentación de emails ⭐
+├── CLERK-AUTHSYNC-SETUP.md  # Documentación de AuthSync ⭐
+└── supabase/                # Configuración local (opcional)
 └── supabase-chat-migrations.sql  # Migraciones del chatbot
 ```
 
@@ -110,6 +132,10 @@ MERCADOPAGO_ACCESS_TOKEN=APP_USR-5101834776453209-092922-...
 
 # Google Gemini AI (Chatbot)
 GEMINI_API_KEY=AIzaSyB0iMvubBq3yp3ZC8UiI86p5pAxhvylX7U
+
+# Resend (Emails Transaccionales) ⭐ NUEVO
+VITE_RESEND_API_KEY=re_FNiQkHW1_MhdZCehba257wyBusis2tBGj
+VITE_APP_URL=https://mercadillo.app  # Para links en emails
 
 # Variables para Vercel Backend
 SUPABASE_URL=https://xwubnuokmfghtyyfpgtl.supabase.co
