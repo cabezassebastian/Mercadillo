@@ -28,14 +28,22 @@ const Checkout: React.FC = () => {
     dni: '',
     telefono: '',
     direccion: '',
-    metodoEntrega: 'envio', // 'envio', 'contraentrega', 'tienda'
+    metodoEntrega: 'envio',
     terminos: false
   })
 
-  // Guardar DNI cuando esté completo
+  // Limpiar DNI cuando se cambia el método de entrega a contraentrega o tienda
+  useEffect(() => {
+    if (formData.metodoEntrega === 'contraentrega' || formData.metodoEntrega === 'tienda') {
+      setFormData(prev => ({ ...prev, dni: '' }))
+      setDniSaved(false)
+    }
+  }, [formData.metodoEntrega])
+
+  // Guardar DNI cuando esté completo (solo para envío a domicilio)
   useEffect(() => {
     const saveDNI = async () => {
-      if (user?.id && formData.dni.length === 8 && !dniSaved) {
+      if (user?.id && formData.dni.length === 8 && !dniSaved && formData.metodoEntrega === 'envio') {
         const result = await updateUserDNI(user.id, formData.dni)
         if (result.success) {
           setDniSaved(true)
@@ -46,7 +54,7 @@ const Checkout: React.FC = () => {
       }
     }
     saveDNI()
-  }, [user?.id, formData.dni, dniSaved])
+  }, [user?.id, formData.dni, dniSaved, formData.metodoEntrega])
 
   // Cargar direcciones del usuario
   useEffect(() => {
@@ -242,25 +250,28 @@ const Checkout: React.FC = () => {
                   </p>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    DNI
-                  </label>
-                  <input
-                    type="text"
-                    name="dni"
-                    value={formData.dni}
-                    onChange={handleInputChange}
-                    required
-                    maxLength={8}
-                    pattern="\d{8}"
-                    className="input-field"
-                    placeholder="12345678"
-                  />
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    {formData.dni.length}/8 dígitos
-                  </p>
-                </div>
+                {/* DNI - Solo requerido para envío a domicilio */}
+                {formData.metodoEntrega === 'envio' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                      DNI <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      name="dni"
+                      value={formData.dni}
+                      onChange={handleInputChange}
+                      required
+                      maxLength={8}
+                      pattern="\d{8}"
+                      className="input-field"
+                      placeholder="12345678"
+                    />
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      {formData.dni.length}/8 dígitos
+                    </p>
+                  </div>
+                )}
 
                 <div>
                   <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
@@ -398,10 +409,13 @@ const Checkout: React.FC = () => {
                   </div>
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
-                    {formData.metodoEntrega === 'envio' ? 'Dirección de Envío' : formData.metodoEntrega === 'contraentrega' ? 'Estación de Entrega (Línea 1)' : 'Dirección (Opcional)'}
-                  </label>
+                {/* Dirección - No mostrar para recojo en tienda */}
+                {formData.metodoEntrega !== 'tienda' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                      {formData.metodoEntrega === 'envio' ? 'Dirección de Envío' : 'Estación de Entrega (Línea 1)'}
+                      <span className="text-red-500 ml-1">*</span>
+                    </label>
                   
                   {/* Selector de direcciones guardadas */}
                   {addresses.length > 0 && (
@@ -488,16 +502,14 @@ const Checkout: React.FC = () => {
                         name="direccion"
                         value={formData.direccion}
                         onChange={handleInputChange}
-                        required={formData.metodoEntrega !== 'tienda'}
+                        required
                         rows={3}
                         maxLength={255}
                         className="input-field"
                         placeholder={
                           formData.metodoEntrega === 'envio' 
                             ? "Ingresa tu dirección completa de entrega" 
-                            : formData.metodoEntrega === 'contraentrega'
-                            ? "Indica la estación del Tren Línea 1 (ej: Villa El Salvador, San Juan, etc.)"
-                            : "Dirección (opcional para recojo en tienda)"
+                            : "Indica la estación del Tren Línea 1 (ej: Villa El Salvador, San Juan, etc.)"
                         }
                       />
                       <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
@@ -518,33 +530,54 @@ const Checkout: React.FC = () => {
                       </button>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {/* Términos y condiciones */}
             <div className="card p-6">
-              <div className="flex items-start space-x-3">
-                <input
-                  type="checkbox"
-                  id="terminos"
-                  name="terminos"
-                  checked={formData.terminos}
-                  onChange={handleInputChange}
-                  required
-                  className="mt-1 text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400 bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600"
-                />
-                <label htmlFor="terminos" className="text-sm text-gray-600 dark:text-gray-400">
+              <label 
+                htmlFor="terminos" 
+                className="flex items-start space-x-3 cursor-pointer group"
+              >
+                <div className="relative flex items-center">
+                  <input
+                    type="checkbox"
+                    id="terminos"
+                    name="terminos"
+                    checked={formData.terminos}
+                    onChange={handleInputChange}
+                    required
+                    className="peer sr-only"
+                  />
+                  <div className="w-5 h-5 border-2 border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 peer-checked:bg-amarillo dark:peer-checked:bg-yellow-400 peer-checked:border-amarillo dark:peer-checked:border-yellow-400 transition-all duration-200 flex items-center justify-center group-hover:border-amarillo dark:group-hover:border-yellow-400">
+                    {formData.terminos && (
+                      <svg className="w-3 h-3 text-white" fill="none" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M5 13l4 4L19 7"></path>
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                <span className="text-sm text-gray-600 dark:text-gray-400 select-none">
                   Acepto los{' '}
-                  <a href="/terminos" className="text-amarillo dark:text-yellow-400 hover:underline">
+                  <a 
+                    href="/terminos" 
+                    className="text-amarillo dark:text-yellow-400 hover:underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     términos y condiciones
                   </a>{' '}
                   y la{' '}
-                  <a href="/privacidad" className="text-amarillo dark:text-yellow-400 hover:underline">
+                  <a 
+                    href="/privacidad" 
+                    className="text-amarillo dark:text-yellow-400 hover:underline font-medium"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     política de privacidad
                   </a>
-                </label>
-              </div>
+                </span>
+              </label>
             </div>
           </div>
 
@@ -552,10 +585,9 @@ const Checkout: React.FC = () => {
           <div className="space-y-6">
             {formData.terminos && 
              formData.nombre && 
-             formData.dni && 
-             formData.dni.length === 8 &&
+             (formData.metodoEntrega === 'envio' ? (formData.dni && formData.dni.length === 8) : true) &&
              formData.telefono && 
-             (formData.metodoEntrega === 'tienda' || formData.direccion) ? (
+             (formData.metodoEntrega !== 'tienda' ? formData.direccion : true) ? (
               <MercadoPagoCheckout
                 onSuccess={handlePaymentSuccess}
                 onError={handlePaymentError}

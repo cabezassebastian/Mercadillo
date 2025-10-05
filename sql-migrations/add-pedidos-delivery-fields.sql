@@ -17,6 +17,6 @@ CREATE INDEX IF NOT EXISTS idx_pedidos_dni_cliente ON pedidos(dni_cliente);
 -- Comentarios en las columnas
 COMMENT ON COLUMN pedidos.metodo_entrega IS 'Método de entrega: envio (Olva Courier), contraentrega (Tren Línea 1), tienda (Recojo en tienda)';
 COMMENT ON COLUMN pedidos.telefono_contacto IS 'Teléfono de contacto del cliente para el pedido';
-COMMENT ON COLUMN pedidos.dni_cliente IS 'DNI del cliente (requerido para envíos)';
+COMMENT ON COLUMN pedidos.dni_cliente IS 'DNI del cliente (solo requerido para método envio - Olva Courier)';
 COMMENT ON COLUMN pedidos.nombre_completo IS 'Nombre completo del cliente para el pedido';
 COMMENT ON COLUMN pedidos.notas_entrega IS 'Notas adicionales sobre la entrega (ej: estación del tren, referencia, etc.)';

@@ -2,41 +2,64 @@
 
 ## 📋 Resumen
 Se implementó un sistema completo de gestión de información de entrega, incluyendo:
-- Campo DNI en el checkout
-- Tres métodos de entrega
+- Campo DNI en el checkout (**solo requerido para envío a domicilio**)
+- Tres métodos de entrega con validaciones específicas
 - Guardado automático de datos de entrega en la base de datos
 - Visualización de información de entrega en el panel de administración
+- Checkbox de términos mejorado con animación
 
 ## 🎯 Funcionalidades Implementadas
 
-### 1. Campo DNI
+### 1. Campo DNI (Condicional)
+- ✅ **Solo visible y requerido para "Envío a domicilio"**
+- ✅ Se oculta automáticamente para "Pago contra entrega" y "Recojo en tienda"
 - ✅ Validación de 8 dígitos numéricos
-- ✅ Auto-guardado en la tabla `usuarios` cuando se completa
+- ✅ Auto-guardado en la tabla `usuarios` cuando se completa (solo para envío)
 - ✅ Visualización en el panel de administración de usuarios
 - ✅ Integración con el sistema de perfiles de usuario
 
 ### 2. Métodos de Entrega
-Se agregaron tres opciones de entrega:
+Se agregaron tres opciones de entrega con validaciones específicas:
 
 1. **📦 Envío a domicilio (Olva Courier)**
    - Entrega en 3-5 días hábiles
+   - **Requiere DNI (8 dígitos)**
    - Requiere dirección completa
-   - Requiere DNI y teléfono
+   - Requiere teléfono
 
 2. **🚇 Pago contra entrega - Tren Línea 1**
    - Entrega en estación del Metro de Lima
+   - **NO requiere DNI** (se limpia automáticamente)
    - Requiere especificar estación
-   - Requiere DNI y teléfono para coordinación
+   - Requiere teléfono para coordinación
 
 3. **🏪 Recojo en tienda**
-   - Dirección opcional
-   - Requiere DNI y teléfono para notificación de pedido listo
+   - **NO requiere DNI** (se limpia automáticamente)
+   - **NO requiere dirección** (campo oculto)
+   - Requiere teléfono para notificación de pedido listo
 
-### 3. Validación Condicional
-- Dirección obligatoria para envío y contra entrega
-- Dirección opcional para recojo en tienda
-- DNI siempre requerido (8 dígitos)
-- Teléfono siempre requerido
+### 3. Validación Condicional Inteligente
+
+#### Cuando selecciona "Envío a domicilio":
+- ✅ Campo DNI: **Visible y obligatorio**
+- ✅ Campo Dirección: **Visible y obligatorio**
+- ✅ Placeholder: "Ingresa tu dirección completa de entrega"
+
+#### Cuando selecciona "Pago contra entrega":
+- ✅ Campo DNI: **Oculto** (se borra automáticamente)
+- ✅ Campo Dirección: **Visible y obligatorio**
+- ✅ Placeholder: "Indica la estación del Tren Línea 1"
+
+#### Cuando selecciona "Recojo en tienda":
+- ✅ Campo DNI: **Oculto** (se borra automáticamente)
+- ✅ Campo Dirección: **Oculto completamente**
+
+### 4. Checkbox de Términos Mejorado
+- ✅ Diseño personalizado con animación
+- ✅ Checkmark con SVG animado
+- ✅ Hover effect en borde
+- ✅ Click en toda la etiqueta funciona
+- ✅ Links a términos y privacidad con stopPropagation
 
 ### 4. Persistencia de Datos
 Los datos de entrega se guardan en la base de datos cuando el pago se completa exitosamente:
@@ -164,20 +187,23 @@ idx_pedidos_dni_cliente
 ## ✅ Validaciones Implementadas
 
 ### Campo DNI
+- **Solo visible para método "envío a domicilio"**
 - Solo números permitidos
 - Exactamente 8 dígitos
 - Validación en frontend y backend
+- **Se limpia automáticamente al cambiar a otros métodos**
 
 ### Campo Dirección
-- Obligatoria para "envío" y "contraentrega"
-- Opcional para "recojo en tienda"
+- **Visible y obligatoria** para "envío" y "contraentrega"
+- **Oculta completamente** para "recojo en tienda"
 - Placeholder dinámico según método
+- Contador de caracteres (máx 255)
 
 ### Antes de Pagar
 - Nombre completo ✓
-- DNI completo (8 dígitos) ✓
+- DNI completo **SOLO si método = envío** ✓
 - Teléfono ✓
-- Dirección (condicional) ✓
+- Dirección **SOLO si método ≠ tienda** ✓
 - Términos aceptados ✓
 
 ## 🎨 UI/UX
@@ -187,7 +213,26 @@ idx_pedidos_dni_cliente
 - Iconos descriptivos (📦, 🚇, 🏪)
 - Colores condicionales (amarillo cuando seleccionado)
 - Descripciones claras de cada método
+- **Campos se ocultan/muestran dinámicamente según método**
 - Validación en tiempo real
+- **Checkbox de términos mejorado con animación personalizada**
+- Checkmark SVG con transición suave
+- Hover effects en checkbox
+
+### Comportamiento Dinámico
+```
+Usuario selecciona "Envío a domicilio":
+  → Campo DNI aparece (obligatorio)
+  → Campo Dirección aparece (obligatorio)
+  
+Usuario selecciona "Pago contra entrega":
+  → Campo DNI desaparece y se borra
+  → Campo Dirección cambia placeholder a "Estación"
+  
+Usuario selecciona "Recojo en tienda":
+  → Campo DNI desaparece y se borra
+  → Campo Dirección desaparece completamente
+```
 
 ### Admin Panel
 - Nueva sección "Información de Entrega"
