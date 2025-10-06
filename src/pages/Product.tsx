@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import { ArrowLeft, ShoppingCart, Truck, Shield, RotateCcw } from 'lucide-react'
-import { supabase, Producto } from '@/lib/supabase'
+import { supabase, Producto, ProductoImagen } from '@/lib/supabase'
 import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
 import ReviewList from '@/components/Reviews/ReviewList'
 import WishlistButton from '@/components/common/WishlistButton'
+import ProductGallery from '@/components/Product/ProductGallery'
 import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
@@ -17,6 +18,7 @@ const Product: React.FC = () => {
   const { user } = useUser()
   const { addToCart, items } = useCart()
   const [producto, setProducto] = useState<Producto | null>(null)
+  const [productoImagenes, setProductoImagenes] = useState<ProductoImagen[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [addingToCart, setAddingToCart] = useState(false)
@@ -46,6 +48,17 @@ const Product: React.FC = () => {
         }
 
         setProducto(data)
+        
+        // Cargar imágenes del producto
+        const { data: imagenesData, error: imagenesError } = await supabase
+          .from('producto_imagenes')
+          .select('*')
+          .eq('producto_id', data.id)
+          .order('orden', { ascending: true })
+        
+        if (!imagenesError && imagenesData) {
+          setProductoImagenes(imagenesData)
+        }
         
         // Cargar estadísticas de reseñas
         const stats = await getProductReviewStats(data.id)
@@ -178,13 +191,11 @@ const Product: React.FC = () => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           {/* Product Images */}
           <div className="space-y-4">
-            <div className="aspect-square overflow-hidden rounded-lg bg-blanco">
-              <img
-                src={producto.imagen}
-                alt={producto.nombre}
-                className="w-full h-full object-cover"
-              />
-            </div>
+            <ProductGallery 
+              images={productoImagenes}
+              productName={producto.nombre}
+              fallbackImage={producto.imagen}
+            />
           </div>
 
           {/* Product Info */}

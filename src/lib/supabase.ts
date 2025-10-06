@@ -21,6 +21,17 @@ export interface Producto {
   total_vendidos?: number   // Total de unidades vendidas
 }
 
+export interface ProductoImagen {
+  id: string
+  producto_id: string
+  url: string
+  orden: number
+  es_principal: boolean
+  alt_text?: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Pedido {
   id: string
   usuario_id: string

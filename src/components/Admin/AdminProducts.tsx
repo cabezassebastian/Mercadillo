@@ -3,6 +3,7 @@ import { Plus, Edit, Trash2, Upload, Search } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
+import ProductImageManager from './ProductImageManager'
 
 const AdminProducts: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([])
@@ -305,16 +306,16 @@ const AdminProducts: React.FC = () => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gris-oscuro mb-6">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">
               {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
             </h3>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gris-oscuro mb-2">
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
                     Nombre
                   </label>
                   <input
@@ -398,7 +399,7 @@ const AdminProducts: React.FC = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gris-oscuro mb-2">
-                  Imagen
+                  Imagen Principal
                 </label>
                 <div className="flex items-center space-x-4">
                   <input
@@ -426,6 +427,19 @@ const AdminProducts: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Galería de imágenes adicionales (solo al editar) */}
+              {editingProduct && (
+                <div className="border-t border-gray-200 dark:border-gray-700 pt-6 mt-6">
+                  <ProductImageManager 
+                    productoId={editingProduct.id}
+                    onImagesChange={() => {
+                      // Opcional: Actualizar algo si es necesario
+                      console.log('Imágenes actualizadas');
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="flex space-x-4 pt-4">
                 <button
