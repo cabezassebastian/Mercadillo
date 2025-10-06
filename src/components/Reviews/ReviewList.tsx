@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@clerk/clerk-react'
+import { useAuth } from '@/contexts/AuthContext'
 import StarRating from '@/components/common/StarRating'
 import { getProductReviews, deleteReview, getUserReviewForProduct } from '@/lib/reviews'
 import type { Review } from '@/types/reviews'
@@ -14,6 +15,7 @@ interface ReviewListProps {
 
 const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }) => {
   const { user } = useUser()
+  const { isAdmin } = useAuth()
   const [reviews, setReviews] = useState<Review[]>([])
   const [userReview, setUserReview] = useState<Review | null>(null)
   const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -59,10 +61,14 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
     setCurrentPage(1)
   }, [productId, user?.id, refreshTrigger, selectedRating, sortBy])
 
-  const handleDeleteReview = async (reviewId: string) => {
+  const handleDeleteReview = async (reviewId: string, isOwnReview: boolean = false) => {
     if (!user?.id) return
     
-    const confirmDelete = window.confirm('¿Estás seguro de que quieres eliminar tu reseña?')
+    const message = isAdmin && !isOwnReview
+      ? '¿Estás seguro de que quieres eliminar esta reseña? (Acción de administrador)'
+      : '¿Estás seguro de que quieres eliminar tu reseña?'
+    
+    const confirmDelete = window.confirm(message)
     if (!confirmDelete) return
 
     setIsDeleting(reviewId)
@@ -167,7 +173,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
 
   return (
     <div className="space-y-6">
-      {/* Botón para agregar reseña (solo si el usuario puede) */}
+      {/* Botón para agregar reseña (si el usuario puede o es admin) */}
       {user && !userReview && !showReviewForm && (
         <div className="text-center">
           <button
@@ -183,7 +189,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
             "
           >
             <MessageCircle className="w-5 h-5" />
-            Escribir reseña
+            {isAdmin ? 'Escribir reseña (Admin)' : 'Escribir reseña'}
           </button>
         </div>
       )}
@@ -228,7 +234,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
               </div>
             </div>
             <button
-              onClick={() => handleDeleteReview(userReview.id)}
+              onClick={() => handleDeleteReview(userReview.id, true)}
               disabled={isDeleting === userReview.id}
               className="
                 p-1 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200
@@ -260,19 +266,43 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
               key={review.id}
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
             >
-              <div className="flex items-center gap-3 mb-3">
-                <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                <div className="flex-1">
-                  <p className="font-medium text-gris-oscuro dark:text-gray-100">
-                    {review.usuario?.nombre} {review.usuario?.apellido}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                    <Calendar className="w-3 h-3" />
-                    {formatDate(review.created_at)}
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gray-500 rounded-full flex items-center justify-center">
+                    <User className="w-4 h-4 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-medium text-gris-oscuro dark:text-gray-100">
+                      {review.usuario?.nombre} {review.usuario?.apellido}
+                    </p>
+                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(review.created_at)}
+                    </div>
                   </div>
                 </div>
+                
+                {/* Botón de eliminar para admins */}
+                {isAdmin && (
+                  <button
+                    onClick={() => handleDeleteReview(review.id, false)}
+                    disabled={isDeleting === review.id}
+                    className="
+                      p-2 text-red-600 hover:text-red-800 dark:text-red-400 dark:hover:text-red-200
+                      hover:bg-red-50 dark:hover:bg-red-900/20
+                      disabled:opacity-50 disabled:cursor-not-allowed
+                      rounded-lg transition-all duration-200
+                      focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50
+                    "
+                    title="Eliminar reseña (Admin)"
+                  >
+                    {isDeleting === review.id ? (
+                      <div className="w-4 h-4 animate-spin rounded-full border-2 border-red-500 border-t-transparent" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
+                )}
               </div>
               
               <StarRating rating={review.calificacion} readonly size="sm" />

@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 import { useUser } from '@clerk/clerk-react'
+import { useAuth } from '@/contexts/AuthContext'
 import StarRating from '@/components/common/StarRating'
 import { createReview, canUserReviewProduct } from '@/lib/reviews'
 import type { CreateReview } from '@/types/reviews'
-import { MessageCircle, Send, AlertCircle } from 'lucide-react'
+import { MessageCircle, Send, AlertCircle, Shield } from 'lucide-react'
 
 interface ReviewFormProps {
   productId: string
@@ -19,6 +20,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   skipPurchaseValidation = false
 }) => {
   const { user } = useUser()
+  const { isAdmin } = useAuth()
   const [rating, setRating] = useState<number>(0)
   const [comment, setComment] = useState<string>('')
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
@@ -31,6 +33,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   React.useEffect(() => {
     const checkPermission = async () => {
       if (!user?.id) return
+      
+      // Admins pueden escribir reseñas sin restricciones
+      if (isAdmin) {
+        setCanReview(true)
+        setPedidoId('admin-review') // ID especial para reseñas de admin
+        setIsCheckingPermission(false)
+        return
+      }
       
       // Si estamos en modo testing, saltarse la validación
       if (skipPurchaseValidation) {
@@ -51,7 +61,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     }
 
     checkPermission()
-  }, [user?.id, productId, skipPurchaseValidation])
+  }, [user?.id, productId, skipPurchaseValidation, isAdmin])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -145,11 +155,19 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
 
   return (
     <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6 shadow-lg">
-      <div className="flex items-center gap-2 mb-4">
-        <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-          Escribe tu reseña
-        </h3>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <MessageCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+            Escribe tu reseña
+          </h3>
+        </div>
+        {isAdmin && (
+          <div className="flex items-center gap-1 px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 rounded-full text-xs font-semibold">
+            <Shield className="w-3 h-3" />
+            <span>ADMIN</span>
+          </div>
+        )}
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
