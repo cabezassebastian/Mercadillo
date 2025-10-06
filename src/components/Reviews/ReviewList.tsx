@@ -20,27 +20,26 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
   const [isDeleting, setIsDeleting] = useState<string>('')
   const [showReviewForm, setShowReviewForm] = useState<boolean>(false)
   const [currentPage, setCurrentPage] = useState<number>(1)
-  const [totalReviews, setTotalReviews] = useState<number>(0)
   const reviewsPerPage = 5
   
   // Estados de filtros
   const [selectedRating, setSelectedRating] = useState<number | null>(null)
   const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating-high' | 'rating-low'>('recent')
-
-  // Cargar reseñas del producto
+  
+  // Cargar TODAS las reseñas para permitir filtrado
   const loadReviews = async () => {
     setIsLoading(true)
     
     try {
-      const offset = (currentPage - 1) * reviewsPerPage
-      const { reviews: productReviews, total } = await getProductReviews(
+      // Cargar todas las reseñas (sin límite para filtrado)
+      const { reviews: productReviews } = await getProductReviews(
         productId, 
-        reviewsPerPage, 
-        offset
+        1000, // Cargar hasta 1000 reseñas
+        0
       )
       
       setReviews(productReviews)
-      setTotalReviews(total)
+      // Ahora usamos reviews.length directamente en lugar de total
 
       // Si el usuario está autenticado, cargar su reseña
       if (user?.id) {
@@ -56,7 +55,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
 
   useEffect(() => {
     loadReviews()
-  }, [productId, currentPage, user?.id, refreshTrigger])
+    // Reset page cuando cambian los filtros
+    setCurrentPage(1)
+  }, [productId, user?.id, refreshTrigger, selectedRating, sortBy])
 
   const handleDeleteReview = async (reviewId: string) => {
     if (!user?.id) return
@@ -130,7 +131,14 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
     return filtered
   }, [reviews, selectedRating, sortBy])
 
-  const totalPages = Math.ceil(totalReviews / reviewsPerPage)
+  // Paginación en el cliente
+  const paginatedReviews = useMemo(() => {
+    const startIndex = (currentPage - 1) * reviewsPerPage
+    const endIndex = startIndex + reviewsPerPage
+    return filteredAndSortedReviews.slice(startIndex, endIndex)
+  }, [filteredAndSortedReviews, currentPage, reviewsPerPage])
+
+  const totalPages = Math.ceil(filteredAndSortedReviews.length / reviewsPerPage)
   const ratingCounts = getRatingCounts()
 
   if (isLoading && currentPage === 1) {
@@ -189,8 +197,8 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
         />
       )}
 
-      {/* Filtros de Reseñas (solo si hay reseñas) */}
-      {reviews.length > 0 && (
+      {/* Filtros de Reseñas (mostrar siempre que tengamos data) */}
+      {!isLoading && reviews.length > 0 && (
         <ReviewFilters
           selectedRating={selectedRating}
           sortBy={sortBy}
@@ -245,9 +253,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
       )}
 
       {/* Lista de reseñas */}
-      {filteredAndSortedReviews.length > 0 ? (
+      {paginatedReviews.length > 0 ? (
         <div className="space-y-4">
-          {filteredAndSortedReviews.map((review) => (
+          {paginatedReviews.map((review) => (
             <div
               key={review.id}
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -277,7 +285,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
             </div>
           ))}
         </div>
-      ) : reviews.length > 0 && filteredAndSortedReviews.length === 0 ? (
+      ) : reviews.length > 0 && paginatedReviews.length === 0 ? (
         <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
           <MessageCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500 dark:text-gray-400 mb-2">
