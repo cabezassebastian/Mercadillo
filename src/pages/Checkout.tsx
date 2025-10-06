@@ -385,7 +385,7 @@ const Checkout: React.FC = () => {
                             </span>
                           </div>
                           <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Entrega a través de Olva Courier (3-5 días hábiles)
+                            Entrega a través de Shalom
                           </p>
                         </div>
                         <input

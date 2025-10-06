@@ -474,7 +474,7 @@ const AdminOrders: React.FC = () => {
                           <span className="text-2xl">📦</span>
                           <div>
                             <p className="text-sm font-semibold text-blue-900 dark:text-blue-100">Envío a domicilio</p>
-                            <p className="text-xs text-blue-700 dark:text-blue-300">Olva Courier (3-5 días hábiles)</p>
+                            <p className="text-xs text-blue-700 dark:text-blue-300">Shalom</p>
                           </div>
                         </div>
                       ) : selectedPedido.metodo_entrega === 'contraentrega' ? (

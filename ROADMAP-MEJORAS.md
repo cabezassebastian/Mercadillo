@@ -10,10 +10,33 @@
 
 ## 📊 Estado General del Proyecto
 
-- ✅ **Completado:** 1/8 tareas principales (12.5%)
+- ✅ **Completado:** 2/8 tareas principales (25%)
 - 🔄 **En Progreso:** 0/8 tareas principales
-- ⏳ **Pendiente:** 7/8 tareas principales
-- **Progreso Total:** 12.5%
+- ⏳ **Pendiente:** 6/8 tareas principales
+- **Progreso Total:** 25%
+
+## 🎉 Últimas Mejoras Completadas (Octubre 2025)
+
+### ✅ Sistema de Emails Mejorado
+- [x] Rediseño completo con colores de marca (#FFD700 - amarillo)
+- [x] Animaciones suaves (bounce, float, scaleIn)
+- [x] Rutas corregidas (/perfil/pedidos, /perfil/reseñas, /catalogo)
+- [x] Email de envío con timeline visual
+- [x] Email de entrega con sección de reseñas
+- [x] Compatibilidad con Vercel (HTML inline)
+
+### ✅ Panel Admin - Mejoras UX
+- [x] Animaciones de filtros (slide-up/down 150ms)
+- [x] Animaciones de modal (scale-up/down 200ms)
+- [x] Backdrop con blur effects
+- [x] Botones de estado: Pendiente (naranja), Cancelar (rojo)
+- [x] Botones de email: Marcar como Enviado (morado), Marcar como Entregado (verde)
+- [x] Descripciones de productos truncadas a 15 caracteres
+
+### ✅ Actualización de Información de Envío
+- [x] Cambio de "Olva Courier" a "Shalom"
+- [x] Eliminación de estimaciones de tiempo "(3-5 días hábiles)"
+- [x] Actualizado en Checkout y Admin Orders
 
 ---
 
@@ -867,6 +890,59 @@ Una vez implementadas las mejoras, medir:
 - **Retorno de clientes:** Meta >30%
 - **CTR de recomendaciones:** Meta >5%
 - **Uso de cupones:** Meta >15% de pedidos
+
+---
+
+## 📝 Registro de Cambios Recientes
+
+### Octubre 5, 2025
+
+#### Emails Mejorados (api/emails/)
+**Archivos modificados:**
+- `send-shipping.ts` - Email de confirmación de envío
+- `send-delivery.ts` - Email de confirmación de entrega
+
+**Cambios:**
+- Reemplazo completo de color dorado (#b8860b) por amarillo marca (#FFD700)
+- Animaciones CSS: bounce, float, scaleIn
+- Timeline visual con gradientes
+- Enlaces corregidos a rutas correctas
+- Email de soporte actualizado: contomercadillo@gmail.com
+
+#### Admin Panel UX (src/components/Admin/)
+**Archivos modificados:**
+- `AdminOrders.tsx` - Panel de gestión de pedidos
+- `AdminProducts.tsx` - Panel de gestión de productos
+
+**Cambios en AdminOrders:**
+- Dropdown de filtros con animación slide (150ms)
+- Modal con animación scale (200ms)
+- Backdrop con blur effect
+- Click fuera para cerrar con animación
+- Botones de cambio de estado restaurados
+- Info de envío actualizada: "Shalom" (sin timeframe)
+
+**Cambios en AdminProducts:**
+- Descripción truncada a 15 caracteres + "..."
+- Tamaños de tabla mantenidos originales
+
+#### Checkout y Envíos (src/pages/)
+**Archivos modificados:**
+- `Checkout.tsx` - Página de checkout
+
+**Cambios:**
+- Método de entrega actualizado: "Entrega a través de Shalom"
+- Removido: "(3-5 días hábiles)"
+- Texto más limpio y genérico
+
+#### CSS Global (src/index.css)
+**Nuevas animaciones agregadas:**
+```css
+@keyframes scale-up
+@keyframes scale-down-out
+.animate-scale-up
+.animate-scale-down-closing
+```
 
 ---
 
