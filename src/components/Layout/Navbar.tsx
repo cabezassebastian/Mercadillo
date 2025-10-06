@@ -80,8 +80,8 @@ const Navbar: React.FC = () => {
   const handleTouchEnd = () => {
     if (!touchStart || !touchEnd) return
     const distance = touchStart - touchEnd
-    // Swipe right to close (negative distance = swipe from left to right)
-    if (distance < -50) {
+    // Swipe left to close (positive distance = swipe from right to left)
+    if (distance > 50) {
       closeMenu()
     }
   }
@@ -210,71 +210,72 @@ const Navbar: React.FC = () => {
         </div>
 
         {/* Mobile Navigation - Enhanced with overlay and slide animation */}
-        {isMenuOpen && (
-          <>
-            {/* Dark overlay with blur */}
-            <div 
-              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
-              onClick={closeMenu}
-            />
-            
-            {/* Sliding menu from left */}
-            <div 
-              ref={menuRef}
-              className={`fixed top-20 left-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-gray-800 
-                shadow-2xl z-50 overflow-y-auto transform transition-transform duration-300 ease-in-out
-                ${isClosing ? '-translate-x-full' : 'translate-x-0'}`}
-              onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
-              onTouchEnd={handleTouchEnd}
-            >
-              <div className="flex flex-col space-y-4 p-6">
-                {/* Mobile Search Bar - Solo en página de inicio */}
-                {isHomePage && (
-                  <div className="w-full">
-                    <SearchWithSuggestions
-                      value={searchTerm}
-                      onChange={setSearchTerm}
-                      onSearch={handleSearch}
-                      productos={allProducts}
-                      placeholder="Buscar productos..."
-                    />
-                  </div>
-                )}
-                
-                {navItems.map((item) => (
+        <>
+          {/* Dark overlay with blur - with fade animation */}
+          <div 
+            className={`fixed top-20 left-0 right-0 bottom-0 bg-black/50 backdrop-blur-sm z-40 md:hidden
+              transition-opacity duration-300 ease-in-out
+              ${isMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={closeMenu}
+          />
+          
+          {/* Sliding menu from right - with slide animation */}
+          <div 
+            ref={menuRef}
+            className={`fixed top-20 right-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-gray-800 
+              shadow-2xl z-50 overflow-y-auto transform transition-transform duration-300 ease-in-out md:hidden
+              ${isMenuOpen && !isClosing ? 'translate-x-0' : 'translate-x-full'}`}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            <div className="flex flex-col space-y-4 p-6">
+              {/* Mobile Search Bar - Solo en página de inicio */}
+              {isHomePage && (
+                <div className="w-full">
+                  <SearchWithSuggestions
+                    value={searchTerm}
+                    onChange={setSearchTerm}
+                    onSearch={handleSearch}
+                    productos={allProducts}
+                    placeholder="Buscar productos..."
+                  />
+                </div>
+              )}
+              
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.path}
+                  className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
+                  onClick={closeMenu}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              
+              {!user && (
+                <>
                   <Link
-                    key={item.name}
-                    to={item.path}
-                    className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
+                    to="/sign-in"
+                    className="btn-primary text-center"
                     onClick={closeMenu}
                   >
-                    {item.name}
+                    Iniciar Sesión
                   </Link>
-                ))}
-                
-                {!user && (
-                  <>
-                    <Link
-                      to="/sign-in"
-                      className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
-                      onClick={closeMenu}
-                    >
-                      Iniciar Sesión
-                    </Link>
-                    <Link
-                      to="/sign-up"
-                      className="btn-primary text-center"
-                      onClick={closeMenu}
-                    >
-                      Registrarse
-                    </Link>
-                  </>
-                )}
-              </div>
+                  <Link
+                    to="/sign-up"
+                    className="btn-primary text-center"
+                    onClick={closeMenu}
+                  >
+                    Registrarse
+                  </Link>
+                </>
+              )}
             </div>
-          </>
-        )}
+          </div>
+        </>
+        
       </div>
     </nav>
   )

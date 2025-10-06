@@ -103,24 +103,24 @@ const Home: React.FC = () => {
           </div>
         </div>
         <div className="absolute inset-0 bg-gris-oscuro bg-opacity-50 dark:bg-black dark:bg-opacity-60 flex items-center justify-center text-center p-4">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-blanco mb-2 sm:mb-4">
+          <div className="max-w-3xl mx-auto w-full">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-blanco mb-3 sm:mb-4 px-2">
               Bienvenido a Mercadillo Lima Perú
             </h1>
-            <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-hueso dark:text-gray-200 mb-4 sm:mb-6 md:mb-8">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-hueso dark:text-gray-200 mb-4 sm:mb-6 md:mb-8 px-2">
               Descubre los mejores productos de Lima. Calidad garantizada y envio rapido a toda la ciudad.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-stretch sm:items-center w-full max-w-md sm:max-w-none mx-auto px-6 sm:px-4">
               <Link
                 to="/catalogo"
-                className="btn-primary text-base sm:text-lg px-6 sm:px-8 py-2.5 sm:py-3 flex items-center justify-center space-x-2"
+                className="btn-primary text-sm sm:text-base md:text-lg px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 flex items-center justify-center gap-2 w-full sm:w-auto"
               >
-                <span>Ver Catalogo</span>
-                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span>Ver Catálogo</span>
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
               </Link>
               <Link
                 to="/carrito"
-                className="bg-blanco dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 hover:bg-hueso dark:hover:bg-gray-700 font-semibold py-2.5 sm:py-3 px-6 sm:px-8 rounded-lg transition-colors duration-200 text-base sm:text-lg"
+                className="bg-blanco dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 hover:bg-hueso dark:hover:bg-gray-700 font-semibold py-2.5 sm:py-3 px-4 sm:px-6 md:px-8 rounded-lg transition-colors duration-200 text-sm sm:text-base md:text-lg text-center w-full sm:w-auto"
               >
                 Mi Carrito
               </Link>
