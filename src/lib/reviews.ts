@@ -8,6 +8,22 @@ export const canUserReviewProduct = async (
   productId: string
 ): Promise<UserPurchaseCheck> => {
   try {
+    // Verificar si el usuario es admin
+    const { data: userData, error: userError } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', userId)
+      .single()
+
+    if (!userError && userData?.rol === 'admin') {
+      // Los admins pueden escribir reseñas sin restricciones
+      return {
+        can_review: true,
+        message: 'Admin puede crear reseña sin restricciones',
+        pedido_id: 'admin-review'
+      }
+    }
+
     // Usar la nueva función de orders para verificar compra
     const purchaseResult = await hasUserPurchasedProduct(userId, productId)
     
@@ -70,13 +86,25 @@ export const createReview = async (
   reviewData: CreateReview
 ): Promise<{ success: boolean; review?: Review; error?: string }> => {
   try {
-    // Verificar que el usuario puede crear la reseña
-    const canReview = await canUserReviewProduct(userId, reviewData.producto_id)
-    
-    if (!canReview.can_review) {
-      return {
-        success: false,
-        error: canReview.message
+    // Verificar si el usuario es admin
+    const { data: userData, error: userError } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', userId)
+      .single()
+
+    const isAdmin = !userError && userData?.rol === 'admin'
+
+    // Solo verificar permisos si NO es admin
+    if (!isAdmin) {
+      // Verificar que el usuario puede crear la reseña
+      const canReview = await canUserReviewProduct(userId, reviewData.producto_id)
+      
+      if (!canReview.can_review) {
+        return {
+          success: false,
+          error: canReview.message
+        }
       }
     }
 
@@ -259,11 +287,27 @@ export const deleteReview = async (
   userId: string
 ): Promise<{ success: boolean; error?: string }> => {
   try {
-    const { error } = await supabase
+    // Verificar si el usuario es admin
+    const { data: userData, error: userError } = await supabase
+      .from('usuarios')
+      .select('rol')
+      .eq('id', userId)
+      .single()
+
+    const isAdmin = !userError && userData?.rol === 'admin'
+
+    // Los admins pueden eliminar cualquier reseña, usuarios normales solo las suyas
+    const deleteQuery = supabase
       .from('resenas')
       .delete()
       .eq('id', reviewId)
-      .eq('usuario_id', userId)
+
+    // Solo agregar filtro de usuario_id si NO es admin
+    if (!isAdmin) {
+      deleteQuery.eq('usuario_id', userId)
+    }
+
+    const { error } = await deleteQuery
 
     if (error) {
       console.error('Error al eliminar reseña:', error)
