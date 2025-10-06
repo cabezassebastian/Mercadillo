@@ -491,30 +491,41 @@
 
 ---
 
-### 14. Recomendaciones Personalizadas ⏳
-**Estado:** Pendiente  
+### 14. Recomendaciones Personalizadas ✅
+**Estado:** Partially completed  
 **Prioridad:** Alta  
-**Estimación:** 6 horas
+**Estimación:** 6 horas (work in repo: ~3.5h, remaining: SQL + tests + PR)
 
 #### 14.1 En Página de Producto
-- [ ] Sección "Productos relacionados"
-- [ ] Algoritmo: Misma categoría + rango de precio similar
-- [ ] Carrusel con 4-6 productos
-- [ ] "Otros clientes también compraron"
-- [ ] Basado en pedidos que incluyen el producto actual
+- [x] Sección "Productos relacionados"
+- [x] Algoritmo: Misma categoría + rango de precio similar (client-side + RPC fallback)
+- [x] Carrusel con 4-6 productos
+- [x] "Otros clientes también compraron"
+- [x] Basado en pedidos que incluyen el producto actual (client-side; SQL RPC migration prepared)
 
-**Archivos a modificar:**
-- `src/pages/Product.tsx`
-- Crear: `src/components/Product/RelatedProducts.tsx`
-- Crear: `src/lib/recommendations.ts`
+**Archivos modificados / creados:**
+- `src/pages/Product.tsx` (integración de RelatedProducts)
+- `src/components/Product/RelatedProducts.tsx` (nuevo — carrusel, dedupe, skeletons, prev/next controls)
+- `src/lib/recommendations.ts` (nuevo — relatedByCategoryAndPrice, alsoBought, topSellers; tries RPC then falls back to client-side)
+
+Notes:
+- The implementation prefers server RPCs when available; a SQL migration file has been added to `sql-migrations/create-recommendations-functions.sql` to create `get_also_bought_products` and `get_top_selling_products` on the DB. Run these in Supabase to enable server-side aggregation for better performance.
 
 #### 14.2 En Home
 - [ ] "Quizás te interese" basado en historial
-- [ ] "Más vendidos de la semana"
+- [x] "Más vendidos de la semana" (client-side `topSellers('week')` integration added)
 - [ ] "Nuevos productos"
 
-**Archivos a modificar:**
-- `src/pages/Home.tsx`
+**Archivos modificados / created:**
+- `src/pages/Home.tsx` (section "Más vendidos de la semana" added)
+
+Remaining work:
+- Run the SQL migration in Supabase to enable RPC endpoints (optional but recommended for large datasets).
+- Implement "Quizás te interese" using user navigation history and add "Nuevos productos" section.
+- Add unit tests for `src/lib/recommendations.ts` and a small UI test for `RelatedProducts`.
+
+Commit & PR:
+- Changes are saved in the workspace. Create a feature branch (e.g. `feature/recommendations`), commit, push, and open a PR with screenshots and checklist when ready.
 
 ---
 

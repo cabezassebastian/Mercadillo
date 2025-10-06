@@ -8,6 +8,7 @@ import StarRating from '@/components/common/StarRating'
 import ReviewList from '@/components/Reviews/ReviewList'
 import WishlistButton from '@/components/common/WishlistButton'
 import ProductGallery from '@/components/Product/ProductGallery'
+import RelatedProducts from '@/components/Product/RelatedProducts'
 import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
@@ -326,7 +327,10 @@ const Product: React.FC = () => {
           </div>
         </div>
 
-        {/* Reviews Section */}
+  {/* Related Products Section */}
+  <RelatedProducts productId={producto.id} category={producto.categoria} price={producto.precio} />
+
+  {/* Reviews Section */}
         <div className="mt-16">
           <div className="max-w-4xl mx-auto">
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
