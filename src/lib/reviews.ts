@@ -21,7 +21,7 @@ export const canUserReviewProduct = async (
       return {
         can_review: true,
         message: 'Admin puede crear reseña sin restricciones',
-        pedido_id: 'admin-review'
+        pedido_id: null // Admins no necesitan pedido_id
       }
     }
 

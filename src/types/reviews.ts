@@ -3,7 +3,7 @@ export interface Review {
   id: string
   usuario_id: string
   producto_id: string
-  pedido_id: string
+  pedido_id: string | null // Puede ser null para reseñas de admin
   calificacion: number // 1-5 estrellas
   comentario?: string
   created_at: string
@@ -17,7 +17,7 @@ export interface Review {
 
 export interface CreateReview {
   producto_id: string
-  pedido_id: string
+  pedido_id: string | null // Puede ser null para reseñas de admin
   calificacion: number
   comentario?: string
 }
@@ -41,6 +41,6 @@ export interface ReviewStats {
 
 export interface UserPurchaseCheck {
   can_review: boolean
-  pedido_id?: string
+  pedido_id?: string | null // Puede ser undefined o null
   message: string
 }

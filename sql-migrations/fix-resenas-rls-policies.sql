@@ -29,9 +29,7 @@ FOR INSERT
 TO authenticated
 WITH CHECK (
   -- El usuario debe estar autenticado y el usuario_id debe coincidir
-  -- O el pedido_id es 'admin-review' (creado por admin desde backend)
   auth.uid()::text = usuario_id
-  OR pedido_id = 'admin-review'
 );
 
 -- 5. POLÍTICA: Actualización (UPDATE) - Solo el dueño puede actualizar su reseña

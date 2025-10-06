@@ -26,7 +26,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [canReview, setCanReview] = useState<boolean | null>(null)
-  const [pedidoId, setPedidoId] = useState<string>('')
+  const [pedidoId, setPedidoId] = useState<string | null>(null)
   const [isCheckingPermission, setIsCheckingPermission] = useState<boolean>(true)
 
   // Verificar si el usuario puede crear una reseña al cargar el componente
@@ -37,7 +37,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       // Admins pueden escribir reseñas sin restricciones
       if (isAdmin) {
         setCanReview(true)
-        setPedidoId('admin-review') // ID especial para reseñas de admin
+        setPedidoId(null) // null para reseñas de admin (usa supabaseAdmin)
         setIsCheckingPermission(false)
         return
       }
@@ -53,7 +53,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       setIsCheckingPermission(true)
       const permission = await canUserReviewProduct(user.id, productId)
       setCanReview(permission.can_review)
-      setPedidoId(permission.pedido_id || '')
+      setPedidoId(permission.pedido_id || null)
       if (!permission.can_review) {
         setError(permission.message)
       }
@@ -76,7 +76,8 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       return
     }
 
-    if (!pedidoId) {
+    // Los admins pueden crear reseñas sin pedido_id (será null)
+    if (!pedidoId && !isAdmin) {
       setError('No se encontró el pedido asociado')
       return
     }
