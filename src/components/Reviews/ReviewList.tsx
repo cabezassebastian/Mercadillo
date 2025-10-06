@@ -331,7 +331,7 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
       </div>
       {/* Mensaje si no hay reseñas con el filtro */}
       {reviews.length > 0 && paginatedReviews.length === 0 && (
-        <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg transition-all duration-300 opacity-100">
+  <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg transition-all duration-300 opacity-100 transform-gpu animate-fade-in-slide">
           <MessageCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
           <p className="text-gray-500 dark:text-gray-400 mb-2">
             No hay reseñas con este filtro
