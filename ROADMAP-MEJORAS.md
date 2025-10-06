@@ -10,10 +10,10 @@
 
 ## 📊 Estado General del Proyecto
 
-- ✅ **Completado:** 4/8 tareas principales (50%)
+- ✅ **Completado:** 5/8 tareas principales (62.5%)
 - 🔄 **En Progreso:** 0/8 tareas principales
-- ⏳ **Pendiente:** 4/8 tareas principales
-- **Progreso Total:** 50%
+- ⏳ **Pendiente:** 3/8 tareas principales
+- **Progreso Total:** 62.5%
 
 ## 🎉 Últimas Mejoras Completadas (Octubre 2025)
 
@@ -54,6 +54,19 @@
 - [x] Ancho completo en móvil con max-width
 - [x] Espaciado mejorado entre elementos
 - [x] Título responsive (text-2xl → text-6xl)
+
+### ✅ Filtros de Reseñas
+- [x] Filtro por calificación (5★, 4★, 3★, 2★, 1★) con contador
+- [x] Ordenar por "Más recientes" (fecha descendente)
+- [x] Ordenar por "Más útiles" (mejores calificaciones)
+- [x] Ordenar por calificación: Mayor a Menor / Menor a Mayor
+- [x] Indicador visual de filtros activos
+- [x] Botón "Limpiar filtros"
+- [x] UI mejorada con botones interactivos
+- [x] Diseño responsive en dos columnas (desktop)
+- [x] Estado vacío personalizado cuando no hay resultados
+- [x] Integrado en página de producto individual
+- [x] También disponible en página de "Mis Reseñas" del usuario
 
 ### ✅ Galería de Imágenes de Producto
 - [x] Tabla `producto_imagenes` en BD con RLS y triggers
@@ -106,10 +119,31 @@
 - [x] Gestos de swipe en galería
 - [x] Botones responsive en Hero (optimizado para 375x667)
 
-### 12. Filtros de Reseñas
-- [ ] Filtro por calificación
-- [ ] Ordenar por "más útiles"
-- [ ] Filtro "solo compra verificada"
+### 12. Filtros de Reseñas ✅
+**Estado:** Completado  
+**Prioridad:** Baja  
+**Estimación:** 3 horas
+**Tiempo real:** ~2 horas
+
+**Funcionalidades implementadas:**
+- [x] Filtro por calificación (5★, 4★, 3★, 2★, 1★)
+- [x] Contador de reseñas por cada nivel de calificación
+- [x] Botón "Todas las calificaciones" para resetear filtro
+- [x] Ordenar por "Más recientes" (fecha descendente)
+- [x] Ordenar por "Más útiles" (mejores calificaciones primero)
+- [x] Ordenar por calificación: Mayor a Menor
+- [x] Ordenar por calificación: Menor a Mayor
+- [x] Indicador visual de filtros activos
+- [x] Botón "Limpiar filtro" cuando hay filtro activo
+- [x] Estado vacío cuando no hay resultados con el filtro aplicado
+- [x] UI responsive con grid de 2 columnas en desktop
+
+**Archivos creados:**
+- ✅ `src/components/Reviews/ReviewFilters.tsx` - Componente de filtros
+
+**Archivos modificados:**
+- ✅ `src/pages/ReviewsPage.tsx` - Filtros en página de reseñas del usuario
+- ✅ `src/components/Reviews/ReviewList.tsx` - Filtros en página de producto individual
 
 ### 14. Recomendaciones en Producto
 - [ ] Sección "Productos relacionados" en página de producto

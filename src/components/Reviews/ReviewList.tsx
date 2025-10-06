@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import StarRating from '@/components/common/StarRating'
 import { getProductReviews, deleteReview, getUserReviewForProduct } from '@/lib/reviews'
 import type { Review } from '@/types/reviews'
 import { MessageCircle, Trash2, User, Calendar } from 'lucide-react'
 import ReviewForm from './ReviewForm'
+import ReviewFilters from './ReviewFilters'
 
 interface ReviewListProps {
   productId: string
@@ -21,6 +22,10 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
   const [currentPage, setCurrentPage] = useState<number>(1)
   const [totalReviews, setTotalReviews] = useState<number>(0)
   const reviewsPerPage = 5
+  
+  // Estados de filtros
+  const [selectedRating, setSelectedRating] = useState<number | null>(null)
+  const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating-high' | 'rating-low'>('recent')
 
   // Cargar reseñas del producto
   const loadReviews = async () => {
@@ -87,7 +92,46 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
     })
   }
 
+  // Obtener conteo de reseñas por calificación
+  const getRatingCounts = () => {
+    const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 }
+    reviews.forEach(review => {
+      counts[review.calificacion as keyof typeof counts]++
+    })
+    return counts
+  }
+
+  // Filtrar y ordenar reseñas
+  const filteredAndSortedReviews = useMemo(() => {
+    let filtered = [...reviews]
+
+    // Filtrar por calificación
+    if (selectedRating !== null) {
+      filtered = filtered.filter(review => review.calificacion === selectedRating)
+    }
+
+    // Ordenar
+    switch (sortBy) {
+      case 'recent':
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+      case 'helpful':
+        // Por ahora ordenamos por calificación más alta (más útiles serían las mejor valoradas)
+        filtered.sort((a, b) => b.calificacion - a.calificacion)
+        break
+      case 'rating-high':
+        filtered.sort((a, b) => b.calificacion - a.calificacion)
+        break
+      case 'rating-low':
+        filtered.sort((a, b) => a.calificacion - b.calificacion)
+        break
+    }
+
+    return filtered
+  }, [reviews, selectedRating, sortBy])
+
   const totalPages = Math.ceil(totalReviews / reviewsPerPage)
+  const ratingCounts = getRatingCounts()
 
   if (isLoading && currentPage === 1) {
     return (
@@ -145,6 +189,18 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
         />
       )}
 
+      {/* Filtros de Reseñas (solo si hay reseñas) */}
+      {reviews.length > 0 && (
+        <ReviewFilters
+          selectedRating={selectedRating}
+          sortBy={sortBy}
+          onRatingChange={setSelectedRating}
+          onSortChange={setSortBy}
+          ratingCounts={ratingCounts}
+          totalReviews={reviews.length}
+        />
+      )}
+
       {/* Reseña del usuario actual (si existe) */}
       {userReview && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
@@ -189,9 +245,9 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
       )}
 
       {/* Lista de reseñas */}
-      {reviews.length > 0 ? (
+      {filteredAndSortedReviews.length > 0 ? (
         <div className="space-y-4">
-          {reviews.map((review) => (
+          {filteredAndSortedReviews.map((review) => (
             <div
               key={review.id}
               className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4"
@@ -220,6 +276,22 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
               )}
             </div>
           ))}
+        </div>
+      ) : reviews.length > 0 && filteredAndSortedReviews.length === 0 ? (
+        <div className="text-center py-8 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg">
+          <MessageCircle className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+          <p className="text-gray-500 dark:text-gray-400 mb-2">
+            No hay reseñas con este filtro
+          </p>
+          <p className="text-sm text-gray-400 dark:text-gray-500 mb-4">
+            Intenta cambiar los filtros para ver más reseñas
+          </p>
+          <button
+            onClick={() => setSelectedRating(null)}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200"
+          >
+            Limpiar Filtros
+          </button>
         </div>
       ) : (
         !showReviewForm && !userReview && (

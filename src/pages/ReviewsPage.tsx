@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { Star, MessageCircle, Package, Calendar, Edit3, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabaseClient'
 import { Link } from 'react-router-dom'
+import ReviewFilters from '@/components/Reviews/ReviewFilters'
 
 interface UserReview {
   id: string
@@ -26,6 +27,10 @@ const ReviewsPage: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  
+  // Estados de filtros
+  const [selectedRating, setSelectedRating] = useState<number | null>(null)
+  const [sortBy, setSortBy] = useState<'recent' | 'helpful' | 'rating-high' | 'rating-low'>('recent')
 
   useEffect(() => {
     if (user?.id) {
@@ -110,6 +115,36 @@ const ReviewsPage: React.FC = () => {
     })
     return counts
   }
+
+  // Filtrar y ordenar reseñas
+  const filteredAndSortedReviews = useMemo(() => {
+    let filtered = [...reviews]
+
+    // Filtrar por calificación
+    if (selectedRating !== null) {
+      filtered = filtered.filter(review => review.calificacion === selectedRating)
+    }
+
+    // Ordenar
+    switch (sortBy) {
+      case 'recent':
+        filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        break
+      case 'helpful':
+        // Por ahora ordenamos por calificación más alta (más útiles serían las mejor valoradas)
+        // En el futuro se puede agregar un campo de votos útiles
+        filtered.sort((a, b) => b.calificacion - a.calificacion)
+        break
+      case 'rating-high':
+        filtered.sort((a, b) => b.calificacion - a.calificacion)
+        break
+      case 'rating-low':
+        filtered.sort((a, b) => a.calificacion - b.calificacion)
+        break
+    }
+
+    return filtered
+  }, [reviews, selectedRating, sortBy])
 
   if (loading) {
     return (
@@ -224,8 +259,36 @@ const ReviewsPage: React.FC = () => {
           </div>
         </div>
 
+        {/* Filtros de Reseñas */}
+        {reviews.length > 0 && (
+          <ReviewFilters
+            selectedRating={selectedRating}
+            sortBy={sortBy}
+            onRatingChange={setSelectedRating}
+            onSortChange={setSortBy}
+            ratingCounts={ratingCounts}
+            totalReviews={reviews.length}
+          />
+        )}
+
         {/* Lista de reseñas */}
-        {reviews.length === 0 ? (
+        {filteredAndSortedReviews.length === 0 && reviews.length > 0 ? (
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
+            <Star className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
+              No hay reseñas con este filtro
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Intenta cambiar los filtros para ver más reseñas
+            </p>
+            <button
+              onClick={() => setSelectedRating(null)}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+            >
+              Limpiar Filtros
+            </button>
+          </div>
+        ) : reviews.length === 0 ? (
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-12 text-center">
             <Star className="w-16 h-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
@@ -243,7 +306,7 @@ const ReviewsPage: React.FC = () => {
           </div>
         ) : (
           <div className="space-y-6">
-            {reviews.map((review) => (
+            {filteredAndSortedReviews.map((review) => (
               <div
                 key={review.id}
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200"
