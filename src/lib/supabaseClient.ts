@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const originalFetch = window.fetch
 window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-  
+
   // Solo interceptar peticiones a Supabase
   if (url.includes(import.meta.env.VITE_SUPABASE_URL)) {
     const getToken = (window as any).__getClerkToken
@@ -12,15 +12,19 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       try {
         const token = await getToken()
         if (token) {
-          // Inyectar el token de Clerk
-          const headers = new Headers(init?.headers)
+          // Preserve original headers when available (Request or init)
+          const originalHeaders = (input instanceof Request) ? input.headers : init?.headers
+          const headers = new Headers(originalHeaders)
+
+          // Ensure JSON Accept header is present (avoids 406 from Supabase REST)
+          if (!headers.has('Accept')) headers.set('Accept', 'application/json')
           headers.set('Authorization', `Bearer ${token}`)
-          
+
           const response = await originalFetch(input, {
             ...init,
             headers
           })
-          
+
           // Solo log de errores críticos (500+), silenciar 401/400/406
           if (!response.ok && response.status >= 500) {
             const clonedResponse = response.clone()
@@ -33,7 +37,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
               })
             })
           }
-          
+
           return response
         }
       } catch (e) {
@@ -41,7 +45,7 @@ window.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
       }
     }
   }
-  
+
   return originalFetch(input, init)
 }
 

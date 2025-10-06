@@ -18,23 +18,31 @@ export const relatedByCategoryAndPrice = async (productId: string, limit = 6): P
   try {
     const { data, error } = await supabase.rpc('get_related_by_category_price', { p_product_id: productId, p_limit: limit })
     if (!error && data && Array.isArray(data)) return data as RecProduct[]
+    // If RPC returned an error status-like object, log at debug level and continue to fallback
+    if (error) {
+      // don't spam console in production, only debug
+      if (import.meta.env.DEV) console.debug('RPC get_related_by_category_price error:', error)
+    }
   } catch (err) {
     // ignore and fallback
   }
 
   // Fallback client-side
-  const { data: baseProduct } = await supabase
+  const { data: baseProduct, error: baseErr } = await supabase
     .from('productos')
     .select('id, categoria_id, precio')
     .eq('id', productId)
     .single()
 
-  if (!baseProduct) return []
+  if (baseErr || !baseProduct) {
+    if (import.meta.env.DEV) console.debug('relatedByCategoryAndPrice base product fetch error:', baseErr)
+    return []
+  }
 
   const minPrice = Number(baseProduct.precio) * 0.8
   const maxPrice = Number(baseProduct.precio) * 1.2
 
-  const { data } = await supabase
+  const { data, error: listErr } = await supabase
     .from('productos')
     .select('id, nombre, precio, slug, imagenes, rating_promedio')
     .eq('categoria_id', baseProduct.categoria_id)
@@ -43,6 +51,11 @@ export const relatedByCategoryAndPrice = async (productId: string, limit = 6): P
     .neq('id', productId)
     .order('rating_promedio', { ascending: false })
     .limit(limit)
+
+  if (listErr) {
+    if (import.meta.env.DEV) console.debug('relatedByCategoryAndPrice products list error:', listErr)
+    return []
+  }
 
   return (data || []) as RecProduct[]
 }
@@ -60,20 +73,30 @@ export const alsoBought = async (productId: string, limit = 6): Promise<RecProdu
   }
 
   // Fallback client-side (existing logic)
-  const { data: orders } = await supabase
+  const { data: orders, error: ordersErr } = await supabase
     .from('pedidos_productos')
     .select('pedido_id')
     .eq('producto_id', productId)
+
+  if (ordersErr) {
+    if (import.meta.env.DEV) console.debug('alsoBought pedidos_productos fetch error:', ordersErr)
+    return topSellers('month', limit)
+  }
 
   const pedidoIds = (orders || []).map((o: any) => o.pedido_id)
   if (pedidoIds.length === 0) {
     return topSellers('month', limit)
   }
 
-  const { data: items } = await supabase
+  const { data: items, error: itemsErr } = await supabase
     .from('pedidos_productos')
     .select('producto_id')
     .in('pedido_id', pedidoIds)
+
+  if (itemsErr) {
+    if (import.meta.env.DEV) console.debug('alsoBought pedidos_productos items fetch error:', itemsErr)
+    return topSellers('month', limit)
+  }
 
   const counts: Record<string, number> = {}
   ;(items || []).forEach((it: any) => {
@@ -89,10 +112,15 @@ export const alsoBought = async (productId: string, limit = 6): Promise<RecProdu
 
   if (sortedIds.length === 0) return topSellers('month', limit)
 
-  const { data: products } = await supabase
+  const { data: products, error: productsErr } = await supabase
     .from('productos')
     .select('id, nombre, precio, slug, imagenes, rating_promedio')
     .in('id', sortedIds)
+
+  if (productsErr) {
+    if (import.meta.env.DEV) console.debug('alsoBought products fetch error:', productsErr)
+    return []
+  }
 
   return (products || []) as RecProduct[]
 }
@@ -116,6 +144,11 @@ export const topSellers = async (period: 'week' | 'month' | 'all' = 'week', limi
 
   const q = supabase.from('pedidos_productos').select('producto_id, created_at').neq('producto_id', null)
   const res = since ? await q.gt('created_at', since).limit(10000) : await q.limit(10000)
+
+  if ((res as any).error) {
+    if (import.meta.env.DEV) console.debug('topSellers pedidos_productos fetch error:', (res as any).error)
+    return []
+  }
 
   const counts: Record<string, number> = {}
   ;(res.data || []).forEach((r: any) => {
