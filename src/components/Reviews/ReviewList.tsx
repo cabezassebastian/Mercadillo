@@ -57,9 +57,12 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
 
   useEffect(() => {
     loadReviews()
-    // Reset page cuando cambian los filtros
+  }, [productId, user?.id, refreshTrigger])
+
+  // Reset página cuando cambian los filtros
+  useEffect(() => {
     setCurrentPage(1)
-  }, [productId, user?.id, refreshTrigger, selectedRating, sortBy])
+  }, [selectedRating, sortBy])
 
   const handleDeleteReview = async (reviewId: string, isOwnReview: boolean = false) => {
     if (!user?.id) return
