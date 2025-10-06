@@ -108,9 +108,13 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             />
           </button>
 
-          {/* Dropdown de Calificación */}
-          {showRatingFilter && (
-            <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden">
+          {/* Dropdown de Calificación con animación */}
+          <div
+            className={`absolute z-10 mt-2 w-full transition-all duration-300
+              ${showRatingFilter ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}
+              bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden`}
+            style={{ willChange: 'opacity, transform' }}
+          >
               <button
                 onClick={() => {
                   onRatingChange(null)
@@ -157,7 +161,7 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
                 </button>
               ))}
             </div>
-          )}
+          {/* Fin animación dropdown calificación */}
         </div>
 
         {/* Ordenamiento */}
@@ -179,9 +183,13 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
             />
           </button>
 
-          {/* Dropdown de Ordenamiento */}
-          {showSortFilter && (
-            <div className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden">
+          {/* Dropdown de Ordenamiento con animación */}
+          <div
+            className={`absolute z-10 mt-2 w-full transition-all duration-300
+              ${showSortFilter ? 'opacity-100 translate-y-0 pointer-events-auto' : 'opacity-0 -translate-y-2 pointer-events-none'}
+              bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg overflow-hidden`}
+            style={{ willChange: 'opacity, transform' }}
+          >
               <button
                 onClick={() => {
                   onSortChange('recent')
@@ -242,7 +250,7 @@ const ReviewFilters: React.FC<ReviewFiltersProps> = ({
                 <span className="text-sm font-medium">Menor Calificación</span>
               </button>
             </div>
-          )}
+          {/* Fin animación dropdown ordenamiento */}
         </div>
       </div>
     </div>
