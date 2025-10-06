@@ -218,8 +218,8 @@ const ReviewList: React.FC<ReviewListProps> = ({ productId, refreshTrigger = 0 }
         />
       )}
 
-      {/* Reseña del usuario actual (si existe) */}
-      {userReview && (
+      {/* Reseña del usuario actual (si existe y coincide con el filtro) */}
+      {userReview && (selectedRating === null || userReview.calificacion === selectedRating) && (
         <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-3">
