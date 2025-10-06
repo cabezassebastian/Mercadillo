@@ -46,6 +46,11 @@ const Catalog: React.FC = () => {
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
   const [onlyInStock, setOnlyInStock] = useState(true) // Solo productos disponibles
   const [minRating, setMinRating] = useState(0) // Filtro por calificación
+  
+  // Estados de paginación
+  const [currentPage, setCurrentPage] = useState(1)
+  const [itemsPerPage] = useState(20) // 20 productos por página
+  
   const [searchParams, setSearchParams] = useSearchParams()
   const sortDropdownRef = useRef<HTMLDivElement>(null)
   const ratingDropdownRef = useRef<HTMLDivElement>(null)
@@ -250,6 +255,24 @@ const Catalog: React.FC = () => {
 
     setFilteredProductos(filtered)
   }, [productos, searchTerm, selectedCategory, sortBy, priceRange, onlyInStock, minRating])
+
+  // Resetear a la página 1 cuando cambian los filtros
+  useEffect(() => {
+    setCurrentPage(1)
+  }, [searchTerm, selectedCategory, sortBy, priceRange, onlyInStock, minRating])
+
+  // Calcular paginación
+  const totalPages = Math.ceil(filteredProductos.length / itemsPerPage)
+  const startIndex = (currentPage - 1) * itemsPerPage
+  const endIndex = startIndex + itemsPerPage
+  const currentProducts = filteredProductos.slice(startIndex, endIndex)
+
+  // Función para cambiar de página
+  const goToPage = (page: number) => {
+    setCurrentPage(page)
+    // Scroll al inicio del contenido de productos
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
 
   // Contar filtros activos
   const activeFiltersCount = [
@@ -686,11 +709,105 @@ const Catalog: React.FC = () => {
                   ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-3' 
                   : 'grid-cols-1'
               }`}>
-                {filteredProductos.map((producto) => (
+                {currentProducts.map((producto) => (
                   <div key={producto.id} className="transform hover:scale-105 transition-transform duration-200">
                     <ProductCard producto={producto} viewMode={viewMode} />
                   </div>
                 ))}
+              </div>
+            )}
+
+            {/* Controles de Paginación */}
+            {!isLoading && filteredProductos.length > 0 && totalPages > 1 && (
+              <div className="mt-8 pb-8 flex flex-col items-center gap-4">
+                {/* Información de página */}
+                <div className="text-sm text-gray-600 dark:text-gray-400">
+                  Mostrando {startIndex + 1} - {Math.min(endIndex, filteredProductos.length)} de {filteredProductos.length} productos
+                </div>
+
+                {/* Botones de paginación */}
+                <div className="flex items-center gap-2 flex-wrap justify-center">
+                  {/* Botón Anterior */}
+                  <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      currentPage === 1
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 hover:border-amarillo dark:hover:border-yellow-500 hover:shadow-md'
+                    }`}
+                  >
+                    ← Anterior
+                  </button>
+
+                  {/* Números de página */}
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
+                      // Mostrar solo algunas páginas para no saturar en mobile
+                      const showPage = 
+                        pageNum === 1 || 
+                        pageNum === totalPages || 
+                        (pageNum >= currentPage - 1 && pageNum <= currentPage + 1)
+                      
+                      const showEllipsis = 
+                        (pageNum === 2 && currentPage > 3) ||
+                        (pageNum === totalPages - 1 && currentPage < totalPages - 2)
+
+                      if (showEllipsis) {
+                        return <span key={pageNum} className="px-2 text-gray-500 dark:text-gray-400">...</span>
+                      }
+
+                      if (!showPage) return null
+
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => goToPage(pageNum)}
+                          className={`min-w-[40px] h-10 rounded-lg font-medium transition-all duration-200 ${
+                            currentPage === pageNum
+                              ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-lg scale-110'
+                              : 'bg-white dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 hover:border-amarillo dark:hover:border-yellow-500 hover:shadow-md'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Botón Siguiente */}
+                  <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                      currentPage === totalPages
+                        ? 'bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed'
+                        : 'bg-white dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 border-2 border-gray-300 dark:border-gray-600 hover:border-amarillo dark:hover:border-yellow-500 hover:shadow-md'
+                    }`}
+                  >
+                    Siguiente →
+                  </button>
+                </div>
+
+                {/* Ir a página específica (opcional, para muchas páginas) */}
+                {totalPages > 10 && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <span className="text-gray-600 dark:text-gray-400">Ir a página:</span>
+                    <input
+                      type="number"
+                      min="1"
+                      max={totalPages}
+                      value={currentPage}
+                      onChange={(e) => {
+                        const page = parseInt(e.target.value)
+                        if (page >= 1 && page <= totalPages) {
+                          goToPage(page)
+                        }
+                      }}
+                      className="w-16 px-2 py-1 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 focus:border-amarillo dark:focus:border-yellow-500 focus:outline-none"
+                    />
+                  </div>
+                )}
               </div>
             )}
           </div>

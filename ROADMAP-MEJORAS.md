@@ -83,10 +83,10 @@
 - [x] Modo fullscreen/modal
 - [x] Swipe en mobile
 
-### 10. Mejoras Mobile
-- [ ] Scroll infinito en catálogo
+### 10. Mejoras Mobile ✅
+- [x] Paginación en catálogo (20 productos por página con controles)
 - [ ] Menú hamburguesa mejorado
-- [ ] Gestos de swipe en galería y carrito
+- [x] Gestos de swipe en galería
 
 ### 12. Filtros de Reseñas
 - [ ] Filtro por calificación

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useUser } from '@clerk/clerk-react'
 import { ShoppingCart, Menu, X } from 'lucide-react'
@@ -15,8 +15,12 @@ const Navbar: React.FC = () => {
   const { isAdmin } = useAuth()
   const { getTotalItems } = useCart()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isClosing, setIsClosing] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [allProducts, setAllProducts] = useState<Producto[]>([])
+  const [touchStart, setTouchStart] = useState<number | null>(null)
+  const [touchEnd, setTouchEnd] = useState<number | null>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -47,7 +51,52 @@ const Navbar: React.FC = () => {
     fetchProducts()
   }, [])
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
+  const toggleMenu = () => {
+    if (isMenuOpen) {
+      closeMenu()
+    } else {
+      setIsMenuOpen(true)
+    }
+  }
+
+  const closeMenu = () => {
+    setIsClosing(true)
+    setTimeout(() => {
+      setIsMenuOpen(false)
+      setIsClosing(false)
+    }, 300) // Match animation duration
+  }
+
+  // Swipe gesture handlers
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null)
+    setTouchStart(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX)
+  }
+
+  const handleTouchEnd = () => {
+    if (!touchStart || !touchEnd) return
+    const distance = touchStart - touchEnd
+    // Swipe right to close (negative distance = swipe from left to right)
+    if (distance < -50) {
+      closeMenu()
+    }
+  }
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [isMenuOpen])
 
   // Handle search - redirect to catalog with search term
   const handleSearch = (term: string) => {
@@ -160,54 +209,71 @@ const Navbar: React.FC = () => {
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Navigation - Enhanced with overlay and slide animation */}
         {isMenuOpen && (
-          <div className="md:hidden py-4 border-t border-gray-200 dark:border-gray-700">
-            <div className="flex flex-col space-y-4">
-              {/* Mobile Search Bar - Solo en página de inicio */}
-              {isHomePage && (
-                <div className="w-full">
-                  <SearchWithSuggestions
-                    value={searchTerm}
-                    onChange={setSearchTerm}
-                    onSearch={handleSearch}
-                    productos={allProducts}
-                    placeholder="Buscar productos..."
-                  />
-                </div>
-              )}
-              
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.path}
-                  className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-              
-              {!user && (
-                <>
+          <>
+            {/* Dark overlay with blur */}
+            <div 
+              className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 md:hidden"
+              onClick={closeMenu}
+            />
+            
+            {/* Sliding menu from left */}
+            <div 
+              ref={menuRef}
+              className={`fixed top-20 left-0 bottom-0 w-80 max-w-[85vw] bg-white dark:bg-gray-800 
+                shadow-2xl z-50 overflow-y-auto transform transition-transform duration-300 ease-in-out
+                ${isClosing ? '-translate-x-full' : 'translate-x-0'}`}
+              onTouchStart={handleTouchStart}
+              onTouchMove={handleTouchMove}
+              onTouchEnd={handleTouchEnd}
+            >
+              <div className="flex flex-col space-y-4 p-6">
+                {/* Mobile Search Bar - Solo en página de inicio */}
+                {isHomePage && (
+                  <div className="w-full">
+                    <SearchWithSuggestions
+                      value={searchTerm}
+                      onChange={setSearchTerm}
+                      onSearch={handleSearch}
+                      productos={allProducts}
+                      placeholder="Buscar productos..."
+                    />
+                  </div>
+                )}
+                
+                {navItems.map((item) => (
                   <Link
-                    to="/sign-in"
+                    key={item.name}
+                    to={item.path}
                     className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
-                    onClick={() => setIsMenuOpen(false)}
+                    onClick={closeMenu}
                   >
-                    Iniciar Sesión
+                    {item.name}
                   </Link>
-                  <Link
-                    to="/sign-up"
-                    className="btn-primary text-center"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    Registrarse
-                  </Link>
-                </>
-              )}
+                ))}
+                
+                {!user && (
+                  <>
+                    <Link
+                      to="/sign-in"
+                      className="text-gris-oscuro dark:text-gray-200 hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200 font-medium"
+                      onClick={closeMenu}
+                    >
+                      Iniciar Sesión
+                    </Link>
+                    <Link
+                      to="/sign-up"
+                      className="btn-primary text-center"
+                      onClick={closeMenu}
+                    >
+                      Registrarse
+                    </Link>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </nav>
