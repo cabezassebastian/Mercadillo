@@ -22,14 +22,16 @@ TO authenticated, anon
 USING (true);
 
 -- 4. POLÍTICA: Inserción (INSERT) - Solo usuarios autenticados
---    pueden crear reseñas (validación de compra se hace en código)
+--    pueden crear reseñas (validación de compra y admin se hace en código backend)
 CREATE POLICY "resenas_insert_policy"
 ON resenas
 FOR INSERT
 TO authenticated
 WITH CHECK (
   -- El usuario debe estar autenticado y el usuario_id debe coincidir
+  -- O el pedido_id es 'admin-review' (creado por admin desde backend)
   auth.uid()::text = usuario_id
+  OR pedido_id = 'admin-review'
 );
 
 -- 5. POLÍTICA: Actualización (UPDATE) - Solo el dueño puede actualizar su reseña
@@ -40,7 +42,8 @@ TO authenticated
 USING (auth.uid()::text = usuario_id)
 WITH CHECK (auth.uid()::text = usuario_id);
 
--- 6. POLÍTICA: Eliminación (DELETE) - El dueño O admin pueden eliminar
+-- 6. POLÍTICA: Eliminación (DELETE) - El dueño puede eliminar su reseña
+--    (Los admins pueden eliminar desde backend con supabaseAdmin bypass RLS)
 CREATE POLICY "resenas_delete_policy"
 ON resenas
 FOR DELETE
@@ -48,13 +51,7 @@ TO authenticated
 USING (
   -- El usuario es el dueño de la reseña
   auth.uid()::text = usuario_id
-  OR
-  -- O el usuario es admin
-  EXISTS (
-    SELECT 1 FROM usuarios
-    WHERE usuarios.id = auth.uid()::text
-    AND usuarios.rol = 'admin'
-  )
+  -- Los admins usan deleteReview() con supabaseAdmin que bypasses RLS
 );
 
 -- =====================================================

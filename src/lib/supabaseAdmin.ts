@@ -5,7 +5,7 @@ import { createClient } from '@supabase/supabase-js'
 // SOLO usar en componentes de admin protegidos
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY || import.meta.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseServiceKey) {
   throw new Error('Missing Supabase environment variables for admin client')

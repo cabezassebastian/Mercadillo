@@ -1,4 +1,5 @@
 import { supabase } from './supabaseClient'
+import { supabaseAdmin } from './supabaseAdmin'
 import { hasUserPurchasedProduct } from './orders'
 import type { Review, CreateReview, UpdateReview, ReviewStats, UserPurchaseCheck } from '@/types/reviews'
 
@@ -108,8 +109,11 @@ export const createReview = async (
       }
     }
 
-    // Crear la reseña
-    const { data, error } = await supabase
+    // Crear la reseña usando el cliente apropiado
+    // Los admins usan supabaseAdmin que bypasea RLS
+    const client = isAdmin ? supabaseAdmin : supabase
+    
+    const { data, error } = await client
       .from('resenas')
       .insert({
         usuario_id: userId,
@@ -296,24 +300,34 @@ export const deleteReview = async (
 
     const isAdmin = !userError && userData?.rol === 'admin'
 
-    // Los admins pueden eliminar cualquier reseña, usuarios normales solo las suyas
-    const deleteQuery = supabase
-      .from('resenas')
-      .delete()
-      .eq('id', reviewId)
+    // Los admins usan supabaseAdmin que bypasea RLS
+    // Usuarios normales usan supabase con filtro de usuario_id
+    if (isAdmin) {
+      const { error } = await supabaseAdmin
+        .from('resenas')
+        .delete()
+        .eq('id', reviewId)
 
-    // Solo agregar filtro de usuario_id si NO es admin
-    if (!isAdmin) {
-      deleteQuery.eq('usuario_id', userId)
-    }
+      if (error) {
+        console.error('Error al eliminar reseña (admin):', error)
+        return {
+          success: false,
+          error: 'Error al eliminar la reseña'
+        }
+      }
+    } else {
+      const { error } = await supabase
+        .from('resenas')
+        .delete()
+        .eq('id', reviewId)
+        .eq('usuario_id', userId)
 
-    const { error } = await deleteQuery
-
-    if (error) {
-      console.error('Error al eliminar reseña:', error)
-      return {
-        success: false,
-        error: 'Error al eliminar la reseña'
+      if (error) {
+        console.error('Error al eliminar reseña (usuario):', error)
+        return {
+          success: false,
+          error: 'Error al eliminar la reseña'
+        }
       }
     }
 
