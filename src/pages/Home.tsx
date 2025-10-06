@@ -29,7 +29,28 @@ const Home: React.FC = () => {
           data = fallbackData
         }
 
-        setFeaturedProducts(data || [])
+        // Obtener imágenes principales para cada producto
+        if (data && data.length > 0) {
+          const productosConImagenes = await Promise.all(
+            data.map(async (producto) => {
+              const { data: imagenes } = await supabase
+                .from('producto_imagenes')
+                .select('url')
+                .eq('producto_id', producto.id)
+                .eq('es_principal', true)
+                .single()
+              
+              // Si hay imagen principal en la galería, usarla; si no, usar la imagen original
+              return {
+                ...producto,
+                imagen: imagenes?.url || producto.imagen
+              }
+            })
+          )
+          setFeaturedProducts(productosConImagenes)
+        } else {
+          setFeaturedProducts(data || [])
+        }
       } catch (err) {
         setError('Ocurrio un error inesperado al cargar los productos.')
       } finally {
