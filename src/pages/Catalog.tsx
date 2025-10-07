@@ -55,6 +55,8 @@ const Catalog: React.FC = () => {
   const sortDropdownRef = useRef<HTMLDivElement>(null)
   const ratingDropdownRef = useRef<HTMLDivElement>(null)
   const categoryDropdownRef = useRef<HTMLDivElement>(null)
+  // Ref al contenedor de productos para hacer scroll cuando se cambia de página
+  const productsRef = useRef<HTMLDivElement | null>(null)
 
   // Estado para animaciones de cierre
   const [isClosing, setIsClosing] = useState({
@@ -267,11 +269,26 @@ const Catalog: React.FC = () => {
   const endIndex = startIndex + itemsPerPage
   const currentProducts = filteredProductos.slice(startIndex, endIndex)
 
-  // Función para cambiar de página
-  const goToPage = (page: number) => {
-    setCurrentPage(page)
-    // Scroll al inicio del contenido de productos
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+  // Función centralizada para cambiar de página y hacer smooth-scroll
+  const handlePageChange = (page: number) => {
+    // Normalizar límites
+    let next = page
+    if (next < 1) next = 1
+    if (next > totalPages) next = totalPages
+
+    setCurrentPage(next)
+
+    // Ejecutar el scroll después del render para evitar lecturas de layout
+    try {
+      // Ensure we scroll to the very top of the page after render
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          window.scrollTo({ top: 0, behavior: 'smooth' })
+        }, 30)
+      })
+    } catch (err) {
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
   }
 
   // Contar filtros activos
@@ -704,7 +721,7 @@ const Catalog: React.FC = () => {
                 </button>
               </div>
             ) : (
-              <div className={`grid gap-6 pb-12 ${
+              <div ref={productsRef} className={`grid gap-6 pb-12 ${
                 viewMode === 'grid' 
                   ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-3' 
                   : 'grid-cols-1'
@@ -729,7 +746,7 @@ const Catalog: React.FC = () => {
                 <div className="flex items-center gap-2 flex-wrap justify-center">
                   {/* Botón Anterior */}
                   <button
-                    onClick={() => goToPage(currentPage - 1)}
+                    onClick={() => handlePageChange(currentPage - 1)}
                     disabled={currentPage === 1}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       currentPage === 1
@@ -741,7 +758,7 @@ const Catalog: React.FC = () => {
                   </button>
 
                   {/* Números de página */}
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                     {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => {
                       // Mostrar solo algunas páginas para no saturar en mobile
                       const showPage = 
@@ -762,7 +779,7 @@ const Catalog: React.FC = () => {
                       return (
                         <button
                           key={pageNum}
-                          onClick={() => goToPage(pageNum)}
+                          onClick={() => handlePageChange(pageNum)}
                           className={`min-w-[40px] h-10 rounded-lg font-medium transition-all duration-200 ${
                             currentPage === pageNum
                               ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-lg scale-110'
@@ -777,7 +794,7 @@ const Catalog: React.FC = () => {
 
                   {/* Botón Siguiente */}
                   <button
-                    onClick={() => goToPage(currentPage + 1)}
+                    onClick={() => handlePageChange(currentPage + 1)}
                     disabled={currentPage === totalPages}
                     className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
                       currentPage === totalPages
@@ -801,7 +818,7 @@ const Catalog: React.FC = () => {
                       onChange={(e) => {
                         const page = parseInt(e.target.value)
                         if (page >= 1 && page <= totalPages) {
-                          goToPage(page)
+                          handlePageChange(page)
                         }
                       }}
                       className="w-16 px-2 py-1 border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gris-oscuro dark:text-gray-200 focus:border-amarillo dark:focus:border-yellow-500 focus:outline-none"

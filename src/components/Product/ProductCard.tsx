@@ -15,20 +15,21 @@ interface ProductCardProps {
 
 const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => {
   const { addToCart, items } = useCart()
-  // wishlist state handled by WishlistButton
+  // Local UI state
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<string | null>(null)
-  
-  // Usar React Query para obtener estadísticas de reviews con cache
-  const { data: reviewStats = { promedio: 0, total: 0, distribucion: { cinco: 0, cuatro: 0, tres: 0, dos: 0, uno: 0 } } } = useProductReviewStats(producto.id)
+
+  // Reviews: use hook then provide a safe default
+  const reviewQuery = useProductReviewStats(producto.id)
+  const reviewStats = reviewQuery.data ?? { promedio: 0, total: 0, distribucion: { cinco: 0, cuatro: 0, tres: 0, dos: 0, uno: 0 } }
 
   // Memorizar cálculos pesados
   const stockInfo = useMemo(() => {
     const existingItem = items.find(item => item.producto.id === producto.id)
     const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
-    const availableStock = producto.stock - currentQuantityInCart
+    const availableStock = (producto.stock ?? 0) - currentQuantityInCart
     const isOutOfStock = availableStock <= 0
-    
+
     return {
       existingItem,
       currentQuantityInCart,
@@ -37,31 +38,30 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
     }
   }, [items, producto.id, producto.stock])
 
-  // Memorizar el formato de precio
+  // Formato de precio
   const formattedPrice = useMemo(() => {
     return new Intl.NumberFormat('es-PE', {
       style: 'currency',
       currency: 'PEN',
-    }).format(producto.precio)
+    }).format(Number(producto.precio ?? 0))
   }, [producto.precio])
 
   const handleAddToCart = useCallback(async (e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    
+
     if (isLoading) return
-    
+
     setIsLoading(true)
     setMessage(null)
-    
+
     try {
-      // Verificar si hay stock disponible
-      if (stockInfo.currentQuantityInCart >= producto.stock) {
+      if (stockInfo.currentQuantityInCart >= (producto.stock ?? 0)) {
         setMessage('Sin stock disponible')
         setTimeout(() => setMessage(null), 2000)
         return
       }
-      
+
       addToCart(producto)
       setMessage('¡Agregado al carrito!')
       setTimeout(() => setMessage(null), 1500)
@@ -72,8 +72,6 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
       setIsLoading(false)
     }
   }, [isLoading, stockInfo.currentQuantityInCart, producto, addToCart])
-
-  // wishlist handled by WishlistButton component
 
   if (viewMode === 'list') {
     return (
@@ -87,7 +85,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
             {message}
           </div>
         )}
-        
+
         <Link to={`/producto/${producto.id}`}>
           <div className="flex">
             {/* Image Section */}
@@ -99,7 +97,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
                 priority={false}
               />
             </div>
-            
+
             {/* Content Section */}
             <div className="flex-1 p-6 flex flex-col justify-between">
               <div>
@@ -121,11 +119,11 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
                     </div>
                   </div>
                 </div>
-                
+
                 <p className="text-gray-600 dark:text-gray-400 mb-4 line-clamp-3 leading-relaxed">
                   {producto.descripcion}
                 </p>
-                
+
                 <div className="flex items-center space-x-4 mb-4">
                   <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                     {producto.categoria}
@@ -151,7 +149,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
                   )}
                 </div>
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex items-center space-x-3">
                 <button
@@ -174,9 +172,9 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
     )
   }
 
-  // Grid View (Default)
+  // Grid View (Default) - uniform card height and distribution
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl dark:hover:shadow-gray-700/50 transition-all duration-300 overflow-hidden group relative">
+    <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl dark:hover:shadow-gray-700/50 transition-all duration-300 overflow-hidden group relative h-full">
       {message && (
         <div className={`absolute top-3 left-3 right-3 z-10 text-xs font-medium px-3 py-2 rounded-lg shadow-lg ${
           message.includes('Error') || message.includes('Sin stock') 
@@ -187,91 +185,94 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
         </div>
       )}
       
-      <Link to={`/producto/${producto.id}`}>
-        {/* Image Section */}
-        <div className="aspect-square overflow-hidden relative">
-          <OptimizedImage
-            src={producto.imagen}
-            alt={producto.nombre}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-            priority={false}
-          />
-          <div className="absolute top-3 right-3">
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 shadow-sm">
-              {producto.categoria}
-            </span>
-          </div>
-        </div>
-        
-        {/* Content Section */}
-        <div className="p-5">
-          <h3 className="font-bold text-lg text-gris-oscuro dark:text-gray-100 mb-2 line-clamp-2 leading-tight">
-            {producto.nombre}
-          </h3>
-          
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
-            {producto.descripcion}
-          </p>
-          
-          {/* Rating */}
-          <div className="flex items-center mb-3">
-            <StarRating rating={reviewStats.promedio} readonly size="sm" />
-            {reviewStats.total > 0 && (
-              <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
-                ({reviewStats.promedio.toFixed(1)})
+      <Link to={`/producto/${producto.id}`} className="block h-full">
+        {/* make the whole card full height and use flex column */}
+        <div className="flex flex-col h-full">
+          {/* Image Section */}
+          <div className="aspect-square overflow-hidden relative">
+            <OptimizedImage
+              src={producto.imagen}
+              alt={producto.nombre}
+              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+              priority={false}
+            />
+            <div className="absolute top-3 right-3">
+              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white/90 dark:bg-gray-800/90 text-gray-700 dark:text-gray-300 shadow-sm">
+                {producto.categoria}
               </span>
-            )}
+            </div>
           </div>
           
-          <div className="mb-4">
-            {/* Price */}
-            <div className="text-center sm:text-left mb-2">
-              <span className="text-xl font-bold text-dorado dark:text-yellow-400">
-                {formattedPrice}
-              </span>
+          {/* Content Section */}
+          <div className="p-5 flex-1 flex flex-col">
+            <h3 className="font-bold text-lg text-gris-oscuro dark:text-gray-100 mb-2 line-clamp-2 leading-tight">
+              {producto.nombre}
+            </h3>
+            
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 line-clamp-2 leading-relaxed">
+              {producto.descripcion}
+            </p>
+            
+            {/* Rating */}
+            <div className="flex items-center mb-3">
+              <StarRating rating={reviewStats.promedio} readonly size="sm" />
+              {reviewStats.total > 0 && (
+                <span className="text-xs text-gray-500 dark:text-gray-400 ml-2">
+                  ({reviewStats.promedio.toFixed(1)})
+                </span>
+              )}
             </div>
             
-            {/* Stock - Below price on mobile, right side on larger screens */}
-            <div className="flex flex-col items-center sm:flex-row sm:justify-between">
-              <div className="sm:flex-1"></div>
-              <div className="text-center sm:text-right">
-                <span className={`text-sm font-semibold px-2 py-1 rounded-md ${
-                  stockInfo.availableStock > 0 
-                    ? stockInfo.availableStock > 10 
-                      ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30' 
-                      : 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
-                    : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
-                }`}>
-                  {stockInfo.availableStock > 0 
-                    ? stockInfo.availableStock > 10 
-                      ? `${stockInfo.availableStock} disponibles` 
-                      : `¡Solo ${stockInfo.availableStock}!`
-                    : 'Sin stock'
-                  }
+            <div className="mb-4">
+              {/* Price */}
+              <div className="text-center sm:text-left mb-2">
+                <span className="text-xl font-bold text-dorado dark:text-yellow-400">
+                  {formattedPrice}
                 </span>
-                {stockInfo.currentQuantityInCart > 0 && (
-                  <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold mt-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
-                    {stockInfo.currentQuantityInCart} en carrito
-                  </div>
-                )}
+              </div>
+              
+              {/* Stock - Below price on mobile, right side on larger screens */}
+              <div className="flex flex-col items-center sm:flex-row sm:justify-between">
+                <div className="sm:flex-1"></div>
+                <div className="text-center sm:text-right">
+                  <span className={`text-sm font-semibold px-2 py-1 rounded-md ${
+                    stockInfo.availableStock > 0 
+                      ? stockInfo.availableStock > 10 
+                        ? 'text-green-700 dark:text-green-400 bg-green-50 dark:bg-green-900/30' 
+                        : 'text-yellow-700 dark:text-yellow-400 bg-yellow-50 dark:bg-yellow-900/30'
+                      : 'text-red-700 dark:text-red-400 bg-red-50 dark:bg-red-900/30'
+                  }`}>
+                    {stockInfo.availableStock > 0 
+                      ? stockInfo.availableStock > 10 
+                        ? `${stockInfo.availableStock} disponibles` 
+                        : `¡Solo ${stockInfo.availableStock}!`
+                      : 'Sin stock'
+                    }
+                  </span>
+                  {stockInfo.currentQuantityInCart > 0 && (
+                    <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold mt-1 bg-blue-50 dark:bg-blue-900/30 px-2 py-1 rounded-md">
+                      {stockInfo.currentQuantityInCart} en carrito
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row gap-2">
-            <button
-              onClick={handleAddToCart}
-              disabled={stockInfo.isOutOfStock || isLoading}
-              className="flex-1 btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
-            >
-              <ShoppingCart className="w-4 h-4" />
-              <span className="truncate">
-                {isLoading ? 'Agregando...' : stockInfo.isOutOfStock ? 'Sin Stock' : 'Agregar'}
-              </span>
-            </button>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2 mt-auto">
+              <button
+                onClick={handleAddToCart}
+                disabled={stockInfo.isOutOfStock || isLoading}
+                className="flex-1 btn-primary py-2.5 flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-semibold"
+              >
+                <ShoppingCart className="w-4 h-4" />
+                <span className="truncate">
+                  {isLoading ? 'Agregando...' : stockInfo.isOutOfStock ? 'Sin Stock' : 'Agregar'}
+                </span>
+              </button>
 
-            <WishlistButton productId={producto.id} productName={producto.nombre} className="sm:w-auto w-full px-4 py-2.5 rounded-lg border justify-center" />
+              <WishlistButton productId={producto.id} productName={producto.nombre} className="sm:w-auto w-full px-4 py-2.5 rounded-lg border justify-center" />
+            </div>
           </div>
         </div>
       </Link>

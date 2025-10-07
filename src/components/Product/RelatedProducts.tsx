@@ -1,7 +1,10 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { relatedByCategoryAndPrice, alsoBought } from '@/lib/recommendations'
 import { supabase } from '@/lib/supabase'
+import OptimizedImage from '@/components/common/OptimizedImage'
+import StarRating from '@/components/common/StarRating'
+import { ArrowLeft, ArrowRight } from 'lucide-react'
 
 type Props = {
   productId: string
@@ -10,21 +13,25 @@ type Props = {
 }
 
 const SkeletonCard = () => (
-  <div className="w-48 sm:w-56 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm animate-pulse">
-    <div className="h-36 bg-gray-200 dark:bg-gray-700 rounded-md mb-3"></div>
+  <div className="w-48 sm:w-56 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <div className="h-40 w-full mb-3 overflow-hidden rounded-md bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
     <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
   </div>
 )
 
 const ProductCardMini: React.FC<{ p: any }> = ({ p }) => {
+  const precio = typeof p.precio === 'number' ? p.precio : Number(p.precio || 0)
   return (
-    <Link to={`/producto/${p.id}`} className="w-48 sm:w-56 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow">
-      <div className="h-36 w-full mb-3 overflow-hidden rounded-md bg-gray-50 flex items-center justify-center">
-        <img src={p.imagen || p.imagenes?.[0]?.url || p.imagenes?.url || ''} alt={p.nombre} className="object-cover w-full h-full" />
+    <Link to={`/producto/${p.id}`} className="min-w-[220px] w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1 active:translate-y-0 p-3">
+      <div className="aspect-square overflow-hidden rounded-xl relative bg-gray-50 mb-3">
+        <OptimizedImage src={p.imagen || p.imagenes?.[0]?.url || p.imagenes?.url || ''} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       </div>
-      <h4 className="text-sm font-medium text-gris-oscuro dark:text-gray-100 truncate">{p.nombre}</h4>
-      <div className="text-dorado font-bold mt-1">S/ {p.precio?.toFixed(2)}</div>
+      <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 mb-1 line-clamp-2">{p.nombre}</h4>
+      <div className="flex items-center justify-between">
+        <StarRating rating={p.rating_promedio || 0} readonly size="sm" />
+        <div className="text-dorado font-bold text-sm">{new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(precio)}</div>
+      </div>
     </Link>
   )
 }
@@ -33,8 +40,8 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
   const [related, setRelated] = useState<any[]>([])
   const [also, setAlso] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
   const relatedRef = useRef<HTMLDivElement | null>(null)
+  const alsoRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     let mounted = true
@@ -116,8 +123,32 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
           })
         }
 
+        // If alsoFiltered is empty, fetch fallback products from other categories so the section is never empty
+        let finalAlso = alsoFiltered
+        if ((!finalAlso || finalAlso.length === 0) && supabase) {
+          try {
+            // Try to exclude the current product's category if we have one
+            const cat = ((byCatArr[0] as any) && ((byCatArr[0] as any).categoria || (byCatArr[0] as any).categoria_id)) || category || null
+            let q = supabase.from('productos').select('*').neq('id', productId).order('rating_promedio', { ascending: false }).limit(6)
+            if (cat) {
+              // If categoria is a string field in your schema
+              q = q.neq('categoria', cat as any)
+            }
+            const { data: fallbackProds } = await q
+            finalAlso = (fallbackProds || []).slice(0, 6)
+          } catch (e) {
+            // If fallback fails, last resort: newest products
+            try {
+              const { data: newest } = await supabase.from('productos').select('*').neq('id', productId).order('created_at', { ascending: false }).limit(6)
+              finalAlso = (newest || []).slice(0, 6)
+            } catch (ee) {
+              finalAlso = []
+            }
+          }
+        }
+
         setRelated(byCatArr)
-        setAlso(alsoFiltered)
+        setAlso(finalAlso)
       } catch (err) {
         console.error('Error loading related products', err)
       } finally {
@@ -132,23 +163,41 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
     }
   }, [productId, category, price])
 
+  // Keyboard navigation: left/right arrows scroll focused carousel
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>, ref?: React.RefObject<HTMLDivElement>) => {
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault()
+      ;(ref || relatedRef).current?.scrollBy({ left: -320, behavior: 'smooth' })
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault()
+      ;(ref || relatedRef).current?.scrollBy({ left: 320, behavior: 'smooth' })
+    }
+  }, [])
+
   const scrollBy = (ref: React.RefObject<HTMLDivElement>, delta = 300) => {
     if (!ref.current) return
     ref.current.scrollBy({ left: delta, behavior: 'smooth' })
   }
 
   const renderList = (items: any[], ref?: React.RefObject<HTMLDivElement>) => (
-    <div className="relative">
-      <button onClick={() => scrollBy(ref || relatedRef, -320)} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md">
-        ‹
+    <div className="relative group">
+      <button aria-label="Desplazar izquierda" onClick={() => scrollBy(ref || relatedRef, -320)} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-90 hover:opacity-100 focus:outline-none focus:ring">
+        <ArrowLeft className="w-5 h-5 text-gris-oscuro dark:text-gray-100" />
       </button>
-      <div ref={ref || relatedRef} className="flex space-x-4 overflow-x-auto py-2 px-1 scrollbar-hide">
+      <div
+        ref={ref || relatedRef}
+        tabIndex={0}
+        onKeyDown={(e) => handleKeyDown(e, ref)}
+        className="flex space-x-4 overflow-x-auto py-2 px-1 focus:outline-none no-scrollbar"
+        role="list"
+        aria-label="Lista de productos"
+      >
         {items.map((p) => (
           <ProductCardMini key={p.id} p={p} />
         ))}
       </div>
-      <button onClick={() => scrollBy(ref || relatedRef, 320)} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md">
-        ›
+      <button aria-label="Desplazar derecha" onClick={() => scrollBy(ref || relatedRef, 320)} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-90 hover:opacity-100 focus:outline-none focus:ring">
+        <ArrowRight className="w-5 h-5 text-gris-oscuro dark:text-gray-100" />
       </button>
     </div>
   )
@@ -168,7 +217,7 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
             <SkeletonCard />
           </div>
         ) : related.length > 0 ? (
-          renderList(related)
+          renderList(related, relatedRef)
         ) : (
           <div className="text-gray-600">No se encontraron productos relacionados.</div>
         )}
@@ -185,7 +234,7 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
               <SkeletonCard />
             </div>
           ) : also.length > 0 ? (
-            renderList(also)
+            renderList(also, alsoRef)
           ) : (
             <div className="text-gray-600">No hay datos de compras relacionadas.</div>
           )}
