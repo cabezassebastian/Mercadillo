@@ -28,36 +28,59 @@ export const relatedByCategoryAndPrice = async (productId: string, limit = 6): P
   }
 
   // Fallback client-side
+  // Request base product (select all to avoid errors if some columns are missing)
   const { data: baseProduct, error: baseErr } = await supabase
     .from('productos')
-    .select('id, categoria_id, precio')
+    .select('*')
     .eq('id', productId)
     .single()
 
   if (baseErr || !baseProduct) {
     if (import.meta.env.DEV) console.debug('relatedByCategoryAndPrice base product fetch error:', baseErr)
-    return []
+    // as last resort, return newest products
+  const { data: newest } = await supabase.from('productos').select('id, nombre, precio, slug, imagenes, rating_promedio, imagen, created_at').order('created_at', { ascending: false }).limit(limit)
+  return ((newest || []) as unknown) as RecProduct[]
   }
 
-  const minPrice = Number(baseProduct.precio) * 0.8
-  const maxPrice = Number(baseProduct.precio) * 1.2
+  const categoryField = baseProduct.categoria_id || baseProduct.categoria || null
+  const hasPrice = baseProduct.precio !== undefined && baseProduct.precio !== null
 
-  const { data, error: listErr } = await supabase
-    .from('productos')
-    .select('id, nombre, precio, slug, imagenes, rating_promedio')
-    .eq('categoria_id', baseProduct.categoria_id)
-    .gte('precio', minPrice)
-    .lte('precio', maxPrice)
-    .neq('id', productId)
-    .order('rating_promedio', { ascending: false })
-    .limit(limit)
+  // We'll select all fields from productos for list queries to avoid requesting missing columns
+  const selector = '*'
 
-  if (listErr) {
-    if (import.meta.env.DEV) console.debug('relatedByCategoryAndPrice products list error:', listErr)
-    return []
+  // 1) Try same category + price range (if price available)
+  if (categoryField && hasPrice) {
+    const minPrice = Number(baseProduct.precio) * 0.8
+    const maxPrice = Number(baseProduct.precio) * 1.2
+
+  let q = supabase.from('productos').select(selector).neq('id', productId).order('rating_promedio', { ascending: false }).limit(limit)
+    // support both column names
+    if (baseProduct.categoria_id) q = q.eq('categoria_id', baseProduct.categoria_id as any)
+    else q = q.eq('categoria', baseProduct.categoria as any)
+
+    q = q.gte('precio', minPrice).lte('precio', maxPrice)
+    const { data, error: listErr } = await q
+    if (!listErr && data && data.length > 0) return data as RecProduct[]
   }
 
-  return (data || []) as RecProduct[]
+  // 2) Try same category ignoring price
+
+  if (categoryField) {
+    // Use generic selector and compare against whichever category field exists
+    let q2 = supabase.from('productos').select(selector).neq('id', productId).order('rating_promedio', { ascending: false }).limit(limit)
+    if ((baseProduct as any).categoria_id) q2 = q2.eq('categoria_id', (baseProduct as any).categoria_id as any)
+    else q2 = q2.eq('categoria', (baseProduct as any).categoria as any)
+
+    const { data: sameCat, error: sameCatErr } = await q2
+    if (!sameCatErr && sameCat && sameCat.length > 0) return sameCat as RecProduct[]
+  }
+
+  // 3) Fallback to top sellers (server or client) then newest
+  const top = await topSellers('month', limit)
+  if (top && top.length > 0) return top
+
+  const { data: newest } = await supabase.from('productos').select(selector).order('created_at', { ascending: false }).limit(limit)
+  return ((newest || []) as unknown) as RecProduct[]
 }
 
 /**
@@ -110,16 +133,31 @@ export const alsoBought = async (productId: string, limit = 6): Promise<RecProdu
     .slice(0, limit)
     .map(([id]) => id)
 
-  if (sortedIds.length === 0) return topSellers('month', limit)
+  if (sortedIds.length === 0) {
+  const ts = await topSellers('month', limit)
+  if (ts && ts.length > 0) return ts
+  }
 
   const { data: products, error: productsErr } = await supabase
     .from('productos')
-    .select('id, nombre, precio, slug, imagenes, rating_promedio')
+    .select('*')
     .in('id', sortedIds)
 
   if (productsErr) {
     if (import.meta.env.DEV) console.debug('alsoBought products fetch error:', productsErr)
-    return []
+    const ts = await topSellers('month', limit)
+    if (ts && ts.length > 0) return ts
+    // fallback to newest
+  const { data: newest } = await supabase.from('productos').select('*').order('created_at', { ascending: false }).limit(limit)
+  return ((newest || []) as unknown) as RecProduct[]
+  }
+
+  // If products list is empty, fallback to top sellers or newest
+  if (!products || products.length === 0) {
+    const ts = await topSellers('month', limit)
+    if (ts && ts.length > 0) return ts
+  const { data: newest } = await supabase.from('productos').select('id, nombre, precio, slug, imagenes, imagen, rating_promedio, created_at').order('created_at', { ascending: false }).limit(limit)
+  return ((newest || []) as unknown) as RecProduct[]
   }
 
   return (products || []) as RecProduct[]
@@ -147,7 +185,9 @@ export const topSellers = async (period: 'week' | 'month' | 'all' = 'week', limi
 
   if ((res as any).error) {
     if (import.meta.env.DEV) console.debug('topSellers pedidos_productos fetch error:', (res as any).error)
-    return []
+    // fallback to newest products
+  const { data: newest } = await supabase.from('productos').select('id, nombre, precio, slug, imagenes, imagen, rating_promedio, created_at').order('created_at', { ascending: false }).limit(limit)
+  return ((newest || []) as unknown) as RecProduct[]
   }
 
   const counts: Record<string, number> = {}
@@ -166,7 +206,7 @@ export const topSellers = async (period: 'week' | 'month' | 'all' = 'week', limi
 
   const { data: products } = await supabase
     .from('productos')
-    .select('id, nombre, precio, slug, imagenes, rating_promedio')
+    .select('*')
     .in('id', topIds)
 
   return (products || []) as RecProduct[]
