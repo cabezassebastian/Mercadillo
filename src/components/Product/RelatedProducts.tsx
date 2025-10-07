@@ -39,11 +39,48 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
   useEffect(() => {
     let mounted = true
 
-    const load = async () => {
+      const load = async () => {
       setLoading(true)
       try {
   const byCategory = await relatedByCategoryAndPrice(productId, 6)
-  const alsoData = await alsoBought(productId, 6)
+    let alsoData = await alsoBought(productId, 6)
+
+    // If alsoBought returned empty, try to build it from pedidos table directly
+    if ((!alsoData || alsoData.length === 0) && supabase) {
+      try {
+        // Get pedidos that include this product by scanning pedidos.items
+        const { data: pedidosRows } = await supabase
+          .from('pedidos')
+          .select('id, items')
+          .limit(1000)
+
+        const otherProductCounts: Record<string, number> = {}
+        ;(pedidosRows || []).forEach((row: any) => {
+          const items = row.items || []
+          const has = items.find((it: any) => String(it.id) === String(productId))
+          if (has) {
+            items.forEach((it: any) => {
+              if (!it || !it.id) return
+              const pid = String(it.id)
+              if (pid === productId) return
+              otherProductCounts[pid] = (otherProductCounts[pid] || 0) + (it.cantidad || 1)
+            })
+          }
+        })
+
+        const picked = Object.entries(otherProductCounts)
+          .sort((a, b) => (b[1] as number) - (a[1] as number))
+          .slice(0, 6)
+          .map(([id]) => id)
+
+        if (picked.length > 0) {
+          const { data: prods } = await supabase.from('productos').select('*').in('id', picked)
+          alsoData = (prods || []) as any[]
+        }
+      } catch (e) {
+        // ignore and keep alsoData empty
+      }
+    }
 
         if (!mounted) return
 

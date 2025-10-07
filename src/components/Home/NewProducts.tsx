@@ -62,7 +62,24 @@ export default function NewProducts({ limit = 8 }: { limit?: number }) {
   }, [limit])
 
   if (loading) return <div className="py-8">Cargando nuevos productos...</div>
-  if (!products.length) return <div className="py-8">No hay nuevos productos.</div>
+
+  // If no products found, attempt a broader fetch (order by updated_at or created_at) before showing empty state
+  if (!products.length) {
+    // perform a fallback fetch synchronously (quick attempt)
+    // Note: we avoid another useEffect by doing a direct async IIFE here
+    (async () => {
+      try {
+        const { data, error } = await supabase
+          .from('productos')
+          .select('*')
+          .order('updated_at', { ascending: false })
+          .limit(limit)
+        if (!error && data && data.length) setProducts(data as any)
+      } catch (e) {
+        // ignore
+      }
+    })()
+  }
 
   return (
     <section className="py-8">
