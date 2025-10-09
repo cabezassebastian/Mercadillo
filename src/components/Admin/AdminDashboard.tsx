@@ -1,5 +1,9 @@
+
 import React, { useEffect, useState } from 'react'
 import { Package, ShoppingCart, Users, DollarSign, TrendingUp } from 'lucide-react'
+import SalesChart from './SalesChart'
+import TopProducts from './TopProducts'
+import LowStockAlert from './LowStockAlert'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 interface DashboardStats {
@@ -95,6 +99,7 @@ const AdminDashboard: React.FC = () => {
       </div>
     )
   }
+
 
   return (
     <div className="space-y-6">
@@ -207,6 +212,48 @@ const AdminDashboard: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Analytics Dashboard */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SalesChart period="month" />
+        <LowStockAlert />
+      </div>
+      <div className="mt-6">
+        <TopProducts />
+      </div>
+
+      {/* Temporary diagnostics panel - remove after debugging */}
+      <div className="mt-6 card p-4 bg-yellow-50">
+        <h3 className="font-semibold mb-2">Diagnostics (temporary)</h3>
+        <p className="text-sm text-gray-700 mb-3">Use this to check Supabase RPCs and tables from the running app.</p>
+        <div className="space-x-2">
+          <button
+            onClick={async () => {
+              try {
+                // call RPCs and simple selects
+                // get monthly sales
+                // @ts-ignore
+                const sales = await supabaseAdmin.rpc('get_monthly_sales');
+                // @ts-ignore
+                const top = await supabaseAdmin.rpc('get_top_selling_products');
+                const low = await supabaseAdmin.from('productos').select('id,nombre,stock').lt('stock',4).order('stock', { ascending: true });
+                // show results in console and as alert
+                console.log('diag.sales', sales);
+                console.log('diag.top', top);
+                console.log('diag.low', low);
+                alert('Diagnostics executed - check console for details');
+              } catch (err) {
+                console.error('Diagnostics error', err);
+                alert('Diagnostics error - see console');
+              }
+            }}
+            className="px-3 py-2 bg-amarillo text-gris-oscuro rounded"
+          >
+            Run diagnostics
+          </button>
+        </div>
+        <p className="text-xs text-gray-600 mt-3">If RPCs return errors, check Vercel env vars: VITE_SUPABASE_URL and VITE_SUPABASE_SERVICE_ROLE_KEY (production).</p>
       </div>
     </div>
   )
