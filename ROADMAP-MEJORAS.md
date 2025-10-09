@@ -573,7 +573,7 @@ Commit & PR:
 - Crear: `sql-migrations/create-analytics-functions.sql`
 - Crear: `src/components/Admin/SalesChart.tsx`
 - Crear: `src/components/Admin/TopProducts.tsx`
-- Crear: `src/components/Admin/LowStockAlert.tsx`
+- Creaar: `src/components/Admin/LowStockAlert.tsx`
 
 ---
 
