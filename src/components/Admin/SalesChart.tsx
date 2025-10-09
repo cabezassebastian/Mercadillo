@@ -1,6 +1,5 @@
 
 import { useEffect, useState } from 'react';
-import { Bar } from 'react-chartjs-2';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 type MonthlySales = {
@@ -33,22 +32,13 @@ export default function SalesChart({ period = 'month' }: { period?: 'month' | 'w
     fetchSales();
   }, []);
 
-  // Preparar datos para el gráfico
-  const chartData = {
-    labels: monthLabels,
-    datasets: [
-      {
-        label: 'Ventas',
-        data: monthLabels.map(label => {
-          const found = sales.find(s => s.month === label);
-          return found ? found.total : 0;
-        }),
-        backgroundColor: 'rgba(255, 206, 86, 0.5)',
-        borderColor: 'rgba(255, 206, 86, 1)',
-        borderWidth: 2,
-      },
-    ],
-  };
+  // Preparar datos para el gráfico (mapa label -> total)
+  const totalsByLabel = monthLabels.map(label => {
+    const found = sales.find((s) => s.month === label);
+    return found ? Number(found.total) : 0;
+  });
+
+  const max = Math.max(...totalsByLabel, 1);
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-xl shadow p-4">
@@ -58,13 +48,23 @@ export default function SalesChart({ period = 'month' }: { period?: 'month' | 'w
       ) : error ? (
         <div className="py-6 text-center text-red-500">{error}</div>
       ) : (
-        <Bar
-          data={chartData}
-          options={{
-            responsive: true,
-            plugins: { legend: { display: false } },
-          }}
-        />
+        <div className="w-full">
+          <div className="flex items-end space-x-2 h-40">
+            {totalsByLabel.map((value, idx) => {
+              const height = Math.round((value / max) * 100);
+              return (
+                <div key={monthLabels[idx]} className="flex-1 flex flex-col items-center">
+                  <div
+                    title={`${monthLabels[idx]}: S/ ${value}`}
+                    className="w-full bg-amarillo rounded-t"
+                    style={{ height: `${height}%` }}
+                  />
+                  <div className="text-xs mt-2 text-center">{monthLabels[idx]}</div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       )}
     </div>
   );
