@@ -10,7 +10,7 @@ type MonthlySales = {
 
 const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-export default function SalesChart() {
+export default function SalesChart({ period = 'month' }: { period?: 'month' | 'week' | 'day' }) {
   const [sales, setSales] = useState<MonthlySales[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -19,8 +19,9 @@ export default function SalesChart() {
     const fetchSales = async () => {
       setLoading(true);
       setError(null);
-      // Agrupar ventas por mes
-      const { data, error } = await supabaseAdmin.rpc('get_monthly_sales');
+      // Elegir la RPC según el periodo (si no existe, fallback a mensual)
+      const rpcName = period === 'month' ? 'get_monthly_sales' : 'get_monthly_sales';
+      const { data, error } = await supabaseAdmin.rpc(rpcName as string);
       if (error) {
         setError('Error al cargar ventas');
         setSales([]);
