@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Bar } from 'react-chartjs-2';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
@@ -10,7 +10,7 @@ type MonthlySales = {
 
 const monthLabels = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-export default function SalesChart({ period = 'month' }: { period?: 'month' }) {
+export default function SalesChart() {
   const [sales, setSales] = useState<MonthlySales[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
