@@ -211,9 +211,9 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   const saveVariant = async (v: any) => {
     setIsLoading(true)
     const payload: any = {
-      sku: v.sku,
-      price: v.price,
-      stock: v.stock,
+      // SKU removed: store per-variant stock instead. Persist null when empty string.
+      price: v.price === '' ? null : (v.price == null ? null : Number(v.price)),
+      stock: v.stock === '' ? null : (v.stock == null ? null : Number(v.stock)),
       is_active: v.is_active,
       attributes: v.attributes || {}
     }
@@ -296,14 +296,17 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
           {variants.length === 0 && <p className="text-sm text-gray-500">No hay variantes aún.</p>}
           {variants.map(v => (
             <div key={v.id} className="flex items-center gap-2 mb-2">
-              <div className="w-48">
-                <input className="input-field" value={v.sku || ''} onChange={(e) => handleVariantChange(v.id, 'sku', e.target.value)} placeholder="SKU" />
+              <div className="w-24">
+                <input type="number" className="input-field" value={v.stock != null ? v.stock : ''} onChange={(e) => {
+                  const val = e.target.value
+                  handleVariantChange(v.id, 'stock', val === '' ? '' : parseInt(val))
+                }} placeholder="Stock" />
               </div>
               <div className="w-32">
-                <input type="number" className="input-field" value={v.price ?? ''} onChange={(e) => handleVariantChange(v.id, 'price', parseFloat(e.target.value || '0'))} placeholder="Precio" />
-              </div>
-              <div className="w-24">
-                <input type="number" className="input-field" value={v.stock ?? 0} onChange={(e) => handleVariantChange(v.id, 'stock', parseInt(e.target.value || '0'))} placeholder="Stock" />
+                <input type="number" className="input-field" value={v.price ?? ''} onChange={(e) => {
+                  const val = e.target.value
+                  handleVariantChange(v.id, 'price', val === '' ? '' : parseFloat(val))
+                }} placeholder="Precio" />
               </div>
               <label className="flex items-center gap-2">
                 <input type="checkbox" checked={!!v.is_active} onChange={(e) => handleVariantChange(v.id, 'is_active', e.target.checked)} /> Activa

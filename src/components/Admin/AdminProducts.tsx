@@ -93,7 +93,8 @@ const AdminProducts: React.FC = () => {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
         precio: parseFloat(formData.precio),
-        stock: parseInt(formData.stock),
+        // Allow empty stock to be stored as null so variants can manage stock
+        stock: formData.stock === '' ? null : parseInt(formData.stock),
         categoria: formData.categoria,
         imagen: formData.imagen,
         activo: true
@@ -147,7 +148,8 @@ const AdminProducts: React.FC = () => {
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio.toString(),
-      stock: producto.stock.toString(),
+      // producto.stock may be null in the DB; show empty string in that case
+      stock: producto.stock != null ? producto.stock.toString() : '',
       categoria: producto.categoria,
       imagen: producto.imagen
     })
@@ -294,15 +296,19 @@ const AdminProducts: React.FC = () => {
                     {formatPrice(producto.precio)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                      producto.stock > 10 
-                        ? 'bg-green-100 text-green-800' 
-                        : producto.stock > 0 
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {producto.stock}
-                    </span>
+                    {producto.stock == null ? (
+                      <span className="px-2 py-1 text-xs font-medium rounded-full bg-gray-100 text-gray-800">—</span>
+                    ) : (
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                        producto.stock > 10 
+                          ? 'bg-green-100 text-green-800' 
+                          : producto.stock > 0 
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        {producto.stock}
+                      </span>
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
@@ -413,9 +419,9 @@ const AdminProducts: React.FC = () => {
                     name="stock"
                     value={formData.stock}
                     onChange={handleInputChange}
-                    required
                     min="0"
                     className="input-field"
+                    placeholder="Dejar vacío para gestionar stock por variante"
                   />
                 </div>
               </div>
