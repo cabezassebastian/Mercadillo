@@ -42,42 +42,108 @@ const Product: React.FC = () => {
       if (!id) return
 
       try {
-        // use new api route that returns product + options + variants
+        // try serverless API first (works in Vercel). If it fails (dev or env missing), fallback to client query below.
         const resp = await fetch(`/api/products/${id}`)
-        if (!resp.ok) throw new Error('Product fetch failed')
-        const json = await resp.json()
-        const { product, options: opts, variants: vars } = json
+        if (resp.ok) {
+          const json = await resp.json()
+          const { product, options: opts, variants: vars } = json
 
-        setProducto(product)
-        setOptions(opts || [])
-        setVariants(vars || [])
+          setProducto(product)
+          setOptions(opts || [])
+          setVariants(vars || [])
 
-        // Cargar imágenes del producto (fallback to old table)
-        const { data: imagenesData, error: imagenesError } = await supabase
-          .from('producto_imagenes')
-          .select('*')
-          .eq('producto_id', product.id)
-          .order('orden', { ascending: true })
+          // Cargar imágenes del producto (still from client table)
+          const { data: imagenesData, error: imagenesError } = await supabase
+            .from('producto_imagenes')
+            .select('*')
+            .eq('producto_id', product.id)
+            .order('orden', { ascending: true })
 
-        if (!imagenesError && imagenesData) {
-          setProductoImagenes(imagenesData)
-        }
+          if (!imagenesError && imagenesData) setProductoImagenes(imagenesData)
 
-        // Cargar estadísticas de reseñas
-        const stats = await getProductReviewStats(product.id)
-        setReviewStats(stats)
+          const stats = await getProductReviewStats(product.id)
+          setReviewStats(stats)
 
-        // Registrar visita al historial de navegación (si el usuario está autenticado)
-        if (user?.id) {
-          try {
-            await addToNavigationHistory(user.id, product.id)
-          } catch (error) {
-            console.error('Error inesperado al agregar al historial:', error)
+          if (user?.id) {
+            try { await addToNavigationHistory(user.id, product.id) } catch (e) { console.error(e) }
+          }
+        } else {
+          // API failed — fallback to client-side Supabase query so page still shows in dev/local
+          console.warn('/api/products failed, falling back to client Supabase')
+          const { data: product, error: pErr } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('id', id)
+            .single()
+
+          if (!pErr && product) {
+            setProducto(product)
+
+            const { data: imagenesData, error: imagenesError } = await supabase
+              .from('producto_imagenes')
+              .select('*')
+              .eq('producto_id', product.id)
+              .order('orden', { ascending: true })
+
+            if (!imagenesError && imagenesData) setProductoImagenes(imagenesData)
+
+            const stats = await getProductReviewStats(product.id)
+            setReviewStats(stats)
+
+            // Also fetch options + values + variants from client as fallback
+            try {
+              const { data: options } = await supabase
+                .from('product_options')
+                .select('id, name')
+                .eq('product_id', product.id)
+                .order('position', { ascending: true })
+
+              const optionsWithValues: any[] = []
+              if (options && options.length) {
+                for (const opt of options) {
+                  const { data: values } = await supabase
+                    .from('product_option_values')
+                    .select('id, value, metadata')
+                    .eq('option_id', opt.id)
+                    .order('position', { ascending: true })
+                  optionsWithValues.push({ ...opt, values: values || [] })
+                }
+              }
+              setOptions(optionsWithValues)
+
+              const { data: variants } = await supabase
+                .from('product_variants')
+                .select('*')
+                .eq('product_id', product.id)
+
+              setVariants(variants || [])
+            } catch (fetchErr) {
+              console.warn('Fallback: could not load options/variants', fetchErr)
+            }
+          } else {
+            // product not found via API nor via client
+            console.error('Product not found by API nor by client', pErr)
+            navigate('/catalogo')
           }
         }
       } catch (error) {
-        console.error('Error in fetchProducto:', error)
-        navigate('/catalogo')
+        console.error('Error in fetchProducto unexpected:', error)
+        // try a last-ditch client fetch before giving up
+        try {
+          const { data: product, error: pErr } = await supabase
+            .from('productos')
+            .select('*')
+            .eq('id', id)
+            .single()
+          if (!pErr && product) {
+            setProducto(product)
+          } else {
+            navigate('/catalogo')
+          }
+        } catch (err2) {
+          console.error('Fallback client fetch also failed', err2)
+          navigate('/catalogo')
+        }
       } finally {
         setIsLoading(false)
       }

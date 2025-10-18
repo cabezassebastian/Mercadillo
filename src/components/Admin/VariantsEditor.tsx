@@ -9,6 +9,7 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
   const [valuesMap, setValuesMap] = useState<Record<string, Value[]>>({})
   const [newOptionName, setNewOptionName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [variants, setVariants] = useState<any[]>([])
 
   useEffect(() => { loadOptions() }, [productoId])
 
@@ -32,6 +33,12 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
       }
     }
     setValuesMap(map)
+    // load variants
+    const { data: vars } = await supabaseAdmin
+      .from('product_variants')
+      .select('*')
+      .eq('product_id', productoId)
+    setVariants(vars || [])
   }
 
   const createOption = async () => {
@@ -96,11 +103,36 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
 
       await supabaseAdmin.from('product_variants').insert([{ product_id: productoId, price, stock: 0, attributes: '{}', option_value_ids: combo }])
     }
-
-  setIsLoading(false)
-    loadOptions()
+    setIsLoading(false)
+    await loadOptions()
     alert('Variantes generadas')
-  if (onClose) onClose()
+    if (onClose) onClose()
+  }
+
+  const handleVariantChange = (id: string, field: string, value: any) => {
+    setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v))
+  }
+
+  const saveVariant = async (v: any) => {
+    setIsLoading(true)
+    const payload: any = {
+      sku: v.sku,
+      price: v.price,
+      stock: v.stock,
+      is_active: v.is_active,
+      attributes: v.attributes || {}
+    }
+    await supabaseAdmin.from('product_variants').update(payload).eq('id', v.id)
+    await loadOptions()
+    setIsLoading(false)
+  }
+
+  const deleteVariant = async (id: string) => {
+    if (!confirm('¿Eliminar variante? Esta acción no se puede deshacer.')) return
+    setIsLoading(true)
+    await supabaseAdmin.from('product_variants').delete().eq('id', id)
+    await loadOptions()
+    setIsLoading(false)
   }
 
   return (
@@ -135,6 +167,32 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
 
         <div className="pt-4">
           <button className="btn-primary" onClick={generateVariants} disabled={isLoading}>Generar variantes automáticas (aplica regla S/M/L)</button>
+        </div>
+
+        {/* Variants list */}
+        <div className="mt-6">
+          <h4 className="font-semibold mb-2">Variantes existentes</h4>
+          {variants.length === 0 && <p className="text-sm text-gray-500">No hay variantes aún.</p>}
+          {variants.map(v => (
+            <div key={v.id} className="flex items-center gap-2 mb-2">
+              <div className="w-48">
+                <input className="input-field" value={v.sku || ''} onChange={(e) => handleVariantChange(v.id, 'sku', e.target.value)} placeholder="SKU" />
+              </div>
+              <div className="w-32">
+                <input type="number" className="input-field" value={v.price ?? ''} onChange={(e) => handleVariantChange(v.id, 'price', parseFloat(e.target.value || '0'))} placeholder="Precio" />
+              </div>
+              <div className="w-24">
+                <input type="number" className="input-field" value={v.stock ?? 0} onChange={(e) => handleVariantChange(v.id, 'stock', parseInt(e.target.value || '0'))} placeholder="Stock" />
+              </div>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={!!v.is_active} onChange={(e) => handleVariantChange(v.id, 'is_active', e.target.checked)} /> Activa
+              </label>
+              <div className="flex items-center gap-2 ml-auto">
+                <button className="btn-secondary" onClick={() => saveVariant(v)} disabled={isLoading}>Guardar</button>
+                <button className="btn-danger" onClick={() => deleteVariant(v.id)} disabled={isLoading}>Eliminar</button>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

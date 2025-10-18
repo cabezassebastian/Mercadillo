@@ -4,7 +4,7 @@ import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import ProductImageManager from './ProductImageManager'
-import VariantsEditor from './VariantsEditor'
+import VariantsEditor from './VariantsEditor.tsx'
 
 const AdminProducts: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([])
