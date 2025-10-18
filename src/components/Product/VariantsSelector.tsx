@@ -89,8 +89,13 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
       {options.map((opt) => (
         <div key={opt.id}>
           <label className="block text-sm font-medium text-gray-700 mb-2">{opt.name}</label>
-          <div role="list" className="mt-2 flex items-center gap-3 flex-wrap">
-                {opt.values.map(v => {
+      <div role="list" className="mt-2 flex items-center gap-3 flex-wrap">
+                {opt.values.filter(v => {
+                  const anyV = v as any
+                  if (typeof anyV.visible === 'boolean') return anyV.visible
+                  if (anyV.metadata && typeof anyV.metadata.hidden === 'boolean') return !anyV.metadata.hidden
+                  return true
+                }).map(v => {
               const isColorOption = typeof opt.name === 'string' && /color/i.test(opt.name)
               if (isColorOption) {
                 // prefer metadata.hex if present

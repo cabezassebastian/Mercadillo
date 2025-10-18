@@ -104,6 +104,10 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     celeste: '#00bfff'
   }
 
+  // Predefined lists (can be expanded)
+  const PREDEF_SIZES = ['XS','S','M','L','XL','XXL']
+  const PREDEF_COLORS = Object.keys(spanishColorMap).map(k => ({ name: k, hex: spanishColorMap[k] }))
+
   const getColorFromValue = (value: string) => {
     if (!value) return undefined
     const v = value.trim()
@@ -377,38 +381,140 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
               </div>
             ))}
           </div>
-          <div className="mt-3 flex gap-2">
+          <div className="mt-3">
+            <div className="text-sm font-medium mb-2">Predefinidos</div>
+            <div className="flex gap-6">
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Tallas</div>
+                <div className="flex gap-2 flex-wrap">
+                  {PREDEF_SIZES.map(s => (
+                    <label key={s} className="inline-flex items-center gap-2">
+                      <input type="checkbox" checked={!!quickSelectedValues[`size:${s}`]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [`size:${s}`]: e.target.checked }))} />
+                      <span className="px-2 py-1 border rounded text-sm">{s}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div className="text-xs text-gray-500 mb-1">Colores</div>
+                <div className="flex gap-2 flex-wrap items-center">
+                  {PREDEF_COLORS.map(c => (
+                    <label key={c.name} className="inline-flex items-center gap-2">
+                      <input type="checkbox" checked={!!quickSelectedValues[`color:${c.name}`]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [`color:${c.name}`]: e.target.checked }))} />
+                      <span className="w-6 h-6 rounded border" style={{ backgroundColor: c.hex }} />
+                      <span className="text-sm">{c.name}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+            <div className="mt-3 flex gap-2">
             <button className="btn-primary" onClick={async () => {
-              const checked = Object.keys(quickSelectedValues).filter(k => quickSelectedValues[k])
-              if (checked.length === 0) return alert('Selecciona al menos un valor')
+              // Build a batch of updates/creates and POST to admin endpoint for atomic handling
               setIsLoading(true)
-              const { data: allVariants } = await supabaseAdmin.from('product_variants').select('*').eq('product_id', productoId)
-              const toUpdate = (allVariants || []).filter((v: any) => {
-                const ids = (v.option_value_ids || []).map(String)
-                return checked.every(c => ids.includes(String(c)))
-              })
-              for (const v of toUpdate) {
-                await supabaseAdmin.from('product_variants').update({ is_active: true }).eq('id', v.id)
+              try {
+                const updates: any[] = []
+                // For each option, look for size/color semantics
+                for (const opt of options) {
+                  const isSize = /talla|size/i.test(String(opt.name))
+                  const isColor = /color/i.test(String(opt.name))
+                  if (isSize) {
+                    for (const s of PREDEF_SIZES) {
+                      const key = `size:${s}`
+                      const shouldExist = !!quickSelectedValues[key]
+                      const existing = (valuesMap[opt.id] || []).find(v => String(v.value).toUpperCase() === String(s).toUpperCase())
+                      if (shouldExist) {
+                        if (!existing) {
+                          updates.push({ create: { option_id: opt.id, value: s, visible: true } })
+                        } else {
+                          updates.push({ id: existing.id, visible: true })
+                        }
+                      } else {
+                        if (existing) updates.push({ id: existing.id, visible: false })
+                      }
+                    }
+                  }
+                  if (isColor) {
+                    for (const c of PREDEF_COLORS) {
+                      const key = `color:${c.name}`
+                      const shouldExist = !!quickSelectedValues[key]
+                      const existing = (valuesMap[opt.id] || []).find(v => String(v.value).toLowerCase() === String(c.name).toLowerCase() || (v.metadata && v.metadata.hex && String(v.metadata.hex).toLowerCase() === String(c.hex).toLowerCase()))
+                      if (shouldExist) {
+                        if (!existing) {
+                          updates.push({ create: { option_id: opt.id, value: c.name, visible: true, metadata: { hex: c.hex } } })
+                        } else {
+                          updates.push({ id: existing.id, visible: true, metadata: { ...(existing.metadata || {}), hex: c.hex } })
+                        }
+                      } else {
+                        if (existing) updates.push({ id: existing.id, visible: false })
+                      }
+                    }
+                  }
+                }
+
+                // Normalize into payload: existing updates and creations separated
+                const payloadUpdates: any[] = []
+                const payloadCreates: any[] = []
+                for (const u of updates) {
+                  if ((u as any).create) payloadCreates.push((u as any).create)
+                  else payloadUpdates.push(u)
+                }
+
+                // First, create new values via supabaseAdmin directly (we need the new ids)
+                if (payloadCreates.length > 0) {
+                  await supabaseAdmin.from('product_option_values').insert(payloadCreates)
+                }
+
+                // Now, use the admin batch API to update existing ones (visible/metadata)
+                if (payloadUpdates.length > 0) {
+                  // map to the endpoint's expected shape
+                  const body = { updates: payloadUpdates.map(u => ({ id: u.id, visible: u.visible, metadata: u.metadata })) }
+                  const resp = await fetch('/api/admin/option-values/batch-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+                  if (!resp.ok) throw new Error('Batch update failed')
+                }
+
+                await loadOptions()
+                alert('Guardado de predefinidos completado')
+              } catch (err) {
+                console.error(err)
+                alert('Error al guardar predefinidos')
+              } finally {
+                setIsLoading(false)
               }
-              await loadOptions()
-              setIsLoading(false)
-              alert(`Activadas ${toUpdate.length} variantes`)
             }}>Activar seleccionadas</button>
             <button className="btn-secondary" onClick={async () => {
               const checked = Object.keys(quickSelectedValues).filter(k => quickSelectedValues[k])
               if (checked.length === 0) return alert('Selecciona al menos un valor')
               setIsLoading(true)
-              const { data: allVariants } = await supabaseAdmin.from('product_variants').select('*').eq('product_id', productoId)
-              const toUpdate = (allVariants || []).filter((v: any) => {
-                const ids = (v.option_value_ids || []).map(String)
-                return checked.every(c => ids.includes(String(c)))
-              })
-              for (const v of toUpdate) {
-                await supabaseAdmin.from('product_variants').update({ is_active: false }).eq('id', v.id)
+              try {
+                const updates: any[] = []
+                for (const k of checked) {
+                  const [type, raw] = k.split(':')
+                  for (const opt of options) {
+                    const vals = valuesMap[opt.id] || []
+                    if (/talla|size/i.test(String(opt.name)) && type === 'size') {
+                      const ex = vals.find(v => String(v.value).toUpperCase() === raw.toUpperCase())
+                      if (ex) updates.push({ id: ex.id, visible: false })
+                    }
+                    if (/color/i.test(String(opt.name)) && type === 'color') {
+                      const ex = vals.find(v => String(v.value).toLowerCase() === raw.toLowerCase() || (v.metadata && v.metadata.hex && String(v.metadata.hex).toLowerCase() === String(raw).toLowerCase()))
+                      if (ex) updates.push({ id: ex.id, visible: false })
+                    }
+                  }
+                }
+                if (updates.length > 0) {
+                  const resp = await fetch('/api/admin/option-values/batch-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
+                  if (!resp.ok) throw new Error('Batch update failed')
+                }
+                await loadOptions()
+                alert('Desactivado para seleccionados')
+              } catch (err) {
+                console.error(err)
+                alert('Error al desactivar')
+              } finally {
+                setIsLoading(false)
               }
-              await loadOptions()
-              setIsLoading(false)
-              alert(`Desactivadas ${toUpdate.length} variantes`)
             }}>Desactivar seleccionadas</button>
           </div>
         </div>
