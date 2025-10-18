@@ -115,7 +115,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     // Fetch fresh options and values from DB to avoid stale state
     const { data: opts } = await supabaseAdmin
       .from('product_options')
-      .select('id')
+      .select('id, name')
       .eq('product_id', productoId)
       .order('position', { ascending: true })
 
@@ -128,12 +128,29 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     }
 
     for (const o of opts) {
-      const { data: vals } = await supabaseAdmin
+      let { data: vals } = await supabaseAdmin
         .from('product_option_values')
         .select('id, value')
         .eq('option_id', o.id)
         .order('position', { ascending: true })
-  const list = (vals || []) as Value[]
+      // If no values and option looks like size/talla, create S/M/L automatically
+      const optName = (o.name || '').toString()
+      if ((!vals || vals.length === 0) && /talla|size/i.test(optName)) {
+        const toInsert = [
+          { option_id: o.id, value: 'S' },
+          { option_id: o.id, value: 'M' },
+          { option_id: o.id, value: 'L' }
+        ]
+        const { error: insertValsErr } = await supabaseAdmin.from('product_option_values').insert(toInsert)
+        if (insertValsErr) console.error('Error inserting default sizes', insertValsErr)
+        const re = await supabaseAdmin
+          .from('product_option_values')
+          .select('id, value')
+          .eq('option_id', o.id)
+          .order('position', { ascending: true })
+        vals = re.data
+      }
+      const list = (vals || []) as Value[]
   localValuesMap[o.id] = list
   optionLists.push(list)
     }
