@@ -8,27 +8,7 @@ export const mercadoPagoConfig = {
 }
 
 // Crear preferencia de pago
-export const createPaymentPreference = async (orderData: {
-  items: Array<{
-    id: string
-    title: string
-    quantity: number
-    unit_price: number
-    picture_url?: string
-  }>
-  payer: {
-    name: string
-    email: string
-    phone?: string
-  }
-  back_urls: {
-    success: string
-    failure: string
-    pending: string
-  }
-  auto_return: 'approved' | 'all'
-  notification_url?: string
-}) => {
+export const createPaymentPreference = async (orderData: any) => {
   try {
     const response = await fetch('/api/mercadopago/create-preference', {
       method: 'POST',
@@ -74,8 +54,10 @@ export const mapCartToMercadoPagoItems = (cartItems: any[], baseUrl: string) => 
     title: item.nombre,
     quantity: item.cantidad,
     unit_price: parseFloat(item.precio),
-    picture_url: item.imagen_url || `${baseUrl}/logo.webp`,
+    picture_url: item.imagen || item.imagen_url || `${baseUrl}/logo.webp`,
     category_id: item.categoria || 'general',
+    variant_id: item.variant_id || null,
+    variant_label: item.variant_label || null,
   }))
 }
 

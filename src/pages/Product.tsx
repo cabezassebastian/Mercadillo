@@ -174,13 +174,23 @@ const Product: React.FC = () => {
         return
       }
 
-      // If variant selected, override product fields for cart item (price/stock) and include variant_id
+      // If variant selected, override product fields for cart item (price/stock) and include variant_id and a human-readable label
       if (selectedVariant) {
+        // Build a human-readable variant label like "Talla: M · Color: Azul"
+        const selectedValueIds = (selectedVariant.option_value_ids || []).map(String)
+        const parts: string[] = []
+        for (const opt of options || []) {
+          const found = (opt.values || []).find((v: any) => selectedValueIds.includes(String(v.id)))
+          if (found) parts.push(`${opt.name}: ${found.value}`)
+        }
+        const variantLabel = parts.join(' · ')
+
         const productoConVariant = {
           ...(producto as any),
           precio: selectedVariant.price ?? producto.precio,
           stock: selectedVariant.stock ?? producto.stock,
           variant_id: selectedVariant.id,
+          variant_label: variantLabel || undefined,
         } as any
 
         addToCart(productoConVariant, quantity)

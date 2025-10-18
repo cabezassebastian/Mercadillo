@@ -47,13 +47,15 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
 
     try {
       const baseUrl = window.location.origin
-      // Convertir CartItem[] a formato esperado por Mercado Pago
+      // Convertir CartItem[] a formato intermedio incluyendo datos de variante (si aplica)
       const cartForMP = items.map(item => ({
-        id: item.producto.id,
-        nombre: item.producto.nombre,
+        id: item.producto.variant_id ? `${item.producto.id}-${item.producto.variant_id}` : item.producto.id,
+        nombre: item.producto.nombre + (item.producto.variant_label ? ` — ${item.producto.variant_label}` : ''),
         precio: item.producto.precio,
         cantidad: item.cantidad,
-        imagen: item.producto.imagen
+        imagen: item.producto.imagen,
+        variant_id: item.producto.variant_id || null,
+        variant_label: item.producto.variant_label || null,
       }))
       
       const mpItems = mapCartToMercadoPagoItems(cartForMP, baseUrl)

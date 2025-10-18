@@ -35,11 +35,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         // Crear nuevo pedido (para casos especiales)
         const { items, subtotal, igv, total, direccion, metodo_pago } = req.body
 
+        // Ensure items keep variant metadata (if provided)
+        const itemsToInsert = items.map((it: any) => ({
+          producto_id: it.producto?.id || it.id || null,
+          cantidad: it.cantidad,
+          precio_unitario: it.producto?.precio || it.unit_price || 0,
+          variant_id: it.producto?.variant_id || it.variant_id || null,
+          variant_label: it.producto?.variant_label || it.variant_label || null,
+          raw: it // keep original for flexibility
+        }))
+
         const { data: pedido, error: createError } = await supabase
           .from('pedidos')
           .insert([{
             usuario_id: userId,
-            items,
+            items: itemsToInsert,
             subtotal,
             igv,
             total,

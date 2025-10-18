@@ -3,16 +3,16 @@ import { Producto } from '@/lib/supabase'
 import { validarCupon, type ValidacionCupon } from '@/lib/cupones'
 
 export interface CartItem {
-  producto: Producto
+  producto: Producto & { variant_id?: string; variant_label?: string }
   cantidad: number
 }
 
 interface CartContextType {
   items: CartItem[]
   cuponAplicado: ValidacionCupon | null
-  addToCart: (producto: Producto, cantidad?: number) => void
-  removeFromCart: (productoId: string) => void
-  updateQuantity: (productoId: string, cantidad: number) => void
+  addToCart: (producto: Producto & { variant_id?: string; variant_label?: string }, cantidad?: number) => void
+  removeFromCart: (productoId: string, variantId?: string) => void
+  updateQuantity: (productoId: string, cantidad: number, variantId?: string) => void
   clearCart: () => void
   aplicarCupon: (codigo: string, usuarioId: string) => Promise<ValidacionCupon>
   removerCupon: () => void
@@ -53,29 +53,27 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localStorage.setItem('mercadillo-cart', JSON.stringify(items))
   }, [items])
 
-  const addToCart = (producto: Producto, cantidad: number = 1) => {
+  const addToCart = (producto: Producto & { variant_id?: string; variant_label?: string }, cantidad: number = 1) => {
     setItems(prevItems => {
-      const existingItem = prevItems.find(item => item.producto.id === producto.id)
+      // treat same product+variant as same item
+      const existingItem = prevItems.find(item => item.producto.id === producto.id && (item.producto.variant_id || '') === (producto.variant_id || ''))
       const currentQuantity = existingItem ? existingItem.cantidad : 0
-      
+
       // Verificar si hay stock suficiente (producto.stock puede ser null)
       const prodStock = producto.stock ?? 0
       if (currentQuantity + cantidad > prodStock) {
-        // Si ya hay stock en el carrito, no agregar más de lo disponible
         const maxCanAdd = prodStock - currentQuantity
         if (maxCanAdd <= 0) {
-          console.warn(`No hay más stock disponible para ${producto.nombre}`)
-          return prevItems // No agregar nada
+          console.warn(`No hay más stock disponible para ${producto.nombre}${producto.variant_label ? ' ('+producto.variant_label+')' : ''}`)
+          return prevItems
         }
-
-        // Agregar solo la cantidad disponible
-        console.warn(`Solo se pueden agregar ${maxCanAdd} unidades de ${producto.nombre}`)
+        console.warn(`Solo se pueden agregar ${maxCanAdd} unidades de ${producto.nombre}${producto.variant_label ? ' ('+producto.variant_label+')' : ''}`)
         cantidad = maxCanAdd
       }
-      
+
       if (existingItem) {
         return prevItems.map(item =>
-          item.producto.id === producto.id
+          item.producto.id === producto.id && (item.producto.variant_id || '') === (producto.variant_id || '')
             ? { ...item, cantidad: item.cantidad + cantidad }
             : item
         )
@@ -85,25 +83,26 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     })
   }
 
-  const removeFromCart = (productoId: string) => {
-    setItems(prevItems => prevItems.filter(item => item.producto.id !== productoId))
+  // remove by product id and optional variant id
+  const removeFromCart = (productoId: string, variantId?: string) => {
+    setItems(prevItems => prevItems.filter(item => !(item.producto.id === productoId && (variantId ? (item.producto.variant_id || '') === variantId : true))))
   }
 
-  const updateQuantity = (productoId: string, cantidad: number) => {
+  const updateQuantity = (productoId: string, cantidad: number, variantId?: string) => {
     if (cantidad <= 0) {
-      removeFromCart(productoId)
+      removeFromCart(productoId, variantId)
       return
     }
 
     setItems(prevItems =>
       prevItems.map(item => {
-        if (item.producto.id === productoId) {
+        if (item.producto.id === productoId && (variantId ? (item.producto.variant_id || '') === variantId : true)) {
           // Verificar que la nueva cantidad no exceda el stock (item.producto.stock puede ser null)
           const itemStock = item.producto.stock ?? 0
           const newQuantity = Math.min(cantidad, itemStock)
 
           if (newQuantity !== cantidad) {
-            console.warn(`Stock limitado: solo hay ${itemStock} unidades disponibles de ${item.producto.nombre}`)
+            console.warn(`Stock limitado: solo hay ${itemStock} unidades disponibles de ${item.producto.nombre}${item.producto.variant_label ? ' ('+item.producto.variant_label+')' : ''}`)
           }
 
           return { ...item, cantidad: newQuantity }

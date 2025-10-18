@@ -57,7 +57,7 @@ const Cart = () => {
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
             {items.map((item) => (
-              <div key={item.producto.id} className="card p-6">
+              <div key={`${item.producto.id}-${item.producto.variant_id || 'base'}`} className="card p-6">
                 <div className="flex items-center space-x-4">
                   <Link 
                     to={`/producto/${item.producto.id}`}
@@ -79,6 +79,9 @@ const Cart = () => {
                         {item.producto.nombre}
                       </h3>
                     </Link>
+                    {item.producto.variant_label && (
+                      <div className="text-sm text-gray-600 mt-1">{item.producto.variant_label}</div>
+                    )}
                     <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       {item.producto.categoria}
                     </p>
@@ -90,7 +93,7 @@ const Cart = () => {
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 shadow-sm">
                       <button
-                        onClick={() => updateQuantity(item.producto.id, item.cantidad - 1)}
+                        onClick={() => updateQuantity(item.producto.id, item.cantidad - 1, item.producto.variant_id)}
                         className="p-2 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 transition-all duration-200 rounded-l-lg"
                       >
                         <Minus className="w-4 h-4" />
@@ -99,7 +102,7 @@ const Cart = () => {
                         {item.cantidad}
                       </span>
                       <button
-                        onClick={() => updateQuantity(item.producto.id, item.cantidad + 1)}
+                        onClick={() => updateQuantity(item.producto.id, item.cantidad + 1, item.producto.variant_id)}
                         className="p-2 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg"
                         disabled={item.cantidad >= (item.producto.stock ?? 0)}
                       >
@@ -108,7 +111,7 @@ const Cart = () => {
                     </div>
 
                       <button
-                        onClick={() => removeFromCart(item.producto.id)}
+                        onClick={() => removeFromCart(item.producto.id, item.producto.variant_id)}
                         className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
                       >
                       <Trash2 className="w-5 h-5" />
