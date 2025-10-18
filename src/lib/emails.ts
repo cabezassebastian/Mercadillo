@@ -67,12 +67,12 @@ export interface EmailBienvenida {
  */
 export async function enviarEmailConfirmacionPedido(data: EmailConfirmacionPedido) {
   try {
-    const response = await fetch('/api/emails/send-order-confirmation', {
+    const response = await fetch('/api/emails/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ action: 'order_confirmation', payload: data }),
     })
 
     if (!response.ok) {
@@ -95,12 +95,12 @@ export async function enviarEmailConfirmacionPedido(data: EmailConfirmacionPedid
  */
 export async function enviarEmailEnvio(data: EmailEnvio) {
   try {
-    const response = await fetch('/api/emails/send-shipping', {
+    const response = await fetch('/api/emails/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ action: 'shipping', payload: data }),
     })
 
     if (!response.ok) {
@@ -123,12 +123,12 @@ export async function enviarEmailEnvio(data: EmailEnvio) {
  */
 export async function enviarEmailEntrega(data: EmailEntrega) {
   try {
-    const response = await fetch('/api/emails/send-delivery', {
+    const response = await fetch('/api/emails/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify({ action: 'delivery', payload: data }),
     })
 
     if (!response.ok) {
@@ -151,15 +151,12 @@ export async function enviarEmailEntrega(data: EmailEntrega) {
  */
 export async function enviarEmailBienvenida(data: EmailBienvenida) {
   try {
-    const response = await fetch('/api/emails/send-welcome', {
+    const response = await fetch('/api/emails/send', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        email: data.email,
-        nombre: data.nombre,
-      }),
+      body: JSON.stringify({ action: 'welcome', payload: { email: data.email, nombre: data.nombre } }),
     })
 
     if (!response.ok) {
