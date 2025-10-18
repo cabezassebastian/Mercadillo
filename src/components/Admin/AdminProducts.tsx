@@ -89,15 +89,39 @@ const AdminProducts: React.FC = () => {
     e.preventDefault()
 
     try {
-      const productData = {
+      // Prepare base product data
+      const productData: any = {
         nombre: formData.nombre,
         descripcion: formData.descripcion,
         precio: parseFloat(formData.precio),
-        // Allow empty stock to be stored as null so variants can manage stock
-        stock: formData.stock === '' ? null : parseInt(formData.stock),
         categoria: formData.categoria,
         imagen: formData.imagen,
         activo: true
+      }
+
+      // If editing existing product and admin left stock empty, try to compute
+      // total stock from variants so the product-level stock reflects sum of variants
+      if (editingProduct) {
+        if (formData.stock === '') {
+          // sum variant stock for this product
+          try {
+            const { data: vars } = await supabaseAdmin
+              .from('product_variants')
+              .select('stock')
+              .eq('product_id', editingProduct.id)
+
+            const total = (vars || []).reduce((s: number, v: any) => s + (v.stock == null ? 0 : Number(v.stock)), 0)
+            productData.stock = total > 0 ? total : null
+          } catch (err) {
+            console.warn('No se pudo calcular stock desde variantes, dejando stock nulo', err)
+            productData.stock = null
+          }
+        } else {
+          productData.stock = parseInt(formData.stock)
+        }
+      } else {
+        // creating new product
+        productData.stock = formData.stock === '' ? null : parseInt(formData.stock)
       }
 
       if (editingProduct) {
@@ -144,16 +168,36 @@ const AdminProducts: React.FC = () => {
 
   const handleEdit = (producto: Producto) => {
     setEditingProduct(producto)
+    // If producto.stock is null, try to fetch sum of variant stock and display that
+    const initialStock = producto.stock != null ? producto.stock.toString() : ''
     setFormData({
       nombre: producto.nombre,
       descripcion: producto.descripcion,
       precio: producto.precio.toString(),
-      // producto.stock may be null in the DB; show empty string in that case
-      stock: producto.stock != null ? producto.stock.toString() : '',
+      stock: initialStock,
       categoria: producto.categoria,
       imagen: producto.imagen
     })
     setIsModalOpen(true)
+
+    // If stock was null, populate with variant sum asynchronously
+    if (producto.stock == null) {
+      ;(async () => {
+        try {
+          const { data: vars } = await supabaseAdmin
+            .from('product_variants')
+            .select('stock')
+            .eq('product_id', producto.id)
+
+          const total = (vars || []).reduce((s: number, v: any) => s + (v.stock == null ? 0 : Number(v.stock)), 0)
+          if (total > 0) {
+            setFormData(prev => ({ ...prev, stock: String(total) }))
+          }
+        } catch (err) {
+          console.warn('No se pudo obtener stock combinado de variantes', err)
+        }
+      })()
+    }
   }
 
   const handleDelete = async (id: string) => {

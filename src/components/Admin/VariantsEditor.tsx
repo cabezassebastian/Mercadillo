@@ -188,7 +188,8 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
 
       const key = JSON.stringify(combo.map(String).sort())
       if (!existingSets.has(key)) {
-        inserts.push({ product_id: productoId, price, stock: 0, attributes: {}, option_value_ids: combo })
+        // Default stock left null so admin can fill per-variant stock; product-level sum will reflect variants when saved
+        inserts.push({ product_id: productoId, price, stock: null, attributes: {}, option_value_ids: combo })
         existingSets.add(key)
       }
     }
