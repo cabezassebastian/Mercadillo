@@ -2,7 +2,7 @@
 
 -- 1) product_options: e.g. Size, Color
 CREATE TABLE IF NOT EXISTS product_options (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id uuid NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
   name text NOT NULL,
   position int DEFAULT 0,
@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS product_options (
 
 -- 2) product_option_values: e.g. S, M, L or Red, Blue
 CREATE TABLE IF NOT EXISTS product_option_values (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   option_id uuid NOT NULL REFERENCES product_options(id) ON DELETE CASCADE,
   value text NOT NULL,
   position int DEFAULT 0,
@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS product_option_values (
 
 -- 3) product_variants: combination of option values with own price/stock/sku
 CREATE TABLE IF NOT EXISTS product_variants (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   product_id uuid NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
   sku text,
   price numeric(12,2),
