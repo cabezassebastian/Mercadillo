@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 type Option = { id: string; name: string; position: number }
-type Value = { id: string; value: string; position: number }
+type Value = { id: string; value: string; position: number; metadata?: any }
 
 export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [options, setOptions] = useState<Option[]>([])
@@ -53,11 +53,31 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     loadOptions()
   }
 
-  const addValue = async (optionId: string, value: string) => {
-    if (!value.trim()) return
+  const addValue = async (optionId: string, value: string, colorRaw?: string) => {
+    // allow adding a named color and optionally a raw color value (hex or rgb)
+    const v = (value || '').trim()
+    if (!v && !colorRaw) return
+
+    const normalizeHex = (input?: string) => {
+      if (!input) return undefined
+      const s = input.trim()
+      const rgbMatch = s.match(/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/i)
+      if (rgbMatch) {
+        const r = Number(rgbMatch[1]), g = Number(rgbMatch[2]), b = Number(rgbMatch[3])
+        const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')
+        return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+      }
+      if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(s)) return s
+      return undefined
+    }
+
+    const hex = normalizeHex(colorRaw)
+    const metadata = hex ? { hex } : null
+    const insertValue = v || (hex || '')
+
     await supabaseAdmin
       .from('product_option_values')
-      .insert([{ option_id: optionId, value }])
+      .insert([{ option_id: optionId, value: insertValue, metadata }])
       .select()
     loadOptions()
   }
@@ -253,10 +273,16 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
                   <>
                     <input type="color" id={`val-${opt.id}`} className="w-12 h-10 p-0 border rounded" />
                     <input placeholder="Nombre (ej. Azul)" id={`val-name-${opt.id}`} className="input-field flex-1" />
+                    <input placeholder="#hex o rgb(...) opcional" id={`val-raw-${opt.id}`} className="input-field w-48 ml-2" />
                     <button type="button" className="btn-secondary" onClick={() => {
                       const colorEl = document.getElementById(`val-${opt.id}`) as HTMLInputElement | null
                       const nameEl = document.getElementById(`val-name-${opt.id}`) as HTMLInputElement | null
-                      if (colorEl) addValue(opt.id, nameEl?.value ? `${nameEl.value} ${colorEl.value}` : colorEl.value)
+                      const rawEl = document.getElementById(`val-raw-${opt.id}`) as HTMLInputElement | null
+                      const raw = rawEl?.value?.trim()
+                      const colorValue = raw || (colorEl ? colorEl.value : undefined)
+                      const name = nameEl?.value?.trim() || ''
+                      const insert = name || (colorValue || '')
+                      addValue(opt.id, insert, colorValue)
                     }}>Agregar color</button>
                   </>
                 ) : (
@@ -270,15 +296,17 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
                 )}
               </div>
               <div className="mt-2 flex gap-2 flex-wrap items-center">
-                {(valuesMap[opt.id] || []).map(v => {
-                  const color = getColorFromValue(v.value)
+                {(valuesMap[opt.id] || []).map((v: any) => {
+                  const metaHex = v.metadata?.hex
+                  const color = metaHex || getColorFromValue(v.value)
+                  const label = v.value
                   return (
-                    <div key={v.id} className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
+                    <div key={v.id} className="flex items-center gap-2 bg-gray-50 px-3 py-1 rounded shadow-sm border">
                       {color ? (
-                        <span className="w-6 h-6 rounded" style={{ backgroundColor: color, border: '1px solid rgba(0,0,0,0.08)' }} />
+                        <span className="w-6 h-6 rounded border" style={{ backgroundColor: color }} />
                       ) : null}
-                      <span>{v.value}</span>
-                      <button type="button" className="text-sm text-red-500 hover:underline" onClick={() => deleteValue(v.id)}>Eliminar</button>
+                      <span className="font-medium">{label}</span>
+                      <button type="button" className="text-sm text-red-500 hover:underline ml-2" onClick={() => deleteValue(v.id)}>Eliminar</button>
                     </div>
                   )
                 })}
