@@ -463,6 +463,7 @@ const AdminProducts: React.FC = () => {
                   />
                   <div className="mt-4">
                     <button
+                      type="button"
                       onClick={() => setIsVariantsOpen(true)}
                       className="btn-secondary"
                     >
@@ -516,9 +517,9 @@ const AdminProducts: React.FC = () => {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">Variantes — {editingProduct.nombre}</h3>
-            <VariantsEditor productoId={editingProduct.id} onClose={() => { setIsVariantsOpen(false); fetchProductos(); }} />
+            <VariantsEditor productoId={editingProduct.id} />
             <div className="mt-4 text-right">
-              <button onClick={() => setIsVariantsOpen(false)} className="btn-secondary">Cerrar</button>
+              <button onClick={() => { setIsVariantsOpen(false); fetchProductos(); }} className="btn-secondary">Cerrar</button>
             </div>
           </div>
         </div>

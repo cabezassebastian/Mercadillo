@@ -38,15 +38,35 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
         <div key={opt.id}>
           <label className="block text-sm font-medium text-gray-700">{opt.name}</label>
           <div className="mt-2 flex items-center gap-2">
-            {opt.values.map(v => (
-              <button
-                key={v.id}
-                onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
-                className={`px-3 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'}`}
-              >
-                {v.value}
-              </button>
-            ))}
+            {opt.values.map(v => {
+              const isColorOption = typeof opt.name === 'string' && opt.name.toLowerCase() === 'color'
+              const looksLikeHex = typeof v.value === 'string' && /^#([0-9A-F]{3}){1,2}$/i.test(v.value.trim())
+              if (isColorOption || looksLikeHex) {
+                const color = looksLikeHex ? v.value.trim() : undefined
+                return (
+                  <button
+                    key={v.id}
+                    type="button"
+                    onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
+                    aria-label={`Seleccionar ${v.value}`}
+                    className={`flex items-center gap-2 px-2 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'}`}
+                  >
+                    <span className="w-6 h-6 rounded" style={{ backgroundColor: color || v.value }} />
+                    <span>{v.value}</span>
+                  </button>
+                )
+              }
+              return (
+                <button
+                  key={v.id}
+                  type="button"
+                  onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
+                  className={`px-3 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'}`}
+                >
+                  {v.value}
+                </button>
+              )
+            })}
           </div>
         </div>
       ))}

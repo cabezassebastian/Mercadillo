@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 type Option = { id: string; name: string; position: number }
 type Value = { id: string; value: string; position: number }
 
-export default function VariantsEditor({ productoId, onClose }: { productoId: string, onClose?: () => void }) {
+export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [options, setOptions] = useState<Option[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, Value[]>>({})
   const [newOptionName, setNewOptionName] = useState('')
@@ -62,14 +62,30 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
     loadOptions()
   }
 
+  const deleteOption = async (optionId: string) => {
+    if (!confirm('¿Eliminar opción y todos sus valores? Esta acción no se puede deshacer.')) return
+    setIsLoading(true)
+    await supabaseAdmin.from('product_options').delete().eq('id', optionId)
+    await loadOptions()
+    setIsLoading(false)
+  }
+
+  const deleteValue = async (valueId: string) => {
+    if (!confirm('¿Eliminar valor? Esta acción no se puede deshacer.')) return
+    setIsLoading(true)
+    await supabaseAdmin.from('product_option_values').delete().eq('id', valueId)
+    await loadOptions()
+    setIsLoading(false)
+  }
+
   const generateVariants = async () => {
     // Simple generator: combine values across options and create variants.
-    // Pricing rule: if option value label contains 'L' (talla L) then price = base + 1, S/M same as base.
+    // Pricing rule: S/M same price, L = base + 1
     setIsLoading(true)
 
     // Fetch product base price
-  const { data: product, error: _prodErr } = await supabaseAdmin.from('productos').select('id, precio').eq('id', productoId).single()
-  const basePrice = product?.precio || 0
+    const { data: product, error: _prodErr } = await supabaseAdmin.from('productos').select('id, precio').eq('id', productoId).single()
+    const basePrice = product?.precio || 0
 
     // Build combinations
     const optionLists = Object.values(valuesMap)
@@ -88,25 +104,44 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
       combos.splice(0, combos.length, ...next)
     }
 
-    // Insert variants
+    // Avoid duplicates: fetch existing variants keys
+    const { data: existingVariants } = await supabaseAdmin
+      .from('product_variants')
+      .select('id, option_value_ids')
+      .eq('product_id', productoId)
+
+    const existingSets = new Set((existingVariants || []).map((ev: any) => JSON.stringify((ev.option_value_ids || []).map(String).sort())))
+
+    const inserts: any[] = []
     for (const combo of combos) {
-      // Determine price:
-      // if any of the option value labels is 'L' (exact match) then +1 sol
       let price = basePrice
-      for (const optId in valuesMap) {
+      // if any selected value is exactly 'L' (case-insensitive) then +1
+      for (const optId of Object.keys(valuesMap)) {
         const vals = valuesMap[optId]
         for (const vid of combo) {
           const found = vals.find(v => v.id === vid)
-          if (found && found.value.toUpperCase() === 'L') price = parseFloat((price + 1).toFixed(2))
+          if (found && typeof found.value === 'string' && found.value.toUpperCase().trim() === 'L') {
+            price = parseFloat((price + 1).toFixed(2))
+          }
         }
       }
 
-      await supabaseAdmin.from('product_variants').insert([{ product_id: productoId, price, stock: 0, attributes: '{}', option_value_ids: combo }])
+      const key = JSON.stringify(combo.map(String).sort())
+      if (!existingSets.has(key)) {
+        inserts.push({ product_id: productoId, price, stock: 0, attributes: {}, option_value_ids: combo })
+        existingSets.add(key)
+      }
     }
+
+    if (inserts.length > 0) {
+      const { error: insertErr } = await supabaseAdmin.from('product_variants').insert(inserts)
+      if (insertErr) console.error('Error inserting variants', insertErr)
+    }
+
     setIsLoading(false)
     await loadOptions()
-    alert('Variantes generadas')
-    if (onClose) onClose()
+    alert(`Variantes generadas (${inserts.length} nuevas)`)
+    // do not auto-close parent modal; user can close explicitly
   }
 
   const handleVariantChange = (id: string, field: string, value: any) => {
@@ -147,18 +182,24 @@ export default function VariantsEditor({ productoId, onClose }: { productoId: st
           <div key={opt.id} className="border p-3 rounded">
             <div className="flex justify-between items-center">
               <strong>{opt.name}</strong>
+              <div>
+                <button type="button" className="text-sm text-red-500 hover:underline" onClick={() => deleteOption(opt.id)}>Eliminar opción</button>
+              </div>
             </div>
             <div className="mt-2">
               <div className="flex gap-2">
                 <input placeholder="Nuevo valor (ej. S)" id={`val-${opt.id}`} className="input-field" />
-                <button className="btn-secondary" onClick={() => {
+                <button type="button" className="btn-secondary" onClick={() => {
                   const el = document.getElementById(`val-${opt.id}`) as HTMLInputElement | null
                   if (el) addValue(opt.id, el.value)
                 }}>Agregar valor</button>
               </div>
               <div className="mt-2 flex gap-2 flex-wrap">
                 {(valuesMap[opt.id] || []).map(v => (
-                  <span key={v.id} className="px-2 py-1 bg-gray-100 rounded">{v.value}</span>
+                  <div key={v.id} className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
+                    <span>{v.value}</span>
+                    <button type="button" className="text-sm text-red-500 hover:underline" onClick={() => deleteValue(v.id)}>Eliminar</button>
+                  </div>
                 ))}
               </div>
             </div>
