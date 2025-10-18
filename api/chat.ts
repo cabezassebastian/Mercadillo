@@ -1,5 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
+import type { PostgrestError } from '@supabase/supabase-js'
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY
 const GEMINI_API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
@@ -10,8 +11,18 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 )
 
+// Tipo mínimo para filas de productos retornadas desde la BD
+interface ProductRow {
+  id: string
+  nombre: string
+  precio: number
+  imagen?: string | null
+  descripcion?: string | null
+  stock?: number | null
+}
+
 // Función para buscar productos
-async function searchProducts(query: string, limit = 5) {
+async function searchProducts(query: string, limit = 5): Promise<ProductRow[]> {
   try {
     const { data, error } = await supabase
       .from('productos')
@@ -27,7 +38,7 @@ async function searchProducts(query: string, limit = 5) {
     }
 
     // Mapear 'imagen' a 'imagen_url' para compatibilidad con el frontend
-    const products = (data || []).map(product => ({
+    const products = (data || []).map((product: ProductRow) => ({
       ...product,
       imagen_url: product.imagen
     }))
@@ -280,7 +291,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           productsFound: productos.length
         }
       })
-      .then(({ error }) => {
+      .then(({ error }: { error: PostgrestError | null }) => {
         if (error) {
           console.error('Error guardando conversación:', error)
         }
