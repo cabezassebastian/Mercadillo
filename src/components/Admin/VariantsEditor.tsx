@@ -112,12 +112,30 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     const { data: product, error: _prodErr } = await supabaseAdmin.from('productos').select('id, precio').eq('id', productoId).single()
     const basePrice = product?.precio || 0
 
-    // Build combinations
-    const optionLists = Object.values(valuesMap)
-    if (optionLists.length === 0) {
+    // Fetch fresh options and values from DB to avoid stale state
+    const { data: opts } = await supabaseAdmin
+      .from('product_options')
+      .select('id')
+      .eq('product_id', productoId)
+      .order('position', { ascending: true })
+
+    const localValuesMap: Record<string, Value[]> = {}
+    const optionLists: Value[][] = []
+    if (!opts || opts.length === 0) {
       alert('No hay valores para generar variantes')
       setIsLoading(false)
       return
+    }
+
+    for (const o of opts) {
+      const { data: vals } = await supabaseAdmin
+        .from('product_option_values')
+        .select('id, value')
+        .eq('option_id', o.id)
+        .order('position', { ascending: true })
+  const list = (vals || []) as Value[]
+  localValuesMap[o.id] = list
+  optionLists.push(list)
     }
 
     const combos: string[][] = [[]]
@@ -141,8 +159,8 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     for (const combo of combos) {
       let price = basePrice
       // if any selected value is exactly 'L' (case-insensitive) then +1
-      for (const optId of Object.keys(valuesMap)) {
-        const vals = valuesMap[optId]
+      for (const optId of Object.keys(localValuesMap)) {
+        const vals = localValuesMap[optId]
         for (const vid of combo) {
           const found = vals.find(v => v.id === vid)
           if (found && typeof found.value === 'string' && found.value.toUpperCase().trim() === 'L') {
