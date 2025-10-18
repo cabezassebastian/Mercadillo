@@ -42,6 +42,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           precio_unitario: it.producto?.precio || it.unit_price || 0,
           variant_id: it.producto?.variant_id || it.variant_id || null,
           variant_label: it.producto?.variant_label || it.variant_label || null,
+          option_value_ids: it.producto?.option_value_ids || it.option_value_ids || null,
+          variant_attributes: it.producto?.variant_attributes || it.variant_attributes || null,
           raw: it // keep original for flexibility
         }))
 

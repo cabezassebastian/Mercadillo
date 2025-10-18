@@ -305,7 +305,41 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
                       {color ? (
                         <span className="w-6 h-6 rounded border" style={{ backgroundColor: color }} />
                       ) : null}
-                      <span className="font-medium">{label}</span>
+                      <input
+                        className="input-field w-40"
+                        value={label}
+                        onChange={(e) => {
+                          // quick inline rename of the value (keeps metadata)
+                          const newVal = e.target.value
+                          supabaseAdmin.from('product_option_values').update({ value: newVal }).eq('id', v.id)
+                            .then(() => loadOptions())
+                        }}
+                      />
+                      <input
+                        className="input-field w-28 ml-2"
+                        placeholder="#hex or rgb(...)"
+                        defaultValue={metaHex || ''}
+                        onBlur={(e) => {
+                          const raw = e.target.value.trim()
+                          // normalize like addValue
+                          const normalizeHex = (input?: string) => {
+                            if (!input) return undefined
+                            const s = input.trim()
+                            const rgbMatch = s.match(/rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)/i)
+                            if (rgbMatch) {
+                              const r = Number(rgbMatch[1]), g = Number(rgbMatch[2]), b = Number(rgbMatch[3])
+                              const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, '0')
+                              return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+                            }
+                            if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(s)) return s
+                            return undefined
+                          }
+                          const hex = normalizeHex(raw)
+                          const metadata = hex ? { hex } : null
+                          supabaseAdmin.from('product_option_values').update({ metadata }).eq('id', v.id)
+                            .then(() => loadOptions())
+                        }}
+                      />
                       <button type="button" className="text-sm text-red-500 hover:underline ml-2" onClick={() => deleteValue(v.id)}>Eliminar</button>
                     </div>
                   )

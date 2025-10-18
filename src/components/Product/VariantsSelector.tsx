@@ -81,7 +81,9 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                 {opt.values.map(v => {
               const isColorOption = typeof opt.name === 'string' && /color/i.test(opt.name)
               if (isColorOption) {
-                const { name, hex } = parseColorValue(v.value)
+                // prefer metadata.hex if present
+                const metaHex = (v as any).metadata?.hex
+                const { name, hex } = metaHex ? { name: v.value, hex: metaHex } : parseColorValue(v.value)
                     const stock = stockByValue[v.id] || 0
                     const disabled = stock <= 0
                     return (
@@ -99,9 +101,10 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                       </button>
                     )
               }
-              const looksLikeHex = typeof v.value === 'string' && /^#([0-9A-F]{3}){1,2}$/i.test(v.value.trim())
-              if (looksLikeHex) {
-                const { name, hex } = parseColorValue(v.value)
+                const metaHex = (v as any).metadata?.hex
+                const looksLikeHex = typeof v.value === 'string' && /^#([0-9A-F]{3}){1,2}$/i.test(v.value.trim())
+              if (metaHex || looksLikeHex) {
+                const { name, hex } = metaHex ? { name: v.value, hex: metaHex } : parseColorValue(v.value)
                     const stock = stockByValue[v.id] || 0
                     const disabled = stock <= 0
                     return (

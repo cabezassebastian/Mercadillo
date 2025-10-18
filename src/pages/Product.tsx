@@ -191,6 +191,8 @@ const Product: React.FC = () => {
           stock: selectedVariant.stock ?? producto.stock,
           variant_id: selectedVariant.id,
           variant_label: variantLabel || undefined,
+          option_value_ids: selectedValueIds,
+          variant_attributes: selectedVariant.attributes || null,
         } as any
 
         addToCart(productoConVariant, quantity)
