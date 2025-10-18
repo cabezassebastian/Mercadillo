@@ -12,6 +12,7 @@ import RelatedProducts from '@/components/Product/RelatedProducts'
 import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
+import VariantsSelector from '@/components/Product/VariantsSelector'
 
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -31,53 +32,47 @@ const Product: React.FC = () => {
   })
   const [reviewsRefreshTrigger] = useState(0)
 
+  
+  const [options, setOptions] = useState<any[]>([])
+  const [variants, setVariants] = useState<any[]>([])
+  const [selectedVariant, setSelectedVariant] = useState<any | null>(null)
+
   useEffect(() => {
     const fetchProducto = async () => {
       if (!id) return
 
       try {
-        const { data, error } = await supabase
-          .from('productos')
-          .select('*')
-          .eq('id', id)
-          .single()
+        // use new api route that returns product + options + variants
+        const resp = await fetch(`/api/products/${id}`)
+        if (!resp.ok) throw new Error('Product fetch failed')
+        const json = await resp.json()
+        const { product, options: opts, variants: vars } = json
 
-        if (error) {
-          console.error('Error fetching product:', error)
-          navigate('/catalogo')
-          return
-        }
+        setProducto(product)
+        setOptions(opts || [])
+        setVariants(vars || [])
 
-        setProducto(data)
-        
-        // Cargar imágenes del producto
+        // Cargar imágenes del producto (fallback to old table)
         const { data: imagenesData, error: imagenesError } = await supabase
           .from('producto_imagenes')
           .select('*')
-          .eq('producto_id', data.id)
+          .eq('producto_id', product.id)
           .order('orden', { ascending: true })
-        
+
         if (!imagenesError && imagenesData) {
           setProductoImagenes(imagenesData)
         }
-        
+
         // Cargar estadísticas de reseñas
-        const stats = await getProductReviewStats(data.id)
+        const stats = await getProductReviewStats(product.id)
         setReviewStats(stats)
-        
+
         // Registrar visita al historial de navegación (si el usuario está autenticado)
         if (user?.id) {
           try {
-            console.log('Intentando agregar al historial:', { userId: user.id, productId: data.id })
-            const result = await addToNavigationHistory(user.id, data.id)
-            if (result.success) {
-              console.log('Producto agregado al historial de navegación exitosamente')
-            } else {
-              console.error('Error al agregar al historial:', result.error)
-            }
+            await addToNavigationHistory(user.id, product.id)
           } catch (error) {
             console.error('Error inesperado al agregar al historial:', error)
-            // No es crítico, no interrumpir la carga de la página
           }
         }
       } catch (error) {
@@ -93,28 +88,45 @@ const Product: React.FC = () => {
 
   const handleAddToCart = async () => {
     if (!producto) return
-    
+
     setAddingToCart(true)
     setMessage(null)
-    
+
     try {
-      // Verificar stock disponible considerando lo que ya está en el carrito
-      const existingItem = items.find(item => item.producto.id === producto.id)
+      // Verificar stock disponible considerando variantes y lo que ya está en el carrito
+      const existingItem = selectedVariant
+        ? items.find(item => item.producto.id === producto.id && (item.producto as any).variant_id === selectedVariant.id)
+        : items.find(item => item.producto.id === producto.id && !(item.producto as any).variant_id)
+
       const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
-      const availableStock = producto.stock - currentQuantityInCart
-      
-      if (quantity > availableStock) {
-        setMessage(`Solo ${availableStock} unidades disponibles`)
+      const stockSource = selectedVariant ? (selectedVariant.stock ?? producto.stock) : producto.stock
+      const available = stockSource - currentQuantityInCart
+
+      if (quantity > available) {
+        setMessage(`Solo ${available} unidades disponibles`)
         setTimeout(() => setMessage(null), 3000)
         return
       }
-      
-      addToCart(producto, quantity)
+
+      // If variant selected, override product fields for cart item (price/stock) and include variant_id
+      if (selectedVariant) {
+        const productoConVariant = {
+          ...(producto as any),
+          precio: selectedVariant.price ?? producto.precio,
+          stock: selectedVariant.stock ?? producto.stock,
+          variant_id: selectedVariant.id,
+        } as any
+
+        addToCart(productoConVariant, quantity)
+      } else {
+        addToCart(producto, quantity)
+      }
+
       setMessage(`¡${quantity} producto${quantity > 1 ? 's' : ''} agregado${quantity > 1 ? 's' : ''} al carrito!`)
       setTimeout(() => setMessage(null), 2000)
-      
+
       // Resetear cantidad si se agotó el stock
-      const newAvailableStock = availableStock - quantity
+      const newAvailableStock = available - quantity
       if (quantity >= newAvailableStock) {
         setQuantity(1)
       }
@@ -133,10 +145,16 @@ const Product: React.FC = () => {
     }).format(price)
   }
 
-  // Calcular stock disponible considerando lo que ya está en el carrito
-  const existingItem = producto ? items.find(item => item.producto.id === producto.id) : null
+  // Calcular stock disponible considerando la variante seleccionada y lo que ya está en el carrito
+  const existingItem = producto
+    ? (selectedVariant
+        ? items.find(item => item.producto.id === producto.id && (item.producto as any).variant_id === selectedVariant.id)
+        : items.find(item => item.producto.id === producto.id && !(item.producto as any).variant_id))
+    : null
   const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
-  const availableStock = producto ? producto.stock - currentQuantityInCart : 0
+  const availableStock = producto
+    ? ((selectedVariant ? (selectedVariant.stock ?? producto.stock) : producto.stock) - currentQuantityInCart)
+    : 0
 
   if (isLoading) {
     return (
@@ -222,7 +240,7 @@ const Product: React.FC = () => {
             <div className="border-t border-b border-gray-200 py-6">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-3xl font-bold text-dorado">
-                  {formatPrice(producto.precio)}
+                  {selectedVariant?.price ? formatPrice(selectedVariant.price) : formatPrice(producto.precio)}
                 </span>
                 <div className="text-right">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
@@ -243,6 +261,12 @@ const Product: React.FC = () => {
               <p className="text-gray-700 leading-relaxed">
                 {producto.descripcion}
               </p>
+              {/* Variant selectors */}
+              {options && options.length > 0 && (
+                <div className="pt-4">
+                  <VariantsSelector options={options} variants={variants} onVariantChange={setSelectedVariant} />
+                </div>
+              )}
             </div>
 
             {/* Quantity and Add to Cart */}
