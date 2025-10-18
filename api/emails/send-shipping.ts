@@ -360,7 +360,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    const { email, nombre, numero_pedido, fecha_envio, numero_seguimiento, items } = req.body
+  const { email, nombre, numero_pedido, fecha_envio, items } = req.body
 
     if (!email || !nombre || !numero_pedido || !fecha_envio || !items) {
       return res.status(400).json({ error: 'Missing required fields' })

@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import { MercadoPagoConfig, Preference } from 'mercadopago'
-import { createClient } from '@supabase/supabase-js'
+// supabase client not needed here; keeping import removed to avoid unused symbol
 
 // Tipos e interfaces
 interface CartItem {
@@ -38,11 +38,6 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   try {
-    // Configurar cliente de Supabase
-    const supabase = createClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY! // Usamos service role para insertar datos
-    )
 
     // Configurar cliente de Mercado Pago
     const client = new MercadoPagoConfig({
@@ -57,11 +52,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Extraer datos del cuerpo de la petición
     const { 
-      items, 
-      payer, 
-      back_urls, 
-      auto_return, 
-      notification_url,
+  items, 
+  payer, 
+  back_urls, 
+  notification_url,
       shipping_address, // Dirección de envío
       user_id, // ID del usuario
       descuento = 0, // Descuento por cupón (opcional)

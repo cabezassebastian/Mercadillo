@@ -5,7 +5,8 @@
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-    "typeRoots": ["./node_modules/@types", "./node_modules/@clerk/types"], // Anadir typeRoots explicitamente
+  "typeRoots": ["./node_modules/@types", "./node_modules/@clerk/types"], // Anadir typeRoots explicitamente
+  "types": ["node"],
 
     /* Bundler mode */
     "moduleResolution": "bundler",
@@ -27,7 +28,7 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "api"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
 
