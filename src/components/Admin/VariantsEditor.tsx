@@ -7,6 +7,7 @@ type Value = { id: string; value: string; position: number; metadata?: any }
 export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [options, setOptions] = useState<Option[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, Value[]>>({})
+  const [quickSelectedValues, setQuickSelectedValues] = useState<Record<string, boolean>>({})
   const [newOptionName, setNewOptionName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [variants, setVariants] = useState<any[]>([])
@@ -33,6 +34,12 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       }
     }
     setValuesMap(map)
+    // reset quick selection when options change
+    const quick: Record<string, boolean> = {}
+    for (const k of Object.keys(map)) {
+      for (const v of map[k] || []) quick[String(v.id)] = false
+    }
+    setQuickSelectedValues(quick)
     // load variants
     const { data: vars } = await supabaseAdmin
       .from('product_variants')
@@ -349,6 +356,63 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
           </div>
         ))}
 
+        {/* Quick-values panel: show all values grouped by option with toggles */}
+        <div className="border p-3 rounded mt-4">
+          <h4 className="font-semibold mb-2">Valores rápidos</h4>
+          <div className="flex gap-4 flex-wrap">
+            {Object.keys(valuesMap).map(optId => (
+              <div key={optId} className="min-w-[180px]">
+                <div className="text-sm font-medium mb-1">{(options.find(o => o.id === optId) || { name: '' }).name}</div>
+                <div className="flex flex-col gap-2">
+                  {(valuesMap[optId] || []).map(v => (
+                    <label key={v.id} className="flex items-center gap-2">
+                      <input type="checkbox" checked={!!quickSelectedValues[String(v.id)]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [String(v.id)]: e.target.checked }))} />
+                      <span className="inline-flex items-center gap-2">
+                        <span className="w-4 h-4 rounded" style={{ backgroundColor: v.metadata?.hex || getColorFromValue(v.value) }} />
+                        <span className="text-sm">{v.value}</span>
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="mt-3 flex gap-2">
+            <button className="btn-primary" onClick={async () => {
+              const checked = Object.keys(quickSelectedValues).filter(k => quickSelectedValues[k])
+              if (checked.length === 0) return alert('Selecciona al menos un valor')
+              setIsLoading(true)
+              const { data: allVariants } = await supabaseAdmin.from('product_variants').select('*').eq('product_id', productoId)
+              const toUpdate = (allVariants || []).filter((v: any) => {
+                const ids = (v.option_value_ids || []).map(String)
+                return checked.every(c => ids.includes(String(c)))
+              })
+              for (const v of toUpdate) {
+                await supabaseAdmin.from('product_variants').update({ is_active: true }).eq('id', v.id)
+              }
+              await loadOptions()
+              setIsLoading(false)
+              alert(`Activadas ${toUpdate.length} variantes`)
+            }}>Activar seleccionadas</button>
+            <button className="btn-secondary" onClick={async () => {
+              const checked = Object.keys(quickSelectedValues).filter(k => quickSelectedValues[k])
+              if (checked.length === 0) return alert('Selecciona al menos un valor')
+              setIsLoading(true)
+              const { data: allVariants } = await supabaseAdmin.from('product_variants').select('*').eq('product_id', productoId)
+              const toUpdate = (allVariants || []).filter((v: any) => {
+                const ids = (v.option_value_ids || []).map(String)
+                return checked.every(c => ids.includes(String(c)))
+              })
+              for (const v of toUpdate) {
+                await supabaseAdmin.from('product_variants').update({ is_active: false }).eq('id', v.id)
+              }
+              await loadOptions()
+              setIsLoading(false)
+              alert(`Desactivadas ${toUpdate.length} variantes`)
+            }}>Desactivar seleccionadas</button>
+          </div>
+        </div>
+
         <div className="pt-4">
           <button className="btn-primary" onClick={generateVariants} disabled={isLoading}>Generar variantes automáticas (aplica regla S/M/L)</button>
         </div>
@@ -357,29 +421,85 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
         <div className="mt-6">
           <h4 className="font-semibold mb-2">Variantes existentes</h4>
           {variants.length === 0 && <p className="text-sm text-gray-500">No hay variantes aún.</p>}
-          {variants.map(v => (
-            <div key={v.id} className="flex items-center gap-2 mb-2">
-              <div className="w-24">
-                <input type="number" className="input-field" value={v.stock != null ? v.stock : ''} onChange={(e) => {
-                  const val = e.target.value
-                  handleVariantChange(v.id, 'stock', val === '' ? '' : parseInt(val))
-                }} placeholder="Stock" />
+          {variants.map(v => {
+            // build human readable label from option_value_ids
+            const comboIds: string[] = (v.option_value_ids || []).map(String)
+            const comboParts: string[] = []
+            for (const opt of options) {
+              const foundId = comboIds.find(id => (valuesMap[opt.id] || []).some((val: any) => String(val.id) === String(id)))
+              if (foundId) {
+                const foundVal = (valuesMap[opt.id] || []).find((val: any) => String(val.id) === String(foundId))
+                if (foundVal) comboParts.push(`${opt.name}: ${foundVal.value}`)
+              }
+            }
+            const comboLabel = comboParts.join(' / ')
+
+            // detect color option id (if any)
+            const colorOption = options.find(o => typeof o.name === 'string' && /color/i.test(o.name))
+            let currentColorValueId: string | null = null
+            if (colorOption) {
+              currentColorValueId = comboIds.find(id => (valuesMap[colorOption.id] || []).some((val: any) => String(val.id) === String(id))) || null
+            }
+
+            return (
+              <div key={v.id} className="flex items-center gap-2 mb-3 p-2 rounded border">
+                <div className="flex-1">
+                  <div className="text-sm font-medium mb-1">{comboLabel || '—'}</div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-28">
+                      <input type="number" className="input-field" value={v.stock != null ? v.stock : ''} onChange={(e) => {
+                        const val = e.target.value
+                        handleVariantChange(v.id, 'stock', val === '' ? '' : parseInt(val))
+                      }} placeholder="Stock" />
+                    </div>
+                    <div className="w-32">
+                      <input type="number" className="input-field" value={v.price ?? ''} onChange={(e) => {
+                        const val = e.target.value
+                        handleVariantChange(v.id, 'price', val === '' ? '' : parseFloat(val))
+                      }} placeholder="Precio" />
+                    </div>
+                    <label className="flex items-center gap-2">
+                      <input type="checkbox" checked={!!v.is_active} onChange={(e) => handleVariantChange(v.id, 'is_active', e.target.checked)} /> Activa
+                    </label>
+                    {colorOption && (
+                      <div className="flex items-center gap-2">
+                        <select value={currentColorValueId || ''} onChange={async (e) => {
+                          const newValId = e.target.value
+                          if (!newValId) return
+                          // update variant option_value_ids replacing color value id
+                          const newIds = (v.option_value_ids || []).map((id: any) => String(id))
+                          const idx = newIds.findIndex((id: string) => (valuesMap[colorOption.id] || []).some((val: any) => String(val.id) === String(id)))
+                          if (idx >= 0) newIds[idx] = newValId
+                          else newIds.push(newValId)
+                          await supabaseAdmin.from('product_variants').update({ option_value_ids: newIds }).eq('id', v.id)
+                          await loadOptions()
+                        }} className="input-field">
+                          <option value="">(sin color)</option>
+                          {(valuesMap[colorOption.id] || []).map((val: any) => (
+                            <option key={val.id} value={String(val.id)}>{val.value}</option>
+                          ))}
+                        </select>
+                        {/* color picker to edit metadata.hex of the currently selected value */}
+                        {currentColorValueId && (
+                          <input type="color" className="w-10 h-10 rounded border" value={(valuesMap[colorOption.id] || []).find((vv: any) => String(vv.id) === String(currentColorValueId))?.metadata?.hex || '#ffffff'} onChange={async (e) => {
+                            const hex = e.target.value
+                            const valId = currentColorValueId
+                            if (!valId) return
+                            await supabaseAdmin.from('product_option_values').update({ metadata: { hex } }).eq('id', valId)
+                            await loadOptions()
+                          }} />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button className="btn-secondary" onClick={() => saveVariant(v)} disabled={isLoading}>Guardar</button>
+                  <button className="btn-danger" onClick={() => deleteVariant(v.id)} disabled={isLoading}>Eliminar</button>
+                </div>
               </div>
-              <div className="w-32">
-                <input type="number" className="input-field" value={v.price ?? ''} onChange={(e) => {
-                  const val = e.target.value
-                  handleVariantChange(v.id, 'price', val === '' ? '' : parseFloat(val))
-                }} placeholder="Precio" />
-              </div>
-              <label className="flex items-center gap-2">
-                <input type="checkbox" checked={!!v.is_active} onChange={(e) => handleVariantChange(v.id, 'is_active', e.target.checked)} /> Activa
-              </label>
-              <div className="flex items-center gap-2 ml-auto">
-                <button className="btn-secondary" onClick={() => saveVariant(v)} disabled={isLoading}>Guardar</button>
-                <button className="btn-danger" onClick={() => deleteVariant(v.id)} disabled={isLoading}>Eliminar</button>
-              </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
     </div>
