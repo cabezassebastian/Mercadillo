@@ -62,6 +62,31 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     loadOptions()
   }
 
+  // helper: map some Spanish color names to hex and detect hex values
+  const spanishColorMap: Record<string, string> = {
+    rojo: '#ff0000',
+    azul: '#007bff',
+    verde: '#28a745',
+    negro: '#000000',
+    blanco: '#ffffff',
+    amarillo: '#ffd400',
+    naranja: '#ff7f00',
+    morado: '#6f42c1',
+    gris: '#6c757d',
+    rosa: '#ff69b4',
+    celeste: '#00bfff'
+  }
+
+  const getColorFromValue = (value: string) => {
+    if (!value) return undefined
+    const v = value.trim()
+    // hex like #fff or #ffffff
+    if (/^#([0-9A-F]{3}|[0-9A-F]{6})$/i.test(v)) return v
+    const key = v.toLowerCase()
+    if (spanishColorMap[key]) return spanishColorMap[key]
+    return undefined
+  }
+
   const deleteOption = async (optionId: string) => {
     if (!confirm('¿Eliminar opción y todos sus valores? Esta acción no se puede deshacer.')) return
     setIsLoading(true)
@@ -187,20 +212,40 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
               </div>
             </div>
             <div className="mt-2">
-              <div className="flex gap-2">
-                <input placeholder="Nuevo valor (ej. S)" id={`val-${opt.id}`} className="input-field" />
-                <button type="button" className="btn-secondary" onClick={() => {
-                  const el = document.getElementById(`val-${opt.id}`) as HTMLInputElement | null
-                  if (el) addValue(opt.id, el.value)
-                }}>Agregar valor</button>
+              <div className="flex gap-2 items-center">
+                {opt.name && typeof opt.name === 'string' && opt.name.toLowerCase() === 'color' ? (
+                  <>
+                    <input type="color" id={`val-${opt.id}`} className="w-12 h-10 p-0 border rounded" />
+                    <input placeholder="Nombre (ej. Azul)" id={`val-name-${opt.id}`} className="input-field flex-1" />
+                    <button type="button" className="btn-secondary" onClick={() => {
+                      const colorEl = document.getElementById(`val-${opt.id}`) as HTMLInputElement | null
+                      const nameEl = document.getElementById(`val-name-${opt.id}`) as HTMLInputElement | null
+                      if (colorEl) addValue(opt.id, nameEl?.value ? `${nameEl.value} ${colorEl.value}` : colorEl.value)
+                    }}>Agregar color</button>
+                  </>
+                ) : (
+                  <>
+                    <input placeholder="Nuevo valor (ej. S)" id={`val-${opt.id}`} className="input-field" />
+                    <button type="button" className="btn-secondary" onClick={() => {
+                      const el = document.getElementById(`val-${opt.id}`) as HTMLInputElement | null
+                      if (el) addValue(opt.id, el.value)
+                    }}>Agregar valor</button>
+                  </>
+                )}
               </div>
-              <div className="mt-2 flex gap-2 flex-wrap">
-                {(valuesMap[opt.id] || []).map(v => (
-                  <div key={v.id} className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
-                    <span>{v.value}</span>
-                    <button type="button" className="text-sm text-red-500 hover:underline" onClick={() => deleteValue(v.id)}>Eliminar</button>
-                  </div>
-                ))}
+              <div className="mt-2 flex gap-2 flex-wrap items-center">
+                {(valuesMap[opt.id] || []).map(v => {
+                  const color = getColorFromValue(v.value)
+                  return (
+                    <div key={v.id} className="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded">
+                      {color ? (
+                        <span className="w-6 h-6 rounded" style={{ backgroundColor: color, border: '1px solid rgba(0,0,0,0.08)' }} />
+                      ) : null}
+                      <span>{v.value}</span>
+                      <button type="button" className="text-sm text-red-500 hover:underline" onClick={() => deleteValue(v.id)}>Eliminar</button>
+                    </div>
+                  )
+                })}
               </div>
             </div>
           </div>
