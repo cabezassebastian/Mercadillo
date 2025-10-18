@@ -8,6 +8,8 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [options, setOptions] = useState<Option[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, Value[]>>({})
   const [quickSelectedValues, setQuickSelectedValues] = useState<Record<string, boolean>>({})
+  const [sizeSelections, setSizeSelections] = useState<Record<string, boolean>>({})
+  const [colorSelections, setColorSelections] = useState<Record<string, boolean>>({})
   const [newOptionName, setNewOptionName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [variants, setVariants] = useState<any[]>([])
@@ -359,6 +361,126 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
             </div>
           </div>
         ))}
+
+        {/* Predefinidos: tallas y colores + guardar todo (no crea nuevos endpoints) */}
+        <div className="border p-3 rounded mt-4">
+          <h4 className="font-semibold mb-2">Predefinidos</h4>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm font-medium mb-2">Tallas</div>
+              <div className="flex gap-2 flex-wrap">
+                {['XS','S','M','L','XL','XXL'].map(sz => (
+                  <button key={sz} type="button" onClick={() => setSizeSelections(prev => ({ ...prev, [sz]: !prev[sz] }))} className={`px-3 py-2 rounded-lg border transition-shadow ${sizeSelections[sz] ? 'bg-amarillo/10 ring-2 ring-amarillo' : 'bg-white hover:shadow-sm'}`}>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" className="hidden" checked={!!sizeSelections[sz]} readOnly />
+                      <span className="text-sm font-medium">{sz}</span>
+                    </label>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm font-medium mb-2">Colores</div>
+              <div className="flex gap-2 flex-wrap">
+                {Object.keys(spanishColorMap).map(col => (
+                  <button key={col} type="button" onClick={() => setColorSelections(prev => ({ ...prev, [col]: !prev[col] }))} className={`flex items-center gap-2 px-3 py-2 rounded-lg border transition-shadow ${colorSelections[col] ? 'bg-amarillo/10 ring-2 ring-amarillo' : 'bg-white hover:shadow-sm'}`}>
+                    <input type="checkbox" className="hidden" checked={!!colorSelections[col]} readOnly />
+                    <span className="w-4 h-4 rounded border" style={{ backgroundColor: spanishColorMap[col] }} />
+                    <span className="text-sm">{col}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 border-t pt-3 flex items-center gap-2">
+            <button className="btn-primary" onClick={async () => {
+              setIsLoading(true)
+              try {
+                // 1) persistir visible para valores existentes (quickSelectedValues)
+                const trueIds: string[] = []
+                const falseIds: string[] = []
+                for (const k of Object.keys(quickSelectedValues)) {
+                  if (quickSelectedValues[k]) trueIds.push(k)
+                  else falseIds.push(k)
+                }
+                if (trueIds.length) await supabaseAdmin.from('product_option_values').update({ visible: true }).in('id', trueIds)
+                if (falseIds.length) await supabaseAdmin.from('product_option_values').update({ visible: false }).in('id', falseIds)
+
+                // 2) handle sizes: ensure option exists and values
+                const sizeOpt = options.find(o => /talla|size/i.test(String(o.name)))
+                let sizeOptionId = sizeOpt?.id
+                if (!sizeOptionId) {
+                  const name = 'Talla'
+                  const { data: inserted } = await supabaseAdmin.from('product_options').insert([{ product_id: productoId, name }]).select().single()
+                  sizeOptionId = inserted?.id
+                  await loadOptions()
+                }
+                if (sizeOptionId) {
+                  const { data: existingSizeVals } = await supabaseAdmin.from('product_option_values').select('id, value').eq('option_id', sizeOptionId)
+                  const existingMap: Record<string, string> = {}
+                  for (const r of (existingSizeVals || [])) existingMap[String(r.value).toUpperCase()] = r.id
+                  const inserts: any[] = []
+                  const updateTrue: string[] = []
+                  const updateFalse: string[] = []
+                  for (const sz of Object.keys(sizeSelections)) {
+                    const upper = sz.toUpperCase()
+                    if (existingMap[upper]) {
+                      if (sizeSelections[sz]) updateTrue.push(existingMap[upper])
+                      else updateFalse.push(existingMap[upper])
+                    } else {
+                      inserts.push({ option_id: sizeOptionId, value: sz, visible: !!sizeSelections[sz] })
+                    }
+                  }
+                  if (inserts.length) await supabaseAdmin.from('product_option_values').insert(inserts)
+                  if (updateTrue.length) await supabaseAdmin.from('product_option_values').update({ visible: true }).in('id', updateTrue)
+                  if (updateFalse.length) await supabaseAdmin.from('product_option_values').update({ visible: false }).in('id', updateFalse)
+                }
+
+                // 3) colors
+                const colorOpt = options.find(o => /color/i.test(String(o.name)))
+                let colorOptionId = colorOpt?.id
+                if (!colorOptionId) {
+                  const name = 'Color'
+                  const { data: inserted } = await supabaseAdmin.from('product_options').insert([{ product_id: productoId, name }]).select().single()
+                  colorOptionId = inserted?.id
+                  await loadOptions()
+                }
+                if (colorOptionId) {
+                  const { data: existingColorVals } = await supabaseAdmin.from('product_option_values').select('id, value, metadata').eq('option_id', colorOptionId)
+                  const existingMap: Record<string, any> = {}
+                  for (const r of (existingColorVals || [])) existingMap[String(r.value).toLowerCase()] = r
+                  const insertsC: any[] = []
+                  const upTrueC: string[] = []
+                  const upFalseC: string[] = []
+                  for (const col of Object.keys(colorSelections)) {
+                    const lower = col.toLowerCase()
+                    const hex = spanishColorMap[col]
+                    if (existingMap[lower]) {
+                      if (colorSelections[col]) upTrueC.push(existingMap[lower].id)
+                      else upFalseC.push(existingMap[lower].id)
+                    } else {
+                      insertsC.push({ option_id: colorOptionId, value: col, metadata: hex ? { hex } : null, visible: !!colorSelections[col] })
+                    }
+                  }
+                  if (insertsC.length) await supabaseAdmin.from('product_option_values').insert(insertsC)
+                  if (upTrueC.length) await supabaseAdmin.from('product_option_values').update({ visible: true }).in('id', upTrueC)
+                  if (upFalseC.length) await supabaseAdmin.from('product_option_values').update({ visible: false }).in('id', upFalseC)
+                }
+
+                await loadOptions()
+                alert('Guardado exitoso')
+              } catch (err) {
+                console.error(err)
+                alert('Error al guardar. Revisa la consola.')
+              } finally {
+                setIsLoading(false)
+              }
+            }}>Guardar todo</button>
+
+            <button className="btn-secondary" onClick={() => { setSizeSelections({}); setColorSelections({}); setQuickSelectedValues({}) }}>Reset</button>
+          </div>
+        </div>
 
         {/* Quick-values panel: show all values grouped by option with toggles */}
         <div className="border p-3 rounded mt-4">
