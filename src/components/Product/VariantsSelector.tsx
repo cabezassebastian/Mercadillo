@@ -72,12 +72,24 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
     }
   }
 
+  const buildVariantLabel = () => {
+    const parts: string[] = []
+    for (const opt of options) {
+      const valId = selected[opt.id]
+      const found = (opt.values || []).find(v => String(v.id) === String(valId))
+      if (found) parts.push(`${opt.name}: ${found.value}`)
+    }
+    return parts.join(' · ')
+  }
+
   return (
     <div className="space-y-4">
+      {/* Selected summary */}
+      <div className="text-sm text-gray-600">Seleccionado: <span className="font-medium text-gray-800">{buildVariantLabel() || '—'}</span></div>
       {options.map((opt) => (
         <div key={opt.id}>
-          <label className="block text-sm font-medium text-gray-700">{opt.name}</label>
-          <div className="mt-2 flex items-center gap-2">
+          <label className="block text-sm font-medium text-gray-700 mb-2">{opt.name}</label>
+          <div role="list" className="mt-2 flex items-center gap-3 flex-wrap">
                 {opt.values.map(v => {
               const isColorOption = typeof opt.name === 'string' && /color/i.test(opt.name)
               if (isColorOption) {
@@ -89,15 +101,18 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                     return (
                       <button
                         key={v.id}
+                        role="listitem"
                         type="button"
                         onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
+                        aria-pressed={selected[opt.id] === v.id}
                         aria-label={`Seleccionar ${name || v.value}`}
-                        className={`flex items-center gap-2 px-2 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                         disabled={disabled}
                       >
-                        <span className="w-6 h-6 rounded" style={{ backgroundColor: hex || name || v.value }} />
-                        <span>{name || v.value}</span>
-                        {stock > 0 && <span className="ml-2 text-xs text-gray-600">{stock}</span>}
+                        <span className="w-8 h-8 rounded-md flex-shrink-0 border" style={{ backgroundColor: hex || name || v.value }} />
+                        <span className="text-sm text-gray-800">{name || v.value}</span>
+                        {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
                       </button>
                     )
               }
@@ -110,15 +125,18 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                     return (
                       <button
                         key={v.id}
+                        role="listitem"
                         type="button"
                         onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
+                        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
+                        aria-pressed={selected[opt.id] === v.id}
                         aria-label={`Seleccionar ${name || v.value}`}
-                        className={`flex items-center gap-2 px-2 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                         disabled={disabled}
                       >
-                        <span className="w-6 h-6 rounded" style={{ backgroundColor: hex || v.value }} />
-                        <span>{name || v.value}</span>
-                        {stock > 0 && <span className="ml-2 text-xs text-gray-600">{stock}</span>}
+                        <span className="w-8 h-8 rounded-md flex-shrink-0 border" style={{ backgroundColor: hex || v.value }} />
+                        <span className="text-sm text-gray-800">{name || v.value}</span>
+                        {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
                       </button>
                     )
               }
@@ -127,13 +145,16 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                 return (
                   <button
                     key={v.id}
+                    role="listitem"
                     type="button"
                     onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
-                    className={`px-3 py-1 border rounded ${selected[opt.id] === v.id ? 'border-amarillo bg-amarillo/20' : 'border-gray-200'} ${disabled ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
+                    aria-pressed={selected[opt.id] === v.id}
+                    className={`px-3 py-2 rounded-lg border transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                     disabled={disabled}
                   >
-                    {v.value}
-                    {stock > 0 && <span className="ml-2 text-xs text-gray-600">{stock}</span>}
+                    <span className="text-sm text-gray-800">{v.value}</span>
+                    {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
                   </button>
                 )
                 })}
