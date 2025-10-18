@@ -104,7 +104,8 @@ const Catalog: React.FC = () => {
         setIsLoading(true)
         setError(null)
 
-        let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
+  // When stock can be nullable in DB, compare using coalesce to treat null as 0 in the query
+  let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
         let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false })
 
         if (supabaseError) {
@@ -193,7 +194,7 @@ const Catalog: React.FC = () => {
 
     // Filtrar solo productos disponibles
     if (onlyInStock) {
-      filtered = filtered.filter(producto => producto.stock > 0)
+      filtered = filtered.filter(producto => (producto.stock ?? 0) > 0)
     }
 
     // Filtrar por rango de precios
@@ -232,8 +233,8 @@ const Catalog: React.FC = () => {
           result = b.nombre.localeCompare(a.nombre, 'es', { sensitivity: 'base' })
           break
         case 'stock':
-          // Mayor stock primero
-          result = b.stock - a.stock
+          // Mayor stock primero (coalesce null to 0)
+          result = (b.stock ?? 0) - (a.stock ?? 0)
           break
         case 'newest':
           // Más recientes primero

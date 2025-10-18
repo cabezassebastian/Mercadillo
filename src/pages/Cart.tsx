@@ -101,16 +101,16 @@ const Cart = () => {
                       <button
                         onClick={() => updateQuantity(item.producto.id, item.cantidad + 1)}
                         className="p-2 hover:bg-amarillo hover:text-gris-oscuro dark:hover:bg-yellow-500 dark:hover:text-gray-900 disabled:hover:bg-transparent disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 rounded-r-lg"
-                        disabled={item.cantidad >= item.producto.stock}
+                        disabled={item.cantidad >= (item.producto.stock ?? 0)}
                       >
                         <Plus className="w-4 h-4" />
                       </button>
                     </div>
 
-                    <button
-                      onClick={() => removeFromCart(item.producto.id)}
-                      className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
-                    >
+                      <button
+                        onClick={() => removeFromCart(item.producto.id)}
+                        className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors duration-200"
+                      >
                       <Trash2 className="w-5 h-5" />
                     </button>
                   </div>

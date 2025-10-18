@@ -58,15 +58,16 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingItem = prevItems.find(item => item.producto.id === producto.id)
       const currentQuantity = existingItem ? existingItem.cantidad : 0
       
-      // Verificar si hay stock suficiente
-      if (currentQuantity + cantidad > producto.stock) {
+      // Verificar si hay stock suficiente (producto.stock puede ser null)
+      const prodStock = producto.stock ?? 0
+      if (currentQuantity + cantidad > prodStock) {
         // Si ya hay stock en el carrito, no agregar más de lo disponible
-        const maxCanAdd = producto.stock - currentQuantity
+        const maxCanAdd = prodStock - currentQuantity
         if (maxCanAdd <= 0) {
           console.warn(`No hay más stock disponible para ${producto.nombre}`)
           return prevItems // No agregar nada
         }
-        
+
         // Agregar solo la cantidad disponible
         console.warn(`Solo se pueden agregar ${maxCanAdd} unidades de ${producto.nombre}`)
         cantidad = maxCanAdd
@@ -97,13 +98,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setItems(prevItems =>
       prevItems.map(item => {
         if (item.producto.id === productoId) {
-          // Verificar que la nueva cantidad no exceda el stock
-          const newQuantity = Math.min(cantidad, item.producto.stock)
-          
+          // Verificar que la nueva cantidad no exceda el stock (item.producto.stock puede ser null)
+          const itemStock = item.producto.stock ?? 0
+          const newQuantity = Math.min(cantidad, itemStock)
+
           if (newQuantity !== cantidad) {
-            console.warn(`Stock limitado: solo hay ${item.producto.stock} unidades disponibles de ${item.producto.nombre}`)
+            console.warn(`Stock limitado: solo hay ${itemStock} unidades disponibles de ${item.producto.nombre}`)
           }
-          
+
           return { ...item, cantidad: newQuantity }
         }
         return item

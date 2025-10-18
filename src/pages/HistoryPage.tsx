@@ -69,7 +69,7 @@ const HistoryPage: React.FC = () => {
     // Verificar stock disponible considerando lo que ya está en el carrito
     const existingItem = items.find(cartItem => cartItem.producto.id === productoToAdd.id)
     const currentQuantityInCart = existingItem ? existingItem.cantidad : 0
-    const availableStock = productoToAdd.stock - currentQuantityInCart
+  const availableStock = (productoToAdd.stock ?? 0) - currentQuantityInCart
 
     // Verificar si hay stock disponible
     if (availableStock <= 0) {
