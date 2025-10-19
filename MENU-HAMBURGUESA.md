@@ -12,7 +12,7 @@ Se ha mejorado el menú hamburguesa móvil con animaciones modernas, overlay osc
 - Duración de animación: **300ms** con `ease-in-out`
 - Animación de salida antes de cerrar el menú
 
-### 2. **Overlay Oscuro con Blur**
+### 2. **Overlay Oscuro con Blurr**
 ```tsx
 <div 
   className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
