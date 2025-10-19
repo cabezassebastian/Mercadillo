@@ -30,7 +30,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   const loadOptions = async () => {
     // Read options and values from server endpoint to avoid admin client usage in browser
     try {
-      const res = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+  const res = await fetch(`/api/admin?action=options&productId=${encodeURIComponent(productoId)}`)
       const json = await res.json()
       if (!res.ok) {
         console.error('Error fetching options from server:', json)
@@ -50,7 +50,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       }
 
       // load variants via server endpoint
-      const vres = await fetch(`/api/admin/variants?productId=${encodeURIComponent(productoId)}`)
+  const vres = await fetch(`/api/admin?action=variants&productId=${encodeURIComponent(productoId)}`)
       const vjson = await vres.json()
       if (!vres.ok) {
         console.error('Error fetching variants from server:', vjson)
@@ -158,11 +158,11 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     // Fetch product base price and options/values from server endpoints
     let basePrice = 0
     try {
-      const pRes = await fetch(`/api/admin/product-info?id=${encodeURIComponent(productoId)}`)
+  const pRes = await fetch(`/api/admin?action=product-info&id=${encodeURIComponent(productoId)}`)
       const pjson = await pRes.json()
       if (pRes.ok && pjson.data) basePrice = pjson.data.precio || 0
 
-      const optsRes = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+  const optsRes = await fetch(`/api/admin?action=options&productId=${encodeURIComponent(productoId)}`)
       const optsJson = await optsRes.json()
   const opts = optsJson.options || []
 
@@ -188,7 +188,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
         const { error: insertValsErr } = await supabaseAdmin.from('product_option_values').insert(toInsert)
         if (insertValsErr) console.error('Error inserting default sizes', insertValsErr)
         // reload from server endpoint
-        const reRes = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+  const reRes = await fetch(`/api/admin?action=options&productId=${encodeURIComponent(productoId)}`)
         const reJson = await reRes.json()
         const reVals = reJson.values || []
         vals = reVals.filter((v: any) => v.option_id === o.id)
@@ -208,7 +208,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     }
 
     // Avoid duplicates: fetch existing variants keys via server endpoint
-    const evRes = await fetch(`/api/admin/variants?productId=${encodeURIComponent(productoId)}`)
+  const evRes = await fetch(`/api/admin?action=variants&productId=${encodeURIComponent(productoId)}`)
     const evJson = await evRes.json()
     const existingVariants = evJson.data || []
 

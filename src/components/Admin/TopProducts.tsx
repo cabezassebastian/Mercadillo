@@ -21,7 +21,7 @@ export default function TopProducts() {
       setError(null);
       
       try {
-        const res = await fetch(`/api/admin/top-products?limit=5`)
+  const res = await fetch(`/api/admin?action=top-products&limit=5`)
         const json = await res.json()
 
         if (!res.ok) {

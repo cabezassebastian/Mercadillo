@@ -30,7 +30,7 @@ const AdminDashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         // Fetch stats via server-side admin endpoint
-        const res = await fetch('/api/admin/stats')
+  const res = await fetch('/api/admin?action=stats')
         const json = await res.json()
 
         if (!res.ok) {

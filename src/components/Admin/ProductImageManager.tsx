@@ -19,7 +19,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const fetchImagenes = async () => {
     try {
-      const res = await fetch(`/api/admin/product-images?productId=${encodeURIComponent(productoId)}`)
+  const res = await fetch(`/api/admin?action=product-images&productId=${encodeURIComponent(productoId)}`)
       const json = await res.json()
       if (!res.ok) {
         console.error('Error fetching images (server):', json)
@@ -57,7 +57,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           es_principal: imagenes.length === 0 && i === 0,
           alt_text: `Imagen ${imagenes.length + i + 1}`
         }
-        const res = await fetch('/api/admin/product-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+  const res = await fetch('/api/admin?action=product-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
         const json = await res.json()
         if (!res.ok) {
           console.error('Error inserting image (server):', json)
@@ -79,8 +79,8 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     try {
       // Primero desmarcar todas las imágenes principales
       // Use server endpoints to update principal flag
-      await fetch('/api/admin/product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
-      const res = await fetch('/api/admin/product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
+  await fetch('/api/admin?action=product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
+  const res = await fetch('/api/admin?action=product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
       const json = await res.json()
       if (!res.ok) {
         console.error('Error setting principal (server):', json)
@@ -121,7 +121,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     try {
         // Update order via server endpoint batch updates
         const updates = newImagenes.map((img, i) => ({ id: img.id, updates: { orden: i } }))
-        await fetch('/api/admin/product-images', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
+  await fetch('/api/admin?action=product-images', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
         setImagenes(newImagenes)
         if (onImagesChange) onImagesChange()
     } catch (error) {
@@ -133,7 +133,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     if (!confirm('¿Eliminar esta imagen?')) return;
 
     try {
-      const res = await fetch(`/api/admin/product-images?id=${encodeURIComponent(imagenId)}`, { method: 'DELETE' })
+  const res = await fetch(`/api/admin?action=product-images&id=${encodeURIComponent(imagenId)}`, { method: 'DELETE' })
       const json = await res.json()
       if (!res.ok) {
         console.error('Error deleting image (server):', json)

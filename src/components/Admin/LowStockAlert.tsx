@@ -23,7 +23,7 @@ export default function LowStockAlert() {
       
       try {
         // Call server-side admin endpoint which runs the RPC with service role key
-        const res = await fetch('/api/admin/metrics?action=low_stock&threshold=5')
+  const res = await fetch('/api/admin?action=metrics&sub=low_stock&threshold=5')
         const json = await res.json()
 
         if (!res.ok) {

@@ -37,7 +37,7 @@ export default function SalesChart() {
       setLoading(true)
       setError(null)
       try {
-        const res = await fetch(`/api/admin/sales?period=${period}`)
+  const res = await fetch(`/api/admin?action=sales&period=${period}`)
         const json = await res.json()
         if (!res.ok) {
           console.error('Error fetching sales (server):', json)
