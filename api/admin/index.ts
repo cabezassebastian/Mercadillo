@@ -191,6 +191,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // Batch update option values (migrated from option-values/batch-update.ts)
+    if (act === 'option-values-batch') {
+      if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
+      try {
+        const payload = req.body // expected { updates: [{ id, visible?: boolean, metadata?: { hex?: string }}] }
+        if (!payload || !Array.isArray(payload.updates)) return res.status(400).json({ error: 'Invalid payload' })
+
+        const results: any[] = []
+        for (const u of payload.updates) {
+          const row: any = {}
+          if (typeof u.visible === 'boolean') row.visible = u.visible
+          if (u.metadata) row.metadata = { ...(u.metadata || {}) }
+          const { error } = await supabase.from('product_option_values').update(row).eq('id', u.id)
+          if (error) throw error
+          results.push({ id: u.id })
+        }
+
+        return res.status(200).json({ updated: results.length })
+      } catch (err: any) {
+        console.error('option-values-batch error', err)
+        return res.status(500).json({ error: err.message || String(err) })
+      }
+    }
+
     // Variants write wrapper
     if (act === 'variants-write') {
       if (req.method === 'POST') {
