@@ -1,11 +1,9 @@
-import { supabase } from "./supabaseClient";
-
 // El cliente de Supabase ya está inicializado en supabaseClient.ts
 // Se re-exporta para compatibilidad con módulos que aún lo importen directamente.
-export { supabase };
+export { supabase } from './supabaseClient';
 
-// Re-exportar la misma instancia para evitar múltiples clientes
-export { supabase as supabaseAdmin } from "./supabaseClient";
+// Re-export admin client from dedicated file
+export { supabaseAdmin } from './supabaseAdmin';
 
 export interface Producto {
   id: string
