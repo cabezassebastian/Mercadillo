@@ -13,6 +13,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [newOptionName, setNewOptionName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [variants, setVariants] = useState<any[]>([])
+  const [autoGenerateOnSave, setAutoGenerateOnSave] = useState(true)
 
   useEffect(() => { loadOptions() }, [productoId])
 
@@ -393,7 +394,12 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
             </div>
           </div>
 
-          <div className="mt-4 border-t pt-3 flex items-center gap-2">
+          <div className="mt-4 border-t pt-3 flex flex-col gap-3">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={autoGenerateOnSave} onChange={(e) => setAutoGenerateOnSave(e.target.checked)} />
+              Generar variantes automáticamente al Guardar todo (aplica regla S/M/L)
+            </label>
+            <div className="flex items-center gap-2">
             <button className="btn-primary" onClick={async () => {
               setIsLoading(true)
               try {
@@ -470,6 +476,10 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
 
                 await loadOptions()
                 alert('Guardado exitoso')
+                // optionally auto-generate variants according to S/M/L rule
+                if (autoGenerateOnSave) {
+                  await generateVariants()
+                }
               } catch (err) {
                 console.error(err)
                 alert('Error al guardar. Revisa la consola.')
@@ -479,6 +489,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
             }}>Guardar todo</button>
 
             <button className="btn-secondary" onClick={() => { setSizeSelections({}); setColorSelections({}); setQuickSelectedValues({}) }}>Reset</button>
+            </div>
           </div>
         </div>
 
