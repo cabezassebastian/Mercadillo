@@ -7,12 +7,21 @@ DO $$
 BEGIN
   -- Only create the view if the pedidos table exists
   IF to_regclass('public.pedidos') IS NOT NULL THEN
+    -- If the view already exists with different column ordering/names, DROP it first to avoid
+    -- 'cannot change name of view column' errors when running CREATE OR REPLACE VIEW inside
+    -- an EXECUTE block. This keeps the migration idempotent and safe to re-run.
+    IF to_regclass('public.pedidos_productos') IS NOT NULL THEN
+      EXECUTE 'DROP VIEW public.pedidos_productos CASCADE';
+    END IF;
+
     EXECUTE $sql$
-      CREATE OR REPLACE VIEW public.pedidos_productos AS
+      CREATE VIEW public.pedidos_productos AS
       SELECT
         (item->>'id')::uuid AS producto_id,
         p.id AS pedido_id,
         COALESCE((item->>'cantidad')::int, 1) AS cantidad,
+        -- extract precio_unitario if stored in the order item JSON (compatibility)
+        CASE WHEN (item ? 'precio_unitario') THEN (item->>'precio_unitario')::numeric ELSE NULL END AS precio_unitario,
         p.created_at
       FROM public.pedidos p,
       LATERAL jsonb_array_elements(p.items) AS item

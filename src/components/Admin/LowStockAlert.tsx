@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+// Server-side admin endpoints used via /api/admin/*
 import { AlertTriangle, Package, Edit, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -22,28 +22,24 @@ export default function LowStockAlert() {
       setError(null);
       
       try {
-        // Usar la función SQL si está disponible, sino fallback a query directo
-        const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('get_low_stock_products', { threshold: 5 });
-        
-        if (rpcError) {
-          // Fallback: query directo si la función no existe
-          console.warn('RPC get_low_stock_products no disponible, usando query directo');
-          const { data, error } = await supabaseAdmin
-            .from('productos')
-            .select('id, nombre, stock, precio, categoria')
-            .lte('stock', 5)
-            .gte('stock', 0)
-            .order('stock', { ascending: true });
-          
-          if (error) {
-            console.error('Error fetching low stock:', error);
-            setError('Error al cargar productos con bajo stock');
-            setLowStockProducts([]);
+        // Call server-side admin endpoint which runs the RPC with service role key
+        const res = await fetch('/api/admin/metrics?action=low_stock&threshold=5')
+        const json = await res.json()
+
+        if (!res.ok) {
+          console.warn('RPC get_low_stock_products not available (server):', json)
+          // Fallback: call public client via regular query (uses public anon key)
+          const publicRes = await fetch('/api/products?low_stock=5')
+          // If you don't have a public API, fallback to empty list to avoid crashes
+          if (!publicRes.ok) {
+            setLowStockProducts([])
+            setError('Error al cargar productos con bajo stock')
           } else {
-            setLowStockProducts(data || []);
+            const publicJson = await publicRes.json()
+            setLowStockProducts(publicJson.data || [])
           }
         } else {
-          setLowStockProducts(rpcData || []);
+          setLowStockProducts(json.data || [])
         }
       } catch (err) {
         console.error('Exception fetching low stock:', err);

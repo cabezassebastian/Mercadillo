@@ -15,11 +15,13 @@ SELECT
   p.id, 
   p.nombre AS name, 
   COALESCE(SUM(pp.cantidad)::integer, 0) AS sold, 
-  COALESCE(SUM(pp.cantidad * pp.precio_unitario), 0) AS revenue
+  -- If pedidos_productos has precio_unitario, use it; otherwise fall back to producto precio
+  COALESCE(SUM(pp.cantidad * COALESCE(pp.precio_unitario, p.precio)), 0) AS revenue
 FROM productos p
 LEFT JOIN pedidos_productos pp ON p.id = pp.producto_id
 LEFT JOIN pedidos ped ON pp.pedido_id = ped.id
-WHERE ped.estado IS NULL OR ped.estado != 'cancelado'
+-- Only count delivered orders for sales analytics
+WHERE ped.estado = 'entregado'
 GROUP BY p.id, p.nombre
 HAVING SUM(pp.cantidad) > 0
 ORDER BY sold DESC
@@ -50,7 +52,7 @@ SELECT
 FROM pedidos
 WHERE 
   created_at >= CURRENT_DATE - (days_back || ' days')::interval
-  AND (estado IS NULL OR estado != 'cancelado')
+  AND estado = 'entregado'
 GROUP BY TO_CHAR(created_at, 'DD/MM'), DATE(created_at)
 ORDER BY DATE(created_at) ASC;
 $$ LANGUAGE sql STABLE;
@@ -68,7 +70,7 @@ SELECT
 FROM pedidos
 WHERE 
   created_at >= CURRENT_DATE - (weeks_back || ' weeks')::interval
-  AND (estado IS NULL OR estado != 'cancelado')
+  AND estado = 'entregado'
 GROUP BY TO_CHAR(created_at, 'WW'), DATE_TRUNC('week', created_at)
 ORDER BY DATE_TRUNC('week', created_at) ASC;
 $$ LANGUAGE sql STABLE;
@@ -86,7 +88,7 @@ SELECT
 FROM pedidos
 WHERE 
   created_at >= CURRENT_DATE - (months_back || ' months')::interval
-  AND (estado IS NULL OR estado != 'cancelado')
+  AND estado = 'entregado'
 GROUP BY TO_CHAR(created_at, 'Mon YYYY'), DATE_TRUNC('month', created_at)
 ORDER BY DATE_TRUNC('month', created_at) ASC;
 $$ LANGUAGE sql STABLE;
@@ -99,11 +101,11 @@ RETURNS TABLE(
 ) AS $$
 SELECT 
   (SELECT COUNT(DISTINCT producto_id) FROM product_views) AS total_views,
-  (SELECT COUNT(*) FROM pedidos WHERE estado IS NULL OR estado != 'cancelado') AS total_orders,
+  (SELECT COUNT(*) FROM pedidos WHERE estado = 'entregado') AS total_orders,
   CASE 
     WHEN (SELECT COUNT(DISTINCT producto_id) FROM product_views) > 0 
     THEN ROUND(
-      ((SELECT COUNT(*) FROM pedidos WHERE estado IS NULL OR estado != 'cancelado')::numeric / 
+      ((SELECT COUNT(*) FROM pedidos WHERE estado = 'entregado')::numeric / 
        (SELECT COUNT(DISTINCT producto_id) FROM product_views)::numeric) * 100, 
       2
     )
@@ -181,6 +183,7 @@ begin
     from pedidos_productos pp
     join pedidos p on p.id = pp.pedido_id
     where (since is null or p.created_at >= since)
+      and p.estado = 'entregado'
     group by pp.producto_id
     order by total_sold desc
     limit p_limit

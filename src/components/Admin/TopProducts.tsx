@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+// Use server-side admin endpoints to avoid creating an admin Supabase client in the browser
 import { Trophy, TrendingUp, DollarSign, ExternalLink, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -21,21 +21,22 @@ export default function TopProducts() {
       setError(null);
       
       try {
-        const { data, error } = await supabaseAdmin.rpc('get_top_selling_products', { limit_count: 5 });
-        
-        if (error) {
-          console.error('Error fetching top products:', error);
-          setError('Error al cargar productos más vendidos');
-          setTopProducts([]);
+        const res = await fetch(`/api/admin/top-products?limit=5`)
+        const json = await res.json()
+
+        if (!res.ok) {
+          console.error('Error fetching top products (server):', json)
+          setError('Error al cargar productos más vendidos')
+          setTopProducts([])
         } else {
-          setTopProducts(data || []);
+          setTopProducts(json.data || [])
         }
       } catch (err) {
-        console.error('Exception fetching top products:', err);
-        setError('Error al cargar productos más vendidos');
-        setTopProducts([]);
+        console.error('Exception fetching top products:', err)
+        setError('Error al cargar productos más vendidos')
+        setTopProducts([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
     };
     

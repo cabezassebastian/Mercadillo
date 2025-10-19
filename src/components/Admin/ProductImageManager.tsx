@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Upload, Trash2, Star, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
 import { ProductoImagen } from '@/lib/supabase';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
 import { uploadImage } from '@/lib/cloudinary';
 
 interface ProductImageManagerProps {
@@ -20,18 +19,14 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const fetchImagenes = async () => {
     try {
-      const { data, error } = await supabaseAdmin
-        .from('producto_imagenes')
-        .select('*')
-        .eq('producto_id', productoId)
-        .order('orden', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching images:', error);
-        return;
+      const res = await fetch(`/api/admin/product-images?productId=${encodeURIComponent(productoId)}`)
+      const json = await res.json()
+      if (!res.ok) {
+        console.error('Error fetching images (server):', json)
+        setImagenes([])
+      } else {
+        setImagenes(json.data || [])
       }
-
-      setImagenes(data || []);
     } catch (error) {
       console.error('Error in fetchImagenes:', error);
     } finally {
@@ -55,19 +50,18 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           ? Math.max(...imagenes.map(img => img.orden)) 
           : -1;
 
-        const { error } = await supabaseAdmin
-          .from('producto_imagenes')
-          .insert([{
-            producto_id: productoId,
-            url: imageUrl,
-            orden: maxOrden + 1 + i,
-            es_principal: imagenes.length === 0 && i === 0, // Primera imagen como principal si no hay otras
-            alt_text: `Imagen ${imagenes.length + i + 1}`
-          }]);
-
-        if (error) {
-          console.error('Error inserting image:', error);
-          alert(`Error al guardar imagen: ${error.message}`);
+        const body = {
+          producto_id: productoId,
+          url: imageUrl,
+          orden: maxOrden + 1 + i,
+          es_principal: imagenes.length === 0 && i === 0,
+          alt_text: `Imagen ${imagenes.length + i + 1}`
+        }
+        const res = await fetch('/api/admin/product-images', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+        const json = await res.json()
+        if (!res.ok) {
+          console.error('Error inserting image (server):', json)
+          alert('Error al guardar imagen')
         }
       }
 
@@ -84,25 +78,18 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
   const handleSetPrincipal = async (imagenId: string) => {
     try {
       // Primero desmarcar todas las imágenes principales
-      await supabaseAdmin
-        .from('producto_imagenes')
-        .update({ es_principal: false })
-        .eq('producto_id', productoId);
-
-      // Luego marcar la seleccionada como principal
-      const { error } = await supabaseAdmin
-        .from('producto_imagenes')
-        .update({ es_principal: true })
-        .eq('id', imagenId);
-
-      if (error) {
-        console.error('Error setting principal:', error);
-        alert(`Error: ${error.message}`);
-        return;
+      // Use server endpoints to update principal flag
+      await fetch('/api/admin/product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
+      const res = await fetch('/api/admin/product-images', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
+      const json = await res.json()
+      if (!res.ok) {
+        console.error('Error setting principal (server):', json)
+        alert('Error al marcar imagen principal')
+        return
       }
 
-      await fetchImagenes();
-      if (onImagesChange) onImagesChange();
+      await fetchImagenes()
+      if (onImagesChange) onImagesChange()
     } catch (error) {
       console.error('Error in handleSetPrincipal:', error);
     }
@@ -132,16 +119,11 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const updateOrden = async (newImagenes: ProductoImagen[]) => {
     try {
-      // Actualizar el orden de cada imagen
-      for (let i = 0; i < newImagenes.length; i++) {
-        await supabaseAdmin
-          .from('producto_imagenes')
-          .update({ orden: i })
-          .eq('id', newImagenes[i].id);
-      }
-
-      setImagenes(newImagenes);
-      if (onImagesChange) onImagesChange();
+        // Update order via server endpoint batch updates
+        const updates = newImagenes.map((img, i) => ({ id: img.id, updates: { orden: i } }))
+        await fetch('/api/admin/product-images', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
+        setImagenes(newImagenes)
+        if (onImagesChange) onImagesChange()
     } catch (error) {
       console.error('Error updating orden:', error);
     }
@@ -151,19 +133,16 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     if (!confirm('¿Eliminar esta imagen?')) return;
 
     try {
-      const { error } = await supabaseAdmin
-        .from('producto_imagenes')
-        .delete()
-        .eq('id', imagenId);
-
-      if (error) {
-        console.error('Error deleting image:', error);
-        alert(`Error: ${error.message}`);
-        return;
+      const res = await fetch(`/api/admin/product-images?id=${encodeURIComponent(imagenId)}`, { method: 'DELETE' })
+      const json = await res.json()
+      if (!res.ok) {
+        console.error('Error deleting image (server):', json)
+        alert('Error al eliminar imagen')
+        return
       }
 
-      await fetchImagenes();
-      if (onImagesChange) onImagesChange();
+      await fetchImagenes()
+      if (onImagesChange) onImagesChange()
     } catch (error) {
       console.error('Error in handleDelete:', error);
     }

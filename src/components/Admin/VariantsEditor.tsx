@@ -28,32 +28,42 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   useEffect(() => { loadOptions() }, [productoId])
 
   const loadOptions = async () => {
-  const { data: opts, error: _optsErr } = await supabaseAdmin
-      .from('product_options')
-      .select('*')
-      .eq('product_id', productoId)
-      .order('position', { ascending: true })
-    setOptions(opts || [])
-
-    const map: Record<string, Value[]> = {}
-    if (opts && opts.length) {
-      for (const o of opts) {
-    const { data: vals, error: _valsErr } = await supabaseAdmin
-          .from('product_option_values')
-          .select('*')
-          .eq('option_id', o.id)
-          .order('position', { ascending: true })
-        map[o.id] = vals || []
+    // Read options and values from server endpoint to avoid admin client usage in browser
+    try {
+      const res = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+      const json = await res.json()
+      if (!res.ok) {
+        console.error('Error fetching options from server:', json)
+        setOptions([])
+        setValuesMap({})
+      } else {
+        const opts = json.options || []
+        const vals = json.values || []
+        setOptions(opts)
+        const map: Record<string, Value[]> = {}
+        for (const v of vals) {
+          const optId = (v.option_id || v.optionId || v.option) as string
+          if (!map[optId]) map[optId] = []
+          map[optId].push(v)
+        }
+        setValuesMap(map)
       }
+
+      // load variants via server endpoint
+      const vres = await fetch(`/api/admin/variants?productId=${encodeURIComponent(productoId)}`)
+      const vjson = await vres.json()
+      if (!vres.ok) {
+        console.error('Error fetching variants from server:', vjson)
+        setVariants([])
+      } else {
+        setVariants(vjson.data || [])
+      }
+    } catch (err) {
+      console.error('Error in loadOptions:', err)
+      setOptions([])
+      setValuesMap({})
+      setVariants([])
     }
-    setValuesMap(map)
-    // reset quick selection when options change (legacy quick-values removed)
-    // load variants
-    const { data: vars } = await supabaseAdmin
-      .from('product_variants')
-      .select('*')
-      .eq('product_id', productoId)
-    setVariants(vars || [])
   }
 
   const createOption = async () => {
@@ -145,18 +155,18 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     // Pricing rule: S/M same price, L = base + 1
     setIsLoading(true)
 
-    // Fetch product base price
-    const { data: product, error: _prodErr } = await supabaseAdmin.from('productos').select('id, precio').eq('id', productoId).single()
-    const basePrice = product?.precio || 0
+    // Fetch product base price and options/values from server endpoints
+    let basePrice = 0
+    try {
+      const pRes = await fetch(`/api/admin/product-info?id=${encodeURIComponent(productoId)}`)
+      const pjson = await pRes.json()
+      if (pRes.ok && pjson.data) basePrice = pjson.data.precio || 0
 
-    // Fetch fresh options and values from DB to avoid stale state
-    const { data: opts } = await supabaseAdmin
-      .from('product_options')
-      .select('id, name')
-      .eq('product_id', productoId)
-      .order('position', { ascending: true })
+      const optsRes = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+      const optsJson = await optsRes.json()
+  const opts = optsJson.options || []
 
-    const localValuesMap: Record<string, Value[]> = {}
+      const localValuesMap: Record<string, Value[]> = {}
     const optionLists: Value[][] = []
     if (!opts || opts.length === 0) {
       alert('No hay valores para generar variantes')
@@ -165,11 +175,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     }
 
     for (const o of opts) {
-      let { data: vals } = await supabaseAdmin
-        .from('product_option_values')
-        .select('id, value')
-        .eq('option_id', o.id)
-        .order('position', { ascending: true })
+      let vals = (localValuesMap[o.id] || []) as Value[]
       // If no values and option looks like size/talla, create S/M/L automatically
       const optName = (o.name || '').toString()
       if ((!vals || vals.length === 0) && /talla|size/i.test(optName)) {
@@ -178,14 +184,14 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
           { option_id: o.id, value: 'M' },
           { option_id: o.id, value: 'L' }
         ]
+        // keep write via admin client for now
         const { error: insertValsErr } = await supabaseAdmin.from('product_option_values').insert(toInsert)
         if (insertValsErr) console.error('Error inserting default sizes', insertValsErr)
-        const re = await supabaseAdmin
-          .from('product_option_values')
-          .select('id, value')
-          .eq('option_id', o.id)
-          .order('position', { ascending: true })
-        vals = re.data
+        // reload from server endpoint
+        const reRes = await fetch(`/api/admin/options?productId=${encodeURIComponent(productoId)}`)
+        const reJson = await reRes.json()
+        const reVals = reJson.values || []
+        vals = reVals.filter((v: any) => v.option_id === o.id)
       }
       const list = (vals || []) as Value[]
   localValuesMap[o.id] = list
@@ -201,11 +207,10 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       combos.splice(0, combos.length, ...next)
     }
 
-    // Avoid duplicates: fetch existing variants keys
-    const { data: existingVariants } = await supabaseAdmin
-      .from('product_variants')
-      .select('id, option_value_ids')
-      .eq('product_id', productoId)
+    // Avoid duplicates: fetch existing variants keys via server endpoint
+    const evRes = await fetch(`/api/admin/variants?productId=${encodeURIComponent(productoId)}`)
+    const evJson = await evRes.json()
+    const existingVariants = evJson.data || []
 
     const existingSets = new Set((existingVariants || []).map((ev: any) => JSON.stringify((ev.option_value_ids || []).map(String).sort())))
 
@@ -236,10 +241,15 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       if (insertErr) console.error('Error inserting variants', insertErr)
     }
 
-    setIsLoading(false)
     await loadOptions()
     alert(`Variantes generadas (${inserts.length} nuevas)`)
     // do not auto-close parent modal; user can close explicitly
+    } catch (err) {
+      console.error('Error generating variants:', err)
+      alert('Error al generar variantes')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleVariantChange = (id: string, field: string, value: any) => {

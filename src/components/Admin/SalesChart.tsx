@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
+// Server-side admin endpoints are used instead of importing supabaseAdmin in the browser
 import { 
   LineChart, 
   Line, 
@@ -34,47 +34,28 @@ export default function SalesChart() {
 
   useEffect(() => {
     const fetchSales = async () => {
-      setLoading(true);
-      setError(null);
-      
+      setLoading(true)
+      setError(null)
       try {
-        let rpcName = '';
-        let params = {};
-        
-        switch (period) {
-          case 'day':
-            rpcName = 'get_daily_sales';
-            params = { days_back: 7 };
-            break;
-          case 'week':
-            rpcName = 'get_weekly_sales';
-            params = { weeks_back: 4 };
-            break;
-          case 'month':
-            rpcName = 'get_monthly_sales';
-            params = { months_back: 12 };
-            break;
-        }
-
-        const { data, error } = await supabaseAdmin.rpc(rpcName, params);
-        
-        if (error) {
-          console.error('Error fetching sales:', error);
-          setError('Error al cargar ventas');
-          setSales([]);
+        const res = await fetch(`/api/admin/sales?period=${period}`)
+        const json = await res.json()
+        if (!res.ok) {
+          console.error('Error fetching sales (server):', json)
+          setError('Error al cargar ventas')
+          setSales([])
         } else {
-          setSales(data || []);
+          setSales(json.data || [])
         }
       } catch (err) {
-        console.error('Exception fetching sales:', err);
-        setError('Error al cargar ventas');
-        setSales([]);
+        console.error('Exception fetching sales:', err)
+        setError('Error al cargar ventas')
+        setSales([])
       } finally {
-        setLoading(false);
+        setLoading(false)
       }
-    };
+    }
 
-    fetchSales();
+    fetchSales()
   }, [period]);
 
   const formatCurrency = (value: number) => {

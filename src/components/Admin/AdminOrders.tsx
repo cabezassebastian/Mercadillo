@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { Eye, Package, Truck, CheckCircle, XCircle, Send, PackageCheck, ChevronDown, X } from 'lucide-react'
 import { Pedido } from '@/lib/supabase'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { enviarEmailEnvio, enviarEmailEntrega } from '@/lib/emails'
 
 const AdminOrders: React.FC = () => {
@@ -41,17 +40,14 @@ const AdminOrders: React.FC = () => {
 
   const fetchPedidos = async () => {
     try {
-      const { data, error } = await supabaseAdmin
-        .from('pedidos')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) {
-        console.error('Error fetching orders:', error)
+      const res = await fetch('/api/admin/orders')
+      if (!res.ok) {
+        const err = await res.json()
+        console.error('Error fetching orders (api):', err)
         return
       }
-
-      setPedidos(data || [])
+      const json = await res.json()
+      setPedidos(json.data || [])
     } catch (error) {
       console.error('Error in fetchPedidos:', error)
     } finally {
@@ -62,29 +58,35 @@ const AdminOrders: React.FC = () => {
   const handleMarcarComoEnviado = async (pedido: Pedido) => {
     try {
       // Actualizar estado del pedido
-      const { error: updateError } = await supabaseAdmin
-        .from('pedidos')
-        .update({ 
-          estado: 'enviado',
-          fecha_envio: new Date().toISOString()
-        })
-        .eq('id', pedido.id)
+      // Update order via server endpoint
+      const updateRes = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: pedido.id, updates: { estado: 'enviado', fecha_envio: new Date().toISOString() } })
+      })
 
-      if (updateError) {
-        console.error('Error updating order:', updateError)
+      if (!updateRes.ok) {
+        const err = await updateRes.json()
+        console.error('Error updating order (api):', err)
         alert('Error al actualizar el pedido')
         return
       }
 
       // Obtener información del usuario
-      const { data: userData, error: userError } = await supabaseAdmin
-        .from('usuarios')
-        .select('email, nombre, apellido')
-        .eq('id', pedido.usuario_id)
-        .single()
+      // Try to fetch basic user info from server-side (we could have returned it in the orders endpoint)
+      let userData = null
+      try {
+        const ures = await fetch(`/api/admin/users?id=${pedido.usuario_id}`)
+        if (ures.ok) {
+          const uj = await ures.json()
+          userData = uj.data
+        }
+      } catch (e) {
+        console.warn('Could not fetch user data from admin/users endpoint:', e)
+      }
 
-      if (userError || !userData) {
-        console.error('Error fetching user data:', userError)
+      if (!userData) {
+        console.error('Missing user data for email')
         alert('Pedido actualizado pero no se pudo enviar el email')
         fetchPedidos()
         setSelectedPedido(null)
@@ -110,8 +112,8 @@ const AdminOrders: React.FC = () => {
         alert('Pedido marcado como enviado (email no enviado - requiere Vercel)')
       }
 
-      fetchPedidos()
-      setSelectedPedido(null)
+  fetchPedidos()
+  setSelectedPedido(null)
     } catch (error) {
       console.error('Error in handleMarcarComoEnviado:', error)
       alert('Error al procesar la acción')
@@ -121,29 +123,33 @@ const AdminOrders: React.FC = () => {
   const handleMarcarComoEntregado = async (pedido: Pedido) => {
     try {
       // Actualizar estado del pedido
-      const { error: updateError } = await supabaseAdmin
-        .from('pedidos')
-        .update({ 
-          estado: 'entregado',
-          fecha_entrega: new Date().toISOString()
-        })
-        .eq('id', pedido.id)
+      const updateRes = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: pedido.id, updates: { estado: 'entregado', fecha_entrega: new Date().toISOString() } })
+      })
 
-      if (updateError) {
-        console.error('Error updating order:', updateError)
+      if (!updateRes.ok) {
+        const err = await updateRes.json()
+        console.error('Error updating order (api):', err)
         alert('Error al actualizar el pedido')
         return
       }
 
       // Obtener información del usuario
-      const { data: userData, error: userError } = await supabaseAdmin
-        .from('usuarios')
-        .select('email, nombre, apellido')
-        .eq('id', pedido.usuario_id)
-        .single()
+      let userData = null
+      try {
+        const ures = await fetch(`/api/admin/users?id=${pedido.usuario_id}`)
+        if (ures.ok) {
+          const uj = await ures.json()
+          userData = uj.data
+        }
+      } catch (e) {
+        console.warn('Could not fetch user data from admin/users endpoint:', e)
+      }
 
-      if (userError || !userData) {
-        console.error('Error fetching user data:', userError)
+      if (!userData) {
+        console.error('Missing user data for email')
         alert('Pedido actualizado pero no se pudo enviar el email')
         fetchPedidos()
         setSelectedPedido(null)
@@ -599,16 +605,17 @@ const AdminOrders: React.FC = () => {
                       </label>
                       <div className="grid grid-cols-2 gap-2">
                         <button
-                          onClick={() => {
-                            supabaseAdmin
-                              .from('pedidos')
-                              .update({ estado: 'pendiente' })
-                              .eq('id', selectedPedido.id)
-                              .then(() => {
+                          onClick={async () => {
+                              const res = await fetch('/api/admin/orders', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: selectedPedido.id, updates: { estado: 'pendiente' } })
+                              })
+                              if (res.ok) {
                                 fetchPedidos()
                                 closeWithAnimation('modal')
-                              })
-                          }}
+                              }
+                            }}
                           disabled={selectedPedido.estado === 'pendiente'}
                           className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                             selectedPedido.estado === 'pendiente'
@@ -621,16 +628,17 @@ const AdminOrders: React.FC = () => {
                         </button>
                         
                         <button
-                          onClick={() => {
-                            supabaseAdmin
-                              .from('pedidos')
-                              .update({ estado: 'cancelado' })
-                              .eq('id', selectedPedido.id)
-                              .then(() => {
+                          onClick={async () => {
+                              const res = await fetch('/api/admin/orders', {
+                                method: 'PATCH',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ id: selectedPedido.id, updates: { estado: 'cancelado' } })
+                              })
+                              if (res.ok) {
                                 fetchPedidos()
                                 closeWithAnimation('modal')
-                              })
-                          }}
+                              }
+                            }}
                           disabled={selectedPedido.estado === 'cancelado'}
                           className={`flex items-center justify-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
                             selectedPedido.estado === 'cancelado'

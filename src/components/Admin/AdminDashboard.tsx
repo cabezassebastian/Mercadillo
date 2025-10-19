@@ -5,7 +5,6 @@ import SalesChart from './SalesChart'
 import TopProducts from './TopProducts'
 import LowStockAlert from './LowStockAlert'
 import ConversionRate from './ConversionRate'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 interface DashboardStats {
   totalProductos: number
@@ -15,13 +14,6 @@ interface DashboardStats {
   pedidosHoy: number
   pedidosMes: number
 }
-
-type Pedido = {
-  id: string;
-  total: number;
-  created_at: string;
-  estado?: string; // Hacemos 'estado' opcional
-};
 
 const AdminDashboard: React.FC = () => {
   const [stats, setStats] = useState<DashboardStats>({
@@ -37,44 +29,21 @@ const AdminDashboard: React.FC = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        // Obtener estadísticas básicas
-        const [productosResult, pedidosResult, usuariosResult] = await Promise.all([
-          supabaseAdmin.from('productos').select('id', { count: 'exact' }),
-          supabaseAdmin.from('pedidos').select('id, total, created_at, estado', { count: 'exact' }),
-          supabaseAdmin.from('usuarios').select('id', { count: 'exact' })
-        ])
+        // Fetch stats via server-side admin endpoint
+        const res = await fetch('/api/admin/stats')
+        const json = await res.json()
 
-        const typedPedidosData = (pedidosResult.data || []) as Pedido[]
-
-        const totalProductos = productosResult.count || 0
-        const totalPedidos = pedidosResult.count || 0
-        const totalUsuarios = usuariosResult.count || 0
-
-        // Calcular ingresos totales
-        const ingresosTotales = typedPedidosData.reduce((sum, pedido) => 
-          (pedido.estado && pedido.estado !== 'cancelado') ? sum + pedido.total : sum, 0
-        ) || 0
-
-        // Calcular pedidos de hoy
-        const hoy = new Date().toISOString().split('T')[0]
-        const pedidosHoy = typedPedidosData.filter(pedido => 
-          pedido.created_at.startsWith(hoy)
-        ).length || 0
-
-        // Calcular pedidos del mes
-        const inicioMes = new Date()
-        inicioMes.setDate(1)
-        const pedidosMes = typedPedidosData.filter(pedido => 
-          new Date(pedido.created_at) >= inicioMes
-        ).length || 0
+        if (!res.ok) {
+          throw new Error(JSON.stringify(json))
+        }
 
         setStats({
-          totalProductos,
-          totalPedidos,
-          totalUsuarios,
-          ingresosTotales,
-          pedidosHoy,
-          pedidosMes
+          totalProductos: json.totalProductos || 0,
+          totalPedidos: json.totalPedidos || 0,
+          totalUsuarios: json.totalUsuarios || 0,
+          ingresosTotales: json.ingresosTotales || 0,
+          pedidosHoy: json.pedidosHoy || 0,
+          pedidosMes: json.pedidosMes || 0
         })
       } catch (error) {
         console.error('Error fetching stats:', error)
