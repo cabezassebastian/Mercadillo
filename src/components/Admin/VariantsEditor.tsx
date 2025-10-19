@@ -3,16 +3,26 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin'
 
 type Option = { id: string; name: string; position: number }
 type Value = { id: string; value: string; position: number; metadata?: any }
+type Variant = {
+  id: string
+  product_id?: string
+  price?: number | null
+  stock?: number | null
+  is_active?: boolean
+  attributes?: Record<string, any>
+  option_value_ids?: Array<string | number>
+  // internal UI flag
+  __dirty?: boolean
+}
 
 export default function VariantsEditor({ productoId }: { productoId: string }) {
   const [options, setOptions] = useState<Option[]>([])
   const [valuesMap, setValuesMap] = useState<Record<string, Value[]>>({})
-  const [quickSelectedValues, setQuickSelectedValues] = useState<Record<string, boolean>>({})
   const [sizeSelections, setSizeSelections] = useState<Record<string, boolean>>({})
   const [colorSelections, setColorSelections] = useState<Record<string, boolean>>({})
   const [newOptionName, setNewOptionName] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [variants, setVariants] = useState<any[]>([])
+  const [variants, setVariants] = useState<Variant[]>([])
   const [autoGenerateOnSave, setAutoGenerateOnSave] = useState(true)
 
   useEffect(() => { loadOptions() }, [productoId])
@@ -37,12 +47,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       }
     }
     setValuesMap(map)
-    // reset quick selection when options change
-    const quick: Record<string, boolean> = {}
-    for (const k of Object.keys(map)) {
-      for (const v of map[k] || []) quick[String(v.id)] = false
-    }
-    setQuickSelectedValues(quick)
+    // reset quick selection when options change (legacy quick-values removed)
     // load variants
     const { data: vars } = await supabaseAdmin
       .from('product_variants')
@@ -107,9 +112,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     celeste: '#00bfff'
   }
 
-  // Predefined lists (can be expanded)
-  const PREDEF_SIZES = ['XS','S','M','L','XL','XXL']
-  const PREDEF_COLORS = Object.keys(spanishColorMap).map(k => ({ name: k, hex: spanishColorMap[k] }))
+  // Predefined lists (can be expanded) - inlined where used
 
   const getColorFromValue = (value: string) => {
     if (!value) return undefined
@@ -240,7 +243,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   }
 
   const handleVariantChange = (id: string, field: string, value: any) => {
-    setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value } : v))
+    setVariants(prev => prev.map(v => v.id === id ? { ...v, [field]: value, __dirty: true } : v))
   }
 
   const saveVariant = async (v: any) => {
@@ -253,8 +256,47 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
       attributes: v.attributes || {}
     }
     await supabaseAdmin.from('product_variants').update(payload).eq('id', v.id)
+    // mark saved locally
+    setVariants(prev => prev.map(x => x.id === v.id ? { ...x, ...payload, __dirty: false } : x))
     await loadOptions()
     setIsLoading(false)
+  }
+
+  const saveAllVariants = async () => {
+    const dirty = variants.filter(v => v.__dirty)
+    if (!dirty || dirty.length === 0) return alert('No hay cambios pendientes para guardar')
+    if (!confirm(`Guardar ${dirty.length} variantes con cambios?`)) return
+    setIsLoading(true)
+    try {
+      const ops = dirty.map(v => {
+        const rawPrice: any = (v as any).price
+        const rawStock: any = (v as any).stock
+        const payload: any = {
+          price: (typeof rawPrice === 'string' && rawPrice.trim() === '') ? null : (rawPrice == null ? null : Number(rawPrice)),
+          stock: (typeof rawStock === 'string' && rawStock.trim() === '') ? null : (rawStock == null ? null : Number(rawStock)),
+          is_active: v.is_active,
+          attributes: v.attributes || {}
+        }
+        return supabaseAdmin.from('product_variants').update(payload).eq('id', v.id).then(res => ({ res, id: v.id }))
+      })
+      const results = await Promise.all(ops)
+      const errs = results.map(r => (r.res as any).error).filter(Boolean)
+      if (errs.length) {
+        console.error('Errores al guardar variantes', errs)
+        alert('Algunas variantes no se pudieron guardar. Revisa la consola.')
+      } else {
+        // clear dirty flags for saved variants
+        const savedIds = results.map(r => r.id)
+        setVariants(prev => prev.map(v => savedIds.includes(v.id) ? { ...v, __dirty: false } : v))
+        alert(`Guardadas ${results.length} variantes correctamente`)
+      }
+      await loadOptions()
+    } catch (err) {
+      console.error(err)
+      alert('Error al guardar todas las variantes')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const deleteVariant = async (id: string) => {
@@ -403,15 +445,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
             <button className="btn-primary" onClick={async () => {
               setIsLoading(true)
               try {
-                // 1) persistir visible para valores existentes (quickSelectedValues)
-                const trueIds: string[] = []
-                const falseIds: string[] = []
-                for (const k of Object.keys(quickSelectedValues)) {
-                  if (quickSelectedValues[k]) trueIds.push(k)
-                  else falseIds.push(k)
-                }
-                if (trueIds.length) await supabaseAdmin.from('product_option_values').update({ visible: true }).in('id', trueIds)
-                if (falseIds.length) await supabaseAdmin.from('product_option_values').update({ visible: false }).in('id', falseIds)
+                // (legacy quick-values removed) We only persist sizeSelections and colorSelections
 
                 // 2) handle sizes: ensure option exists and values
                 const sizeOpt = options.find(o => /talla|size/i.test(String(o.name)))
@@ -488,169 +522,12 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
               }
             }}>Guardar todo</button>
 
-            <button className="btn-secondary" onClick={() => { setSizeSelections({}); setColorSelections({}); setQuickSelectedValues({}) }}>Reset</button>
+            <button className="btn-secondary" onClick={() => { setSizeSelections({}); setColorSelections({}) }}>Reset</button>
             </div>
           </div>
         </div>
 
-        {/* Quick-values panel: show all values grouped by option with toggles */}
-        <div className="border p-3 rounded mt-4">
-          <h4 className="font-semibold mb-2">Valores rápidos</h4>
-          <div className="flex gap-4 flex-wrap">
-            {Object.keys(valuesMap).map(optId => (
-              <div key={optId} className="min-w-[180px]">
-                <div className="text-sm font-medium mb-1">{(options.find(o => o.id === optId) || { name: '' }).name}</div>
-                <div className="flex flex-col gap-2">
-                  {(valuesMap[optId] || []).map(v => (
-                    <label key={v.id} className="flex items-center gap-2">
-                      <input type="checkbox" checked={!!quickSelectedValues[String(v.id)]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [String(v.id)]: e.target.checked }))} />
-                      <span className="inline-flex items-center gap-2">
-                        <span className="w-4 h-4 rounded" style={{ backgroundColor: v.metadata?.hex || getColorFromValue(v.value) }} />
-                        <span className="text-sm">{v.value}</span>
-                      </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="mt-3">
-            <div className="text-sm font-medium mb-2">Predefinidos</div>
-            <div className="flex gap-6">
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Tallas</div>
-                <div className="flex gap-2 flex-wrap">
-                  {PREDEF_SIZES.map(s => (
-                    <label key={s} className="inline-flex items-center gap-2">
-                      <input type="checkbox" checked={!!quickSelectedValues[`size:${s}`]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [`size:${s}`]: e.target.checked }))} />
-                      <span className="px-2 py-1 border rounded text-sm">{s}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <div className="text-xs text-gray-500 mb-1">Colores</div>
-                <div className="flex gap-2 flex-wrap items-center">
-                  {PREDEF_COLORS.map(c => (
-                    <label key={c.name} className="inline-flex items-center gap-2">
-                      <input type="checkbox" checked={!!quickSelectedValues[`color:${c.name}`]} onChange={(e) => setQuickSelectedValues(prev => ({ ...prev, [`color:${c.name}`]: e.target.checked }))} />
-                      <span className="w-6 h-6 rounded border" style={{ backgroundColor: c.hex }} />
-                      <span className="text-sm">{c.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-            <div className="mt-3 flex gap-2">
-            <button className="btn-primary" onClick={async () => {
-              // Build a batch of updates/creates and POST to admin endpoint for atomic handling
-              setIsLoading(true)
-              try {
-                const updates: any[] = []
-                // For each option, look for size/color semantics
-                for (const opt of options) {
-                  const isSize = /talla|size/i.test(String(opt.name))
-                  const isColor = /color/i.test(String(opt.name))
-                  if (isSize) {
-                    for (const s of PREDEF_SIZES) {
-                      const key = `size:${s}`
-                      const shouldExist = !!quickSelectedValues[key]
-                      const existing = (valuesMap[opt.id] || []).find(v => String(v.value).toUpperCase() === String(s).toUpperCase())
-                      if (shouldExist) {
-                        if (!existing) {
-                          updates.push({ create: { option_id: opt.id, value: s, visible: true } })
-                        } else {
-                          updates.push({ id: existing.id, visible: true })
-                        }
-                      } else {
-                        if (existing) updates.push({ id: existing.id, visible: false })
-                      }
-                    }
-                  }
-                  if (isColor) {
-                    for (const c of PREDEF_COLORS) {
-                      const key = `color:${c.name}`
-                      const shouldExist = !!quickSelectedValues[key]
-                      const existing = (valuesMap[opt.id] || []).find(v => String(v.value).toLowerCase() === String(c.name).toLowerCase() || (v.metadata && v.metadata.hex && String(v.metadata.hex).toLowerCase() === String(c.hex).toLowerCase()))
-                      if (shouldExist) {
-                        if (!existing) {
-                          updates.push({ create: { option_id: opt.id, value: c.name, visible: true, metadata: { hex: c.hex } } })
-                        } else {
-                          updates.push({ id: existing.id, visible: true, metadata: { ...(existing.metadata || {}), hex: c.hex } })
-                        }
-                      } else {
-                        if (existing) updates.push({ id: existing.id, visible: false })
-                      }
-                    }
-                  }
-                }
-
-                // Normalize into payload: existing updates and creations separated
-                const payloadUpdates: any[] = []
-                const payloadCreates: any[] = []
-                for (const u of updates) {
-                  if ((u as any).create) payloadCreates.push((u as any).create)
-                  else payloadUpdates.push(u)
-                }
-
-                // First, create new values via supabaseAdmin directly (we need the new ids)
-                if (payloadCreates.length > 0) {
-                  await supabaseAdmin.from('product_option_values').insert(payloadCreates)
-                }
-
-                // Now, use the admin batch API to update existing ones (visible/metadata)
-                if (payloadUpdates.length > 0) {
-                  // map to the endpoint's expected shape
-                  const body = { updates: payloadUpdates.map(u => ({ id: u.id, visible: u.visible, metadata: u.metadata })) }
-                  const resp = await fetch('/api/admin/option-values/batch-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-                  if (!resp.ok) throw new Error('Batch update failed')
-                }
-
-                await loadOptions()
-                alert('Guardado de predefinidos completado')
-              } catch (err) {
-                console.error(err)
-                alert('Error al guardar predefinidos')
-              } finally {
-                setIsLoading(false)
-              }
-            }}>Activar seleccionadas</button>
-            <button className="btn-secondary" onClick={async () => {
-              const checked = Object.keys(quickSelectedValues).filter(k => quickSelectedValues[k])
-              if (checked.length === 0) return alert('Selecciona al menos un valor')
-              setIsLoading(true)
-              try {
-                const updates: any[] = []
-                for (const k of checked) {
-                  const [type, raw] = k.split(':')
-                  for (const opt of options) {
-                    const vals = valuesMap[opt.id] || []
-                    if (/talla|size/i.test(String(opt.name)) && type === 'size') {
-                      const ex = vals.find(v => String(v.value).toUpperCase() === raw.toUpperCase())
-                      if (ex) updates.push({ id: ex.id, visible: false })
-                    }
-                    if (/color/i.test(String(opt.name)) && type === 'color') {
-                      const ex = vals.find(v => String(v.value).toLowerCase() === raw.toLowerCase() || (v.metadata && v.metadata.hex && String(v.metadata.hex).toLowerCase() === String(raw).toLowerCase()))
-                      if (ex) updates.push({ id: ex.id, visible: false })
-                    }
-                  }
-                }
-                if (updates.length > 0) {
-                  const resp = await fetch('/api/admin/option-values/batch-update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
-                  if (!resp.ok) throw new Error('Batch update failed')
-                }
-                await loadOptions()
-                alert('Desactivado para seleccionados')
-              } catch (err) {
-                console.error(err)
-                alert('Error al desactivar')
-              } finally {
-                setIsLoading(false)
-              }
-            }}>Desactivar seleccionadas</button>
-          </div>
-        </div>
+        {/* Quick-values removed to simplify UI; Predefinidos handled above with sizeSelections/colorSelections */}
 
         <div className="pt-4">
           <button className="btn-primary" onClick={generateVariants} disabled={isLoading}>Generar variantes automáticas (aplica regla S/M/L)</button>
@@ -739,6 +616,10 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
               </div>
             )
           })}
+          <div className="mt-4 flex gap-2">
+            <button className="btn-primary" onClick={saveAllVariants} disabled={isLoading}>Guardar todos</button>
+            <button className="btn-secondary" onClick={() => loadOptions()} disabled={isLoading}>Refrescar</button>
+          </div>
         </div>
       </div>
     </div>
