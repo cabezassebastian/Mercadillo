@@ -7,6 +7,12 @@ import { createUserProfile } from '@/lib/userProfile'
 let cachedToken: string | null = null
 let tokenPromise: Promise<string | null> | null = null
 
+// Allow other modules (fetch interceptor) to clear Clerk token cache when needed
+;(window as any).__clearClerkTokenCache = () => {
+	cachedToken = null
+	tokenPromise = null
+}
+
 // 🎯 Track if we've already created the user profile to avoid duplicates
 const processedUsers = new Set<string>()
 const lastSyncedData = new Map<string, string>() // Track last synced data to detect changes
@@ -20,28 +26,28 @@ const AuthSync = () => {
 		if (!isLoaded) return
 
 		// 💾 Expose a getter that returns the cached token OR fetches it
-		;(window as any).__getClerkToken = async () => {
-			// If we already have a token, return it immediately
-			if (cachedToken) return cachedToken
-			
-			// If already fetching, wait for that promise
-			if (tokenPromise) return tokenPromise
-			
-			// Otherwise, fetch the token
-			if (session) {
-				tokenPromise = session.getToken({ template: 'supabase' }).then(token => {
-					cachedToken = token
-					tokenPromise = null
-					return token
-				}).catch(() => {
-					tokenPromise = null
-					return null
-				})
-				return tokenPromise
+			;(window as any).__getClerkToken = async () => {
+				// If we already have a token, return it immediately
+				if (cachedToken) return cachedToken
+
+				// If already fetching, wait for that promise
+				if (tokenPromise) return tokenPromise
+
+				// Otherwise, fetch the token
+				if (session) {
+					tokenPromise = session.getToken({ template: 'supabase' }).then(token => {
+						cachedToken = token
+						tokenPromise = null
+						return token
+					}).catch(() => {
+						tokenPromise = null
+						return null
+					})
+					return tokenPromise
+				}
+
+				return null
 			}
-			
-			return null
-		}
 
 		const sync = async () => {
 			if (session && user) {
@@ -51,12 +57,10 @@ const AuthSync = () => {
 						// 💾 Cache the token
 						cachedToken = token
 						
-						// Try to set session on supabase client
-						try {
-							await supabase.auth.setSession({ access_token: token, refresh_token: '' })
-						} catch (e) {
-							// If setSession fails, that's OK - we'll use the token directly
-						}
+						// We intentionally DO NOT call `supabase.auth.setSession` here.
+						// Creating sessions with the Supabase client in the browser may
+						// instantiate GoTrue clients and lead to the "Multiple GoTrueClient instances" warning.
+						// Instead, fetch calls include the Clerk token via the global getter.
 						
 						// 🎉 Check and sync user profile
 						if (!hasProcessedUser.current && !processedUsers.has(user.id)) {
@@ -147,17 +151,10 @@ const AuthSync = () => {
 					console.error('AuthSync: error getting Clerk token', err)
 				}
 			} else {
-				// No clerk session: clear cache
+				// No clerk session: clear cache and don't touch supabase client auth
 				cachedToken = null
+				tokenPromise = null
 				hasProcessedUser.current = false
-				try {
-					const { data } = await supabase.auth.getSession()
-					if (data?.session) {
-						await supabase.auth.signOut()
-					}
-				} catch (e) {
-					// ignore
-				}
 			}
 		}
 
