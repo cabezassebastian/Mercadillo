@@ -20,7 +20,9 @@
 import { VercelRequest, VercelResponse } from '@vercel/node'
 import { createClient } from '@supabase/supabase-js'
 
-import { topProductsHandler } from '../../server/admin_handlers/topProducts'
+// `topProducts` handler is imported dynamically below to avoid bundling
+// it into the top-level function. Static import here caused Vercel to try to
+// resolve the module at build time and fail in some deployment scenarios.
 import { salesHandler } from '../../server/admin_handlers/sales'
 import { productImagesHandler } from '../../server/admin_handlers/productImages'
 
@@ -38,6 +40,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Top products
     if (act === 'top-products') {
+      const { topProductsHandler } = await import('../../server/admin_handlers/topProducts')
       return topProductsHandler(req, res, supabase)
     }
 
