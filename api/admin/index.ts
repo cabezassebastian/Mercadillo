@@ -23,8 +23,7 @@ import { createClient } from '@supabase/supabase-js'
 // `topProducts` handler is imported dynamically below to avoid bundling
 // it into the top-level function. Static import here caused Vercel to try to
 // resolve the module at build time and fail in some deployment scenarios.
-import { salesHandler } from '../../server/admin_handlers/sales'
-import { productImagesHandler } from '../../server/admin_handlers/productImages'
+// handlers imported dynamically below to avoid bundling/resolution issues on Vercel
 
 const supabase = createClient(
   process.env.SUPABASE_URL || '',
@@ -46,6 +45,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Sales (day/week/month)
     if (act === 'sales') {
+      const { salesHandler } = await import('../../server/admin_handlers/sales')
       return salesHandler(req, res, supabase)
     }
 
@@ -79,6 +79,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Product images CRUD
     if (act === 'product-images') {
+      const { productImagesHandler } = await import('../../server/admin_handlers/productImages')
       return productImagesHandler(req, res, supabase)
     }
 
