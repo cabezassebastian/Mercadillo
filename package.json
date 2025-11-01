@@ -10,7 +10,11 @@
     "preview": "vite preview",
     "setup": "node setup.cjs",
     "configure": "node configure-keys.cjs",
-    "verify": "node verify-setup.cjs"
+    "verify": "node verify-setup.cjs",
+    "supabase:deploy": "pwsh -File deploy-supabase-functions.ps1",
+    "supabase:local": "pwsh -File test-functions-local.ps1",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link --project-ref xwubnuokmfghtyyfpgtl"
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.46.1",
