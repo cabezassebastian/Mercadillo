@@ -16,7 +16,7 @@ const USE_SUPABASE_FUNCTIONS = {
   checkout: true,    // ✅ Migrada - Fase 2
   emails: true,      // ✅ Migrada - Fase 2
   mercadopago: true, // ✅ Migrada - Fase 2
-  chat: false,       // ⏸️ Pendiente - Fase 3
+  chat: true,        // ✅ Migrada - Fase 3
 }
 
 /**
@@ -166,13 +166,13 @@ export const MIGRATION_STATUS = {
     migratedAt: '2025-11-02',
   },
   phase3: {
-    status: 'pending',
+    status: 'completed',
     functions: ['chat'],
-    estimatedDate: 'TBD',
+    migratedAt: '2025-11-02',
   },
-  totalFunctions: 12,
-  migratedFunctions: 7,
-  progress: '58%',
+  totalFunctions: 8,
+  migratedFunctions: 8,
+  progress: '100%',
 }
 
 // Log de configuración en desarrollo
