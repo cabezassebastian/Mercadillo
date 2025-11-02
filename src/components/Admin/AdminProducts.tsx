@@ -4,7 +4,7 @@ import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import ProductImageManager from './ProductImageManager'
-import VariantsEditor from './VariantsEditor.tsx'
+import VariantsEditorNew from './VariantsEditorNew'
 
 const AdminProducts: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([])
@@ -565,11 +565,18 @@ const AdminProducts: React.FC = () => {
 
       {isVariantsOpen && editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">Variantes — {editingProduct.nombre}</h3>
-            <VariantsEditor productoId={editingProduct.id} />
-            <div className="mt-4 text-right">
-              <button onClick={() => { setIsVariantsOpen(false); fetchProductos(); }} className="btn-secondary">Cerrar</button>
+          <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">
+              📦 Administrar Variantes — {editingProduct.nombre}
+            </h3>
+            <VariantsEditorNew productoId={editingProduct.id} />
+            <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700 flex justify-end">
+              <button 
+                onClick={() => { setIsVariantsOpen(false); fetchProductos(); }} 
+                className="btn-primary"
+              >
+                Cerrar y Guardar
+              </button>
             </div>
           </div>
         </div>

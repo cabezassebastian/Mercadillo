@@ -391,20 +391,55 @@ const AdminOrders: React.FC = () => {
                 </h4>
                 <div className="space-y-4">
                   {selectedPedido.items.map((item, index) => (
-                    <div key={index} className="flex items-center space-x-4 p-4 border border-gray-200 rounded-lg">
-                      <div className="w-16 h-16 overflow-hidden rounded-lg bg-gray-100">
+                    <div key={index} className="flex items-start space-x-4 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800">
+                      <div className="w-16 h-16 flex-shrink-0 overflow-hidden rounded-lg bg-gray-100">
                         <img
                           src={item.imagen}
                           alt={item.nombre}
                           className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="flex-1">
-                        <h5 className="font-medium text-gris-oscuro">{item.nombre}</h5>
-                        <p className="text-sm text-gray-600">Cantidad: {item.cantidad}</p>
-                        <p className="text-sm font-medium text-dorado">
-                          {formatPrice(item.precio * item.cantidad)}
-                        </p>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="font-medium text-gris-oscuro dark:text-gray-100 mb-1">
+                          {item.nombre}
+                        </h5>
+                        
+                        {/* Mostrar variante si existe */}
+                        {item.variant_name && (
+                          <div className="mb-2">
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Variante:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {item.variant_name.split(',').map((option: string, idx: number) => {
+                                const [optName, optValue] = option.split(':').map((s: string) => s.trim())
+                                return (
+                                  <span 
+                                    key={idx}
+                                    className="inline-flex items-center px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium"
+                                  >
+                                    <span className="text-gray-600 dark:text-gray-400">{optName}:</span>
+                                    <span className="ml-1">{optValue}</span>
+                                  </span>
+                                )
+                              })}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* SKU si existe */}
+                        {item.sku && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mb-1">
+                            SKU: {item.sku}
+                          </p>
+                        )}
+                        
+                        <div className="flex items-center justify-between mt-2">
+                          <p className="text-sm text-gray-600 dark:text-gray-400">
+                            Cantidad: <span className="font-medium text-gris-oscuro dark:text-gray-100">{item.cantidad}</span>
+                          </p>
+                          <p className="text-sm font-semibold text-dorado">
+                            {formatPrice(item.precio * item.cantidad)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}

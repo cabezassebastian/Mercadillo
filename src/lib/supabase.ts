@@ -84,4 +84,12 @@ export interface PedidoItem {
   precio: number
   nombre: string
   imagen: string
+  variant_id?: string
+  variant_name?: string
+  sku?: string
+  opciones?: Array<{
+    option_name: string
+    option_value: string
+    metadata?: { hex?: string }
+  }>
 }
