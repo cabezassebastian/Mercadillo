@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
-import { API_ENDPOINTS } from '../../config/api'
+import { fetchAdmin } from '../../lib/adminApi'
 
 type Option = { id: string; name: string; position: number }
 type Value = { id: string; value: string; position: number; metadata?: any }
@@ -31,34 +31,22 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
   const loadOptions = async () => {
     // Read options and values from server endpoint to avoid admin client usage in browser
     try {
-      const res = await fetch(API_ENDPOINTS.admin(`options&productId=${encodeURIComponent(productoId)}`))
-      const json = await res.json()
-      if (!res.ok) {
-        console.error('Error fetching options from server:', json)
-        setOptions([])
-        setValuesMap({})
-      } else {
-        const opts = json.options || []
-        const vals = json.values || []
-        setOptions(opts)
-        const map: Record<string, Value[]> = {}
-        for (const v of vals) {
-          const optId = (v.option_id || v.optionId || v.option) as string
-          if (!map[optId]) map[optId] = []
-          map[optId].push(v)
-        }
-        setValuesMap(map)
+      const json = await fetchAdmin(`options&productId=${encodeURIComponent(productoId)}`)
+      
+      const opts = json.options || []
+      const vals = json.values || []
+      setOptions(opts)
+      const map: Record<string, Value[]> = {}
+      for (const v of vals) {
+        const optId = (v.option_id || v.optionId || v.option) as string
+        if (!map[optId]) map[optId] = []
+        map[optId].push(v)
       }
+      setValuesMap(map)
 
       // load variants via server endpoint
-      const vres = await fetch(API_ENDPOINTS.admin(`variants&productId=${encodeURIComponent(productoId)}`))
-      const vjson = await vres.json()
-      if (!vres.ok) {
-        console.error('Error fetching variants from server:', vjson)
-        setVariants([])
-      } else {
-        setVariants(vjson.data || [])
-      }
+      const vjson = await fetchAdmin(`variants&productId=${encodeURIComponent(productoId)}`)
+      setVariants(vjson.data || [])
     } catch (err) {
       console.error('Error in loadOptions:', err)
       setOptions([])
@@ -159,14 +147,12 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     // Fetch product base price and options/values from server endpoints
     let basePrice = 0
     try {
-      const pRes = await fetch(API_ENDPOINTS.admin(`product-info&id=${encodeURIComponent(productoId)}`))
-      const pjson = await pRes.json()
-      if (pRes.ok && pjson.data) basePrice = pjson.data.precio || 0
+      const pjson = await fetchAdmin(`product-info&id=${encodeURIComponent(productoId)}`)
+      if (pjson.data) basePrice = pjson.data.precio || 0
 
-      const optsRes = await fetch(API_ENDPOINTS.admin(`options&productId=${encodeURIComponent(productoId)}`))
-      const optsJson = await optsRes.json()
-  const opts = optsJson.options || []
-
+      const optsJson = await fetchAdmin(`options&productId=${encodeURIComponent(productoId)}`)
+      const opts = optsJson.options || []
+      
       const localValuesMap: Record<string, Value[]> = {}
     const optionLists: Value[][] = []
     if (!opts || opts.length === 0) {
@@ -189,8 +175,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
         const { error: insertValsErr } = await supabaseAdmin.from('product_option_values').insert(toInsert)
         if (insertValsErr) console.error('Error inserting default sizes', insertValsErr)
         // reload from server endpoint
-        const reRes = await fetch(API_ENDPOINTS.admin(`options&productId=${encodeURIComponent(productoId)}`))
-        const reJson = await reRes.json()
+        const reJson = await fetchAdmin(`options&productId=${encodeURIComponent(productoId)}`)
         const reVals = reJson.values || []
         vals = reVals.filter((v: any) => v.option_id === o.id)
       }
@@ -209,8 +194,7 @@ export default function VariantsEditor({ productoId }: { productoId: string }) {
     }
 
     // Avoid duplicates: fetch existing variants keys via server endpoint
-    const evRes = await fetch(API_ENDPOINTS.admin(`variants&productId=${encodeURIComponent(productoId)}`))
-    const evJson = await evRes.json()
+    const evJson = await fetchAdmin(`variants&productId=${encodeURIComponent(productoId)}`)
     const existingVariants = evJson.data || []
 
     const existingSets = new Set((existingVariants || []).map((ev: any) => JSON.stringify((ev.option_value_ids || []).map(String).sort())))

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 // Server-side admin endpoints used via /api/admin/*
 import { AlertTriangle, Package, Edit, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { API_ENDPOINTS } from '../../config/api';
+import { fetchAdmin } from '../../lib/adminApi';
 
 type LowStockProduct = {
   id: string;
@@ -24,24 +24,8 @@ export default function LowStockAlert() {
       
       try {
         // Call server-side admin endpoint which runs the RPC with service role key
-        const res = await fetch(API_ENDPOINTS.admin('metrics&sub=low_stock&threshold=5'))
-        const json = await res.json()
-
-        if (!res.ok) {
-          console.warn('RPC get_low_stock_products not available (server):', json)
-          // Fallback: call public client via regular query (uses public anon key)
-          const publicRes = await fetch('/api/products?low_stock=5')
-          // If you don't have a public API, fallback to empty list to avoid crashes
-          if (!publicRes.ok) {
-            setLowStockProducts([])
-            setError('Error al cargar productos con bajo stock')
-          } else {
-            const publicJson = await publicRes.json()
-            setLowStockProducts(publicJson.data || [])
-          }
-        } else {
-          setLowStockProducts(json.data || [])
-        }
+        const json = await fetchAdmin('metrics&sub=low_stock&threshold=5')
+        setLowStockProducts(json.data || [])
       } catch (err) {
         console.error('Exception fetching low stock:', err);
         setError('Error al cargar productos con bajo stock');

@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Eye, Package, Truck, CheckCircle, XCircle, Send, PackageCheck, ChevronDown, X } from 'lucide-react'
 import { Pedido } from '@/lib/supabase'
 import { enviarEmailEnvio, enviarEmailEntrega } from '@/lib/emails'
-import { API_ENDPOINTS } from '../../config/api'
+import { fetchAdmin } from '../../lib/adminApi'
 
 const AdminOrders: React.FC = () => {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
@@ -41,13 +41,7 @@ const AdminOrders: React.FC = () => {
 
   const fetchPedidos = async () => {
     try {
-      const res = await fetch(API_ENDPOINTS.admin('orders'))
-      if (!res.ok) {
-        const err = await res.json()
-        console.error('Error fetching orders (api):', err)
-        return
-      }
-      const json = await res.json()
+      const json = await fetchAdmin('orders')
       setPedidos(json.data || [])
     } catch (error) {
       console.error('Error in fetchPedidos:', error)
@@ -59,29 +53,16 @@ const AdminOrders: React.FC = () => {
   const handleMarcarComoEnviado = async (pedido: Pedido) => {
     try {
       // Actualizar estado del pedido
-      // Update order via server endpoint
-      const updateRes = await fetch(API_ENDPOINTS.admin('orders'), {
+      await fetchAdmin('orders', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: pedido.id, updates: { estado: 'enviado', fecha_envio: new Date().toISOString() } })
       })
 
-      if (!updateRes.ok) {
-        const err = await updateRes.json()
-        console.error('Error updating order (api):', err)
-        alert('Error al actualizar el pedido')
-        return
-      }
-
       // Obtener información del usuario
-      // Try to fetch basic user info from server-side (we could have returned it in the orders endpoint)
       let userData = null
       try {
-        const ures = await fetch(API_ENDPOINTS.admin(`users&id=${pedido.usuario_id}`))
-        if (ures.ok) {
-          const uj = await ures.json()
-          userData = uj.data
-        }
+        const uj = await fetchAdmin(`users&id=${pedido.usuario_id}`)
+        userData = uj.data
       } catch (e) {
         console.warn('Could not fetch user data from admin/users endpoint:', e)
       }
@@ -124,27 +105,16 @@ const AdminOrders: React.FC = () => {
   const handleMarcarComoEntregado = async (pedido: Pedido) => {
     try {
       // Actualizar estado del pedido
-      const updateRes = await fetch(API_ENDPOINTS.admin('orders'), {
+      await fetchAdmin('orders', {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: pedido.id, updates: { estado: 'entregado', fecha_entrega: new Date().toISOString() } })
       })
-
-      if (!updateRes.ok) {
-        const err = await updateRes.json()
-        console.error('Error updating order (api):', err)
-        alert('Error al actualizar el pedido')
-        return
-      }
 
       // Obtener información del usuario
       let userData = null
       try {
-        const ures = await fetch(API_ENDPOINTS.admin(`users&id=${pedido.usuario_id}`))
-        if (ures.ok) {
-          const uj = await ures.json()
-          userData = uj.data
-        }
+        const uj = await fetchAdmin(`users&id=${pedido.usuario_id}`)
+        userData = uj.data
       } catch (e) {
         console.warn('Could not fetch user data from admin/users endpoint:', e)
       }

@@ -5,7 +5,7 @@ import SalesChart from './SalesChart'
 import TopProducts from './TopProducts'
 import LowStockAlert from './LowStockAlert'
 import ConversionRate from './ConversionRate'
-import { API_ENDPOINTS } from '../../config/api'
+import { fetchAdmin } from '../../lib/adminApi'
 
 interface DashboardStats {
   totalProductos: number
@@ -31,12 +31,7 @@ const AdminDashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         // Fetch stats via server-side admin endpoint
-        const res = await fetch(API_ENDPOINTS.admin('stats'))
-        const json = await res.json()
-
-        if (!res.ok) {
-          throw new Error(JSON.stringify(json))
-        }
+        const json = await fetchAdmin('stats')
 
         setStats({
           totalProductos: json.totalProductos || 0,

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Upload, Trash2, Star, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
 import { ProductoImagen } from '@/lib/supabase';
 import { uploadImage } from '@/lib/cloudinary';
-import { API_ENDPOINTS } from '../../config/api';
+import { fetchAdmin } from '../../lib/adminApi';
 
 interface ProductImageManagerProps {
   productoId: string;
@@ -20,14 +20,8 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const fetchImagenes = async () => {
     try {
-      const res = await fetch(API_ENDPOINTS.admin(`product-images&productId=${encodeURIComponent(productoId)}`))
-      const json = await res.json()
-      if (!res.ok) {
-        console.error('Error fetching images (server):', json)
-        setImagenes([])
-      } else {
-        setImagenes(json.data || [])
-      }
+      const json = await fetchAdmin(`product-images&productId=${encodeURIComponent(productoId)}`)
+      setImagenes(json.data || [])
     } catch (error) {
       console.error('Error in fetchImagenes:', error);
     } finally {
@@ -58,12 +52,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           es_principal: imagenes.length === 0 && i === 0,
           alt_text: `Imagen ${imagenes.length + i + 1}`
         }
-        const res = await fetch(API_ENDPOINTS.admin('product-images'), { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
-        const json = await res.json()
-        if (!res.ok) {
-          console.error('Error inserting image (server):', json)
-          alert('Error al guardar imagen')
-        }
+        await fetchAdmin('product-images', { method: 'POST', body: JSON.stringify(body) })
       }
 
       await fetchImagenes();
@@ -80,14 +69,8 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     try {
       // Primero desmarcar todas las imágenes principales
       // Use server endpoints to update principal flag
-      await fetch(API_ENDPOINTS.admin('product-images'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
-      const res = await fetch(API_ENDPOINTS.admin('product-images'), { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
-      const json = await res.json()
-      if (!res.ok) {
-        console.error('Error setting principal (server):', json)
-        alert('Error al marcar imagen principal')
-        return
-      }
+      await fetchAdmin('product-images', { method: 'PUT', body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
+      await fetchAdmin('product-images', { method: 'PUT', body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
 
       await fetchImagenes()
       if (onImagesChange) onImagesChange()
@@ -122,7 +105,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     try {
         // Update order via server endpoint batch updates
         const updates = newImagenes.map((img, i) => ({ id: img.id, updates: { orden: i } }))
-        await fetch(API_ENDPOINTS.admin('product-images'), { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ updates }) })
+        await fetchAdmin('product-images', { method: 'PATCH', body: JSON.stringify({ updates }) })
         setImagenes(newImagenes)
         if (onImagesChange) onImagesChange()
     } catch (error) {
@@ -134,13 +117,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     if (!confirm('¿Eliminar esta imagen?')) return;
 
     try {
-      const res = await fetch(API_ENDPOINTS.admin(`product-images&id=${encodeURIComponent(imagenId)}`), { method: 'DELETE' })
-      const json = await res.json()
-      if (!res.ok) {
-        console.error('Error deleting image (server):', json)
-        alert('Error al eliminar imagen')
-        return
-      }
+      await fetchAdmin(`product-images&id=${encodeURIComponent(imagenId)}`, { method: 'DELETE' })
 
       await fetchImagenes()
       if (onImagesChange) onImagesChange()
