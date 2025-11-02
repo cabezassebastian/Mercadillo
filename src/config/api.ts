@@ -10,12 +10,12 @@ const SUPABASE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`
 
 // Feature flags para habilitar/deshabilitar funciones migradas
 const USE_SUPABASE_FUNCTIONS = {
-  products: true,    // ✅ Migrada
-  orders: true,      // ✅ Migrada
-  admin: true,       // ✅ Migrada
-  checkout: false,   // ⏸️ Pendiente - Fase 2
-  emails: false,     // ⏸️ Pendiente - Fase 2
-  mercadopago: false,// ⏸️ Pendiente - Fase 3
+  products: true,    // ✅ Migrada - Fase 1
+  orders: true,      // ✅ Migrada - Fase 1
+  admin: true,       // ✅ Migrada - Fase 1
+  checkout: true,    // ✅ Migrada - Fase 2
+  emails: true,      // ✅ Migrada - Fase 2
+  mercadopago: true, // ✅ Migrada - Fase 2
   chat: false,       // ⏸️ Pendiente - Fase 3
 }
 
@@ -161,18 +161,18 @@ export const MIGRATION_STATUS = {
     migratedAt: '2025-11-01',
   },
   phase2: {
-    status: 'pending',
-    functions: ['checkout', 'emails'],
-    estimatedDate: 'TBD',
+    status: 'completed',
+    functions: ['checkout', 'emails', 'mercadopago-preference', 'mercadopago-webhook'],
+    migratedAt: '2025-11-02',
   },
   phase3: {
     status: 'pending',
-    functions: ['mercadopago', 'chat'],
+    functions: ['chat'],
     estimatedDate: 'TBD',
   },
   totalFunctions: 12,
-  migratedFunctions: 3,
-  progress: '25%',
+  migratedFunctions: 7,
+  progress: '58%',
 }
 
 // Log de configuración en desarrollo
