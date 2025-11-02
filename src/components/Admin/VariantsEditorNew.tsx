@@ -379,15 +379,17 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     try {
       if (template === 'ropa') {
         // Crear opción Talla
-        const { data: tallaOpt } = await supabaseAdmin
+        const { data: tallaOpt, error: tallaError } = await supabaseAdmin
           .from('product_options')
           .insert([{ product_id: productoId, name: 'Talla', position: 0 }])
           .select()
           .single()
         
+        if (tallaError) throw tallaError
+        
         if (tallaOpt) {
           const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-          await supabaseAdmin
+          const { error: tallasError } = await supabaseAdmin
             .from('product_option_values')
             .insert(tallas.map((t, i) => ({
               option_id: tallaOpt.id,
@@ -395,14 +397,18 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
               position: i,
               visible: true
             })))
+          
+          if (tallasError) throw tallasError
         }
         
         // Crear opción Color
-        const { data: colorOpt } = await supabaseAdmin
+        const { data: colorOpt, error: colorError } = await supabaseAdmin
           .from('product_options')
           .insert([{ product_id: productoId, name: 'Color', position: 1 }])
           .select()
           .single()
+        
+        if (colorError) throw colorError
         
         if (colorOpt) {
           const colores = [
@@ -411,7 +417,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
             { value: 'Azul', hex: '#007bff' },
             { value: 'Rojo', hex: '#dc3545' }
           ]
-          await supabaseAdmin
+          const { error: coloresError } = await supabaseAdmin
             .from('product_option_values')
             .insert(colores.map((c, i) => ({
               option_id: colorOpt.id,
@@ -420,14 +426,21 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
               position: i,
               visible: true
             })))
+          
+          if (coloresError) throw coloresError
         }
       }
       
+      // Recargar datos
       await loadData()
-      alert('Plantilla aplicada exitosamente')
+      
+      // Cambiar automáticamente al paso 2 para que vea los valores
+      setCurrentStep('values')
+      
+      alert('✅ Plantilla aplicada exitosamente!\n\n- Opción "Talla" creada con 6 valores (XS-XXL)\n- Opción "Color" creada con 4 valores\n\nAhora puedes ir al Paso 3 para generar las variantes.')
     } catch (error) {
       console.error('Error applying template:', error)
-      alert('Error al aplicar plantilla')
+      alert('❌ Error al aplicar plantilla: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -498,19 +511,28 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
           {/* Plantillas rápidas */}
           <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
             <h4 className="font-semibold mb-3">🚀 Plantillas Rápidas</h4>
-            <div className="flex gap-2">
-              <button
-                onClick={() => applyQuickTemplate('ropa')}
-                disabled={isLoading || options.length > 0}
-                className="btn-secondary flex-1"
-              >
-                👕 Ropa (Talla + Color)
-              </button>
-            </div>
-            {options.length > 0 && (
-              <p className="text-xs text-gray-500 mt-2">
-                * Las plantillas solo están disponibles cuando no hay opciones creadas
-              </p>
+            {isLoading ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-amarillo mx-auto mb-2"></div>
+                <p className="text-sm text-gray-600">Creando opciones y valores...</p>
+              </div>
+            ) : (
+              <>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => applyQuickTemplate('ropa')}
+                    disabled={isLoading || options.length > 0}
+                    className="btn-secondary flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    👕 Ropa (Talla + Color)
+                  </button>
+                </div>
+                {options.length > 0 && (
+                  <p className="text-xs text-gray-500 mt-2">
+                    * Las plantillas solo están disponibles cuando no hay opciones creadas
+                  </p>
+                )}
+              </>
             )}
           </div>
 
