@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { supabaseAdmin } from '@/lib/supabaseAdmin'
 import { fetchAdmin } from '../../lib/adminApi'
 import { Plus, Trash2, RefreshCw, Package, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
 
@@ -78,18 +77,16 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       })
       setOptionValues(valuesMap)
 
-      // Cargar variantes usando la nueva vista SQL
-      const { data: variantsData, error } = await supabaseAdmin
-        .from('variantes_con_detalles')
-        .select('*')
-        .eq('product_id', productoId)
-        .order('variante_nombre')
+      // Cargar variantes usando la nueva vista SQL a través del backend
+      const variantsResponse = await fetchAdmin(`get-variants?product_id=${productoId}`, {
+        method: 'GET'
+      })
       
-      if (error) {
-        console.error('Error loading variants:', error)
+      if (variantsResponse.error) {
+        console.error('Error loading variants:', variantsResponse.error)
         setVariants([])
       } else {
-        setVariants(variantsData || [])
+        setVariants(variantsResponse.data || [])
       }
     } catch (error) {
       console.error('Error in loadData:', error)
@@ -106,23 +103,25 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
-      const { data, error } = await supabaseAdmin
-        .from('product_options')
-        .insert([{ 
+      // Usar endpoint admin en lugar de supabaseAdmin directo
+      const response = await fetchAdmin('create-option', {
+        method: 'POST',
+        body: JSON.stringify({ 
           product_id: productoId, 
           name: newOptionName,
           position: options.length 
-        }])
-        .select()
-        .single()
+        })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
-      setOptions([...options, data])
+      // Recargar datos completos
+      await loadData()
       setNewOptionName('')
+      alert(`✅ Opción "${newOptionName}" creada exitosamente`)
     } catch (error) {
       console.error('Error creating option:', error)
-      alert('Error al crear opción')
+      alert('❌ Error al crear opción: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -133,17 +132,18 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
-      const { error } = await supabaseAdmin
-        .from('product_options')
-        .delete()
-        .eq('id', optionId)
+      const response = await fetchAdmin('delete-option', {
+        method: 'DELETE',
+        body: JSON.stringify({ option_id: optionId })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
       await loadData()
+      alert('✅ Opción eliminada')
     } catch (error) {
       console.error('Error deleting option:', error)
-      alert('Error al eliminar opción')
+      alert('❌ Error al eliminar opción: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -170,29 +170,26 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
         }
       }
       
-      const { data, error } = await supabaseAdmin
-        .from('product_option_values')
-        .insert([{ 
+      const response = await fetchAdmin('create-option-value', {
+        method: 'POST',
+        body: JSON.stringify({ 
           option_id: optionId, 
           value,
           metadata,
           position: (optionValues[optionId]?.length || 0),
           visible: true
-        }])
-        .select()
-        .single()
-      
-      if (error) throw error
-      
-      setOptionValues({
-        ...optionValues,
-        [optionId]: [...(optionValues[optionId] || []), data]
+        })
       })
       
+      if (response.error) throw new Error(response.error)
+      
+      // Recargar datos
+      await loadData()
       setNewValueInputs({ ...newValueInputs, [optionId]: '' })
+      alert(`✅ Valor "${value}" agregado`)
     } catch (error) {
       console.error('Error adding value:', error)
-      alert('Error al agregar valor')
+      alert('❌ Error al agregar valor: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -203,17 +200,18 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
-      const { error } = await supabaseAdmin
-        .from('product_option_values')
-        .delete()
-        .eq('id', valueId)
+      const response = await fetchAdmin('delete-option-value', {
+        method: 'DELETE',
+        body: JSON.stringify({ value_id: valueId })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
       await loadData()
+      alert('✅ Valor eliminado')
     } catch (error) {
       console.error('Error deleting value:', error)
-      alert('Error al eliminar valor')
+      alert('❌ Error al eliminar valor: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -222,12 +220,12 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
   const toggleValueVisibility = async (valueId: string, optionId: string, currentVisible: boolean) => {
     setIsLoading(true)
     try {
-      const { error } = await supabaseAdmin
-        .from('product_option_values')
-        .update({ visible: !currentVisible })
-        .eq('id', valueId)
+      const response = await fetchAdmin('update-option-value-visibility', {
+        method: 'PATCH',
+        body: JSON.stringify({ value_id: valueId, visible: !currentVisible })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
       // Actualizar estado local
       setOptionValues({
@@ -238,7 +236,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       })
     } catch (error) {
       console.error('Error toggling visibility:', error)
-      alert('Error al cambiar visibilidad')
+      alert('❌ Error al cambiar visibilidad: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -266,61 +264,29 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
-      // Construir todas las combinaciones
-      const combinations: string[][] = [[]]
-      
-      for (const option of options) {
-        const values = optionValues[option.id]?.filter(v => v.visible !== false) || []
-        if (values.length === 0) continue
-        
-        const newCombinations: string[][] = []
-        for (const combo of combinations) {
-          for (const value of values) {
-            newCombinations.push([...combo, value.id])
-          }
-        }
-        combinations.length = 0
-        combinations.push(...newCombinations)
-      }
-      
-      // Obtener variantes existentes
-      const { data: existing } = await supabaseAdmin
-        .from('product_variants')
-        .select('option_value_ids')
-        .eq('product_id', productoId)
-      
-      const existingCombos = new Set(
-        (existing || []).map(v => JSON.stringify(v.option_value_ids.sort()))
-      )
-      
-      // Insertar solo las nuevas
-      const newVariants = combinations
-        .filter(combo => !existingCombos.has(JSON.stringify([...combo].sort())))
-        .map(combo => ({
+      const response = await fetchAdmin('generate-variants', {
+        method: 'POST',
+        body: JSON.stringify({
           product_id: productoId,
-          option_value_ids: combo,
-          price: basePrice,
-          stock: null,
-          is_active: true,
-          attributes: {}
-        }))
+          options: options.map(opt => ({
+            id: opt.id,
+            values: (optionValues[opt.id] || [])
+              .filter(v => v.visible !== false)
+              .map(v => v.id)
+          })),
+          base_price: basePrice
+        })
+      })
       
-      if (newVariants.length > 0) {
-        const { error } = await supabaseAdmin
-          .from('product_variants')
-          .insert(newVariants)
-        
-        if (error) throw error
-        
-        alert(`Se generaron ${newVariants.length} variantes nuevas`)
-      } else {
-        alert('No hay variantes nuevas para generar')
-      }
+      if (response.error) throw new Error(response.error)
+      
+      const count = response.data?.count || 0
+      alert(`✅ Se generaron ${count} variantes nuevas`)
       
       await loadData()
     } catch (error) {
       console.error('Error generating variants:', error)
-      alert('Error al generar variantes')
+      alert('❌ Error al generar variantes: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -329,12 +295,12 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
   const updateVariant = async (variantId: string, field: string, value: any) => {
     setIsLoading(true)
     try {
-      const { error } = await supabaseAdmin
-        .from('product_variants')
-        .update({ [field]: value })
-        .eq('id', variantId)
+      const response = await fetchAdmin('update-variant', {
+        method: 'PATCH',
+        body: JSON.stringify({ variant_id: variantId, field, value })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
       // Actualizar estado local
       setVariants(variants.map(v => 
@@ -342,7 +308,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       ))
     } catch (error) {
       console.error('Error updating variant:', error)
-      alert('Error al actualizar variante')
+      alert('❌ Error al actualizar variante: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -353,17 +319,17 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
-      const { error } = await supabaseAdmin
-        .from('product_variants')
-        .delete()
-        .eq('id', variantId)
+      const response = await fetchAdmin('delete-variant', {
+        method: 'DELETE',
+        body: JSON.stringify({ variant_id: variantId })
+      })
       
-      if (error) throw error
+      if (response.error) throw new Error(response.error)
       
       setVariants(variants.filter(v => v.id !== variantId))
     } catch (error) {
       console.error('Error deleting variant:', error)
-      alert('Error al eliminar variante')
+      alert('❌ Error al eliminar variante: ' + (error as Error).message)
     } finally {
       setIsLoading(false)
     }
@@ -379,55 +345,65 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     try {
       if (template === 'ropa') {
         // Crear opción Talla
-        const { data: tallaOpt, error: tallaError } = await supabaseAdmin
-          .from('product_options')
-          .insert([{ product_id: productoId, name: 'Talla', position: 0 }])
-          .select()
-          .single()
+        const tallaResponse = await fetchAdmin('create-option', {
+          method: 'POST',
+          body: JSON.stringify({
+            product_id: productoId,
+            name: 'Talla',
+            position: 0
+          })
+        })
         
-        if (tallaError) throw tallaError
+        if (tallaResponse.error) throw new Error(tallaResponse.error)
+        const tallaOptId = tallaResponse.data.id
         
-        if (tallaOpt) {
-          const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
-          const { error: tallasError } = await supabaseAdmin
-            .from('product_option_values')
-            .insert(tallas.map((t, i) => ({
-              option_id: tallaOpt.id,
-              value: t,
+        // Crear valores de talla
+        const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+        for (let i = 0; i < tallas.length; i++) {
+          const valueResponse = await fetchAdmin('create-option-value', {
+            method: 'POST',
+            body: JSON.stringify({
+              option_id: tallaOptId,
+              value: tallas[i],
               position: i,
               visible: true
-            })))
-          
-          if (tallasError) throw tallasError
+            })
+          })
+          if (valueResponse.error) throw new Error(valueResponse.error)
         }
         
         // Crear opción Color
-        const { data: colorOpt, error: colorError } = await supabaseAdmin
-          .from('product_options')
-          .insert([{ product_id: productoId, name: 'Color', position: 1 }])
-          .select()
-          .single()
+        const colorResponse = await fetchAdmin('create-option', {
+          method: 'POST',
+          body: JSON.stringify({
+            product_id: productoId,
+            name: 'Color',
+            position: 1
+          })
+        })
         
-        if (colorError) throw colorError
+        if (colorResponse.error) throw new Error(colorResponse.error)
+        const colorOptId = colorResponse.data.id
         
-        if (colorOpt) {
-          const colores = [
-            { value: 'Negro', hex: '#000000' },
-            { value: 'Blanco', hex: '#ffffff' },
-            { value: 'Azul', hex: '#007bff' },
-            { value: 'Rojo', hex: '#dc3545' }
-          ]
-          const { error: coloresError } = await supabaseAdmin
-            .from('product_option_values')
-            .insert(colores.map((c, i) => ({
-              option_id: colorOpt.id,
-              value: c.value,
-              metadata: { hex: c.hex },
+        // Crear valores de color
+        const colores = [
+          { value: 'Negro', hex: '#000000' },
+          { value: 'Blanco', hex: '#ffffff' },
+          { value: 'Azul', hex: '#007bff' },
+          { value: 'Rojo', hex: '#dc3545' }
+        ]
+        for (let i = 0; i < colores.length; i++) {
+          const valueResponse = await fetchAdmin('create-option-value', {
+            method: 'POST',
+            body: JSON.stringify({
+              option_id: colorOptId,
+              value: colores[i].value,
+              metadata: { hex: colores[i].hex },
               position: i,
               visible: true
-            })))
-          
-          if (coloresError) throw coloresError
+            })
+          })
+          if (valueResponse.error) throw new Error(valueResponse.error)
         }
       }
       

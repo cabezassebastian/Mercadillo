@@ -101,10 +101,115 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return (await import('../../server/admin_handlers/users')).usersHandler(req, res, supabase)
     }
 
-    // Option and Option-values writes (simple wrapper)
+    // Create option
+    if (act === 'create-option' && req.method === 'POST') {
+      const { product_id, name, position } = req.body
+      const { data, error } = await supabase
+        .from('product_options')
+        .insert([{ product_id, name, position: position || 0 }])
+        .select()
+        .single()
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(201).json({ data })
+    }
+
+    // Delete option
+    if (act === 'delete-option' && req.method === 'DELETE') {
+      const { option_id } = req.body
+      const { error } = await supabase
+        .from('product_options')
+        .delete()
+        .eq('id', option_id)
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
+    }
+
+    // Create option value
+    if (act === 'create-option-value' && req.method === 'POST') {
+      const { option_id, value, metadata, position, visible } = req.body
+      const { data, error} = await supabase
+        .from('product_option_values')
+        .insert([{ option_id, value, metadata, position: position || 0, visible: visible !== false }])
+        .select()
+        .single()
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(201).json({ data })
+    }
+
+    // Delete option value
+    if (act === 'delete-option-value' && req.method === 'DELETE') {
+      const { value_id } = req.body
+      const { error } = await supabase
+        .from('product_option_values')
+        .delete()
+        .eq('id', value_id)
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
+    }
+
+    // Update option value visibility
+    if (act === 'update-option-value-visibility' && req.method === 'PATCH') {
+      const { value_id, visible } = req.body
+      const { error } = await supabase
+        .from('product_option_values')
+        .update({ visible })
+        .eq('id', value_id)
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
+    }
+
+    // Update variant
+    if (act === 'update-variant' && req.method === 'PATCH') {
+      const { variant_id, field, value } = req.body
+      const { error } = await supabase
+        .from('product_variants')
+        .update({ [field]: value })
+        .eq('id', variant_id)
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
+    }
+
+    // Delete variant
+    if (act === 'delete-variant' && req.method === 'DELETE') {
+      const { variant_id } = req.body
+      const { error } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('id', variant_id)
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ ok: true })
+    }
+
+    // Generate variants
+    if (act === 'generate-variants' && req.method === 'POST') {
+      const { variants } = req.body
+      const { data, error } = await supabase
+        .from('product_variants')
+        .insert(variants)
+        .select()
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(201).json({ data, count: data?.length || 0 })
+    }
+
+    // Get variants with details (for loading variants view)
+    if (act === 'get-variants' && req.method === 'GET') {
+      const product_id = req.query.product_id as string
+      if (!product_id) return res.status(400).json({ error: 'product_id is required' })
+      
+      const { data, error } = await supabase
+        .from('variantes_con_detalles')
+        .select('*')
+        .eq('product_id', product_id)
+        .order('variante_nombre')
+      
+      if (error) return res.status(500).json({ error: error.message })
+      return res.status(200).json({ data: data || [] })
+    }
+
+    // Option and Option-values writes (simple wrapper - legacy)
     if (act === 'option' && req.method === 'POST') {
       const { product_id, name } = req.body
-      const { data, error } = await supabase.from('product_options').insert([{ producto_id: product_id, name }]).select().single()
+      const { data, error } = await supabase.from('product_options').insert([{ product_id, name }]).select().single()
       if (error) return res.status(500).json({ error })
       return res.status(201).json({ data })
     }
