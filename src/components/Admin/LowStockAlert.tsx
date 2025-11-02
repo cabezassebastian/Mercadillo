@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 // Server-side admin endpoints used via /api/admin/*
 import { AlertTriangle, Package, Edit, CheckCircle } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../config/api';
 
 type LowStockProduct = {
   id: string;
@@ -23,7 +24,7 @@ export default function LowStockAlert() {
       
       try {
         // Call server-side admin endpoint which runs the RPC with service role key
-  const res = await fetch('/api/admin?action=metrics&sub=low_stock&threshold=5')
+        const res = await fetch(API_ENDPOINTS.admin('metrics&sub=low_stock&threshold=5'))
         const json = await res.json()
 
         if (!res.ok) {

@@ -15,6 +15,7 @@ import {
   Legend
 } from 'recharts';
 import { TrendingUp, Calendar } from 'lucide-react';
+import { API_ENDPOINTS } from '../../config/api';
 
 type SalesData = {
   date?: string;
@@ -37,7 +38,7 @@ export default function SalesChart() {
       setLoading(true)
       setError(null)
       try {
-  const res = await fetch(`/api/admin?action=sales&period=${period}`)
+        const res = await fetch(API_ENDPOINTS.admin(`sales&period=${period}`))
         const json = await res.json()
         if (!res.ok) {
           console.error('Error fetching sales (server):', json)

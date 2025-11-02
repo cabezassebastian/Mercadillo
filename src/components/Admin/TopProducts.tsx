@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 // Use server-side admin endpoints to avoid creating an admin Supabase client in the browser
 import { Trophy, TrendingUp, DollarSign, ExternalLink, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { API_ENDPOINTS } from '../../config/api';
 
 type TopProduct = {
   id: string;
@@ -21,7 +22,7 @@ export default function TopProducts() {
       setError(null);
       
       try {
-  const res = await fetch(`/api/admin?action=top-products&limit=5`)
+        const res = await fetch(API_ENDPOINTS.admin('top-products&limit=5'))
         const json = await res.json()
 
         if (!res.ok) {
