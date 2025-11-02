@@ -33,6 +33,14 @@ const supabase = createClient(
 // Single entrypoint for admin RPCs and CRUD to reduce serverless function count
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {
+    // Validate ADMIN_SECRET
+    const adminSecret = req.headers['x-admin-secret'] as string
+    const expectedSecret = process.env.VITE_ADMIN_SECRET || process.env.ADMIN_SECRET
+    
+    if (!adminSecret || adminSecret !== expectedSecret) {
+      return res.status(403).json({ error: 'Forbidden: Invalid admin secret' })
+    }
+
     const action = (req.query.action as string) || (req.query.route as string) || ''
     // normalize
     const act = action.toLowerCase()
