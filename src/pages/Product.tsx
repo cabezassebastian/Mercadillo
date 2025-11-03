@@ -9,6 +9,7 @@ import ReviewList from '@/components/Reviews/ReviewList'
 import WishlistButton from '@/components/common/WishlistButton'
 import ProductGallery from '@/components/Product/ProductGallery'
 import RelatedProducts from '@/components/Product/RelatedProducts'
+import ShareButtons from '@/components/Product/ShareButtons'
 import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
@@ -403,6 +404,16 @@ const Product: React.FC = () => {
                   productName={producto.nombre}
                   showText={true}
                   className="sm:w-auto w-full px-6 py-4 text-lg rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800"
+                />
+              </div>
+
+              {/* Share Buttons */}
+              <div className="pt-4 border-t border-gray-200">
+                <ShareButtons
+                  productName={producto.nombre}
+                  productPrice={selectedVariant?.price || producto.precio}
+                  productUrl={`/producto/${producto.id}`}
+                  productImage={productoImagenes[0]?.url || producto.imagen}
                 />
               </div>
             </div>
