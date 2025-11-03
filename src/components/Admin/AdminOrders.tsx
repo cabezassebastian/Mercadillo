@@ -361,13 +361,39 @@ const AdminOrders: React.FC = () => {
 
       {/* Order Detail Modal */}
       {selectedPedido && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <>
+          {/* Overlay de fondo - capa separada para asegurar cobertura total */}
           <div 
-            className={`absolute inset-0 bg-black/60 backdrop-blur-sm ${
+            className={`fixed z-[9998] bg-black/60 backdrop-blur-sm ${
               isClosing.modal ? 'animate-backdrop-closing' : 'animate-backdrop'
             }`}
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              margin: 0,
+              padding: 0
+            }}
             onClick={() => closeWithAnimation('modal')}
           />
+          
+          {/* Contenido del modal */}
+          <div 
+            className="fixed z-[9999] flex items-center justify-center"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              margin: 0,
+              padding: '1rem'
+            }}
+          >
           <div className={`relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto ${
             isClosing.modal ? 'animate-scale-down-closing' : 'animate-scale-up'
           }`}>
@@ -703,7 +729,8 @@ const AdminOrders: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </>
       )}
     </div>
   )
