@@ -21,6 +21,16 @@ interface DailyStats {
   count: number
 }
 
+interface ChatConversation {
+  usuario_id: string | null
+  mensaje: string
+  metadata: {
+    productsFound?: number
+    [key: string]: any
+  } | null
+  created_at: string
+}
+
 const ChatAnalytics: React.FC = () => {
   const { user } = useUser()
   const [loading, setLoading] = useState(true)
@@ -66,12 +76,11 @@ const ChatAnalytics: React.FC = () => {
 
       console.log('📅 Fetching analytics desde:', startDateISO, 'hasta:', now.toISOString())
 
-      // Obtener estadísticas generales
+      // Usar RPC function para bypassear RLS de manera segura
       const { data: conversations, error: convError } = await supabase
-        .from('chat_conversations')
-        .select('usuario_id, mensaje, metadata, created_at')
-        .gte('created_at', startDateISO)
-        .order('created_at', { ascending: false })
+        .rpc('get_chat_analytics', { 
+          start_date: startDateISO 
+        }) as { data: ChatConversation[] | null, error: any }
 
       if (convError) {
         console.error('❌ Error fetching conversations:', convError)
@@ -91,7 +100,7 @@ const ChatAnalytics: React.FC = () => {
 
       const totalConvs = conversations?.length || 0
       const uniqueUsers = new Set(conversations?.map(c => c.usuario_id).filter(Boolean)).size
-      const productSearches = conversations?.filter(c => c.metadata?.productsFound > 0).length || 0
+      const productSearches = conversations?.filter(c => c.metadata?.productsFound && c.metadata.productsFound > 0).length || 0
 
       setStats({
         totalConversations: totalConvs,
