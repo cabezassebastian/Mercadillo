@@ -5,6 +5,7 @@ import { supabase } from '@/lib/supabase'
 import OptimizedImage from '@/components/common/OptimizedImage'
 import StarRating from '@/components/common/StarRating'
 import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { getProductUrl } from '@/lib/slugify'
 
 type Props = {
   productId: string
@@ -23,7 +24,7 @@ const SkeletonCard = () => (
 const ProductCardMini: React.FC<{ p: any }> = ({ p }) => {
   const precio = typeof p.precio === 'number' ? p.precio : Number(p.precio || 0)
   return (
-    <Link to={`/producto/${p.id}`} className="min-w-[220px] w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1 active:translate-y-0 p-3">
+    <Link to={getProductUrl(p.id, p.nombre)} className="min-w-[220px] w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1 active:translate-y-0 p-3">
       <div className="aspect-square overflow-hidden rounded-xl relative bg-gray-50 mb-3">
         <OptimizedImage src={p.imagen || p.imagenes?.[0]?.url || p.imagenes?.url || ''} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
       </div>

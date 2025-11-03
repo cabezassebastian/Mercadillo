@@ -7,6 +7,7 @@ import { useCart } from '@/contexts/CartContext'
 import StarRating from '@/components/common/StarRating'
 import OptimizedImage from '@/components/common/OptimizedImage'
 import { useProductReviewStats } from '@/hooks/useProductQueries'
+import { getProductUrl } from '@/lib/slugify'
 
 interface ProductCardProps {
   producto: Producto
@@ -86,7 +87,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
           </div>
         )}
 
-        <Link to={`/producto/${producto.id}`}>
+        <Link to={getProductUrl(producto.id, producto.nombre)}>
           <div className="flex">
             {/* Image Section */}
             <div className="w-48 h-48 flex-shrink-0 overflow-hidden">
@@ -185,7 +186,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
         </div>
       )}
       
-      <Link to={`/producto/${producto.id}`} className="block h-full">
+      <Link to={getProductUrl(producto.id, producto.nombre)} className="block h-full">
         {/* make the whole card full height and use flex column */}
         <div className="flex flex-col h-full">
           {/* Image Section */}

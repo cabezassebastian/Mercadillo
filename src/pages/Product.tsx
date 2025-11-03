@@ -15,9 +15,10 @@ import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
 import VariantsSelector from '@/components/Product/VariantsSelector'
 import { API_ENDPOINTS } from '@/config/api'
+import { extractProductId, getProductUrl } from '@/lib/slugify'
 
 const Product: React.FC = () => {
-  const { id } = useParams<{ id: string }>()
+  const { id: slugOrId } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const { user } = useUser()
   const { addToCart, items } = useCart()
@@ -38,6 +39,9 @@ const Product: React.FC = () => {
   const [options, setOptions] = useState<any[]>([])
   const [variants, setVariants] = useState<any[]>([])
   const [selectedVariant, setSelectedVariant] = useState<any | null>(null)
+
+  // Extraer el ID real del slug
+  const id = slugOrId ? extractProductId(slugOrId) : undefined
 
   useEffect(() => {
     const fetchProducto = async () => {
@@ -412,7 +416,7 @@ const Product: React.FC = () => {
                 <ShareButtons
                   productName={producto.nombre}
                   productPrice={selectedVariant?.price || producto.precio}
-                  productUrl={`/producto/${producto.id}`}
+                  productUrl={getProductUrl(producto.id, producto.nombre)}
                   productImage={productoImagenes[0]?.url || producto.imagen}
                 />
               </div>
