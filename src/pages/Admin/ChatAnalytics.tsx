@@ -337,39 +337,78 @@ const ChatAnalytics: React.FC = () => {
             <TrendingUp className="w-5 h-5 text-amarillo" />
             Conversaciones por Día
           </h2>
-          <div className="space-y-3">
-            {dailyStats.length > 0 ? (
-              <div className="relative h-64">
-                {/* Simple bar chart */}
-                <div className="flex items-end justify-between h-full gap-2">
-                  {dailyStats.map((day, index) => {
-                    const maxCount = Math.max(...dailyStats.map(d => d.count))
-                    const height = (day.count / maxCount) * 100
-                    
-                    return (
-                      <div key={index} className="flex-1 flex flex-col items-center">
-                        <div 
-                          className="w-full bg-amarillo rounded-t-md hover:bg-yellow-500 transition-colors cursor-pointer relative group"
-                          style={{ height: `${height}%` }}
-                        >
-                          <div className="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                            {day.count} mensajes
-                          </div>
+          {dailyStats.length > 0 ? (
+            <div className="space-y-4">
+              {/* Listado con barras horizontales */}
+              <div className="space-y-3">
+                {dailyStats.slice().reverse().slice(0, 10).map((day, index) => {
+                  const maxCount = Math.max(...dailyStats.map(d => d.count))
+                  const percentage = (day.count / maxCount) * 100
+                  const isToday = new Date(day.date).toDateString() === new Date().toDateString()
+                  
+                  return (
+                    <div key={index} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 min-w-[80px]">
+                            {new Date(day.date).toLocaleDateString('es-PE', { 
+                              day: '2-digit', 
+                              month: 'short',
+                              year: new Date(day.date).getFullYear() !== new Date().getFullYear() ? '2-digit' : undefined
+                            })}
+                          </span>
+                          {isToday && (
+                            <span className="text-xs bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 px-2 py-0.5 rounded-full font-medium">
+                              Hoy
+                            </span>
+                          )}
                         </div>
-                        <span className="text-xs text-gray-600 dark:text-gray-400 mt-2 whitespace-nowrap">
-                          {new Date(day.date).toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit' })}
+                        <span className="text-sm font-bold text-amarillo">
+                          {day.count} {day.count === 1 ? 'mensaje' : 'mensajes'}
                         </span>
                       </div>
-                    )
-                  })}
+                      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden">
+                        <div
+                          className="bg-gradient-to-r from-amarillo to-yellow-500 h-3 rounded-full transition-all duration-500 ease-out"
+                          style={{ width: `${percentage}%` }}
+                        ></div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+
+              {/* Resumen estadístico */}
+              <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Promedio/día</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">
+                      {(dailyStats.reduce((sum, d) => sum + d.count, 0) / dailyStats.length).toFixed(1)}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Día más activo</p>
+                    <p className="text-lg font-bold text-green-600 dark:text-green-400">
+                      {Math.max(...dailyStats.map(d => d.count))}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">Total días</p>
+                    <p className="text-lg font-bold text-blue-600 dark:text-blue-400">
+                      {dailyStats.length}
+                    </p>
+                  </div>
                 </div>
               </div>
-            ) : (
-              <div className="h-64 flex items-center justify-center text-gray-500 dark:text-gray-400">
-                No hay datos suficientes para mostrar
-              </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <div className="h-64 flex flex-col items-center justify-center text-gray-500 dark:text-gray-400">
+              <Calendar className="w-16 h-16 mb-4 opacity-50" />
+              <p className="text-sm">No hay datos suficientes para mostrar</p>
+              <p className="text-xs mt-2">Las conversaciones aparecerán aquí</p>
+            </div>
+          )}
         </div>
       </div>
     </div>
