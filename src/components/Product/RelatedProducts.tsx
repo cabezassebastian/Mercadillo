@@ -206,7 +206,7 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
     <div className="mt-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-gris-oscuro">Productos relacionados</h3>
+          <h3 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Productos relacionados</h3>
         </div>
 
         {loading ? (
@@ -219,13 +219,13 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
         ) : related.length > 0 ? (
           renderList(related, relatedRef)
         ) : (
-          <div className="text-gray-600">No se encontraron productos relacionados.</div>
+          <div className="text-gray-600 dark:text-gray-400">No se encontraron productos relacionados.</div>
         )}
 
         {/* Also bought */}
         <div className="mt-8">
           <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-gris-oscuro">Otros clientes también compraron</h4>
+            <h4 className="text-xl font-semibold text-gris-oscuro dark:text-gray-100">Otros clientes también compraron</h4>
           </div>
           {loading ? (
             <div className="flex space-x-4">

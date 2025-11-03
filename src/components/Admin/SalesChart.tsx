@@ -207,7 +207,7 @@ export default function SalesChart() {
             <TrendingUp className="w-5 h-5 text-gris-oscuro" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gris-oscuro">
+            <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
               {getChartTitle()}
             </h3>
             <p className="text-sm text-gray-600">Análisis de ventas</p>

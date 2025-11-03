@@ -92,7 +92,7 @@ const Profile: React.FC = () => {
   return (
     <div className="min-h-screen bg-hueso py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-8">
+        <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-8">
           Mi Perfil
         </h1>
 
@@ -101,7 +101,7 @@ const Profile: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="card p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gris-oscuro flex items-center">
+                <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 flex items-center">
                   <User className="w-6 h-6 mr-2 text-amarillo" />
                   Informacion Personal
                 </h2>
@@ -127,7 +127,7 @@ const Profile: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-600 mb-1">
                     Email
                   </label>
-                  <p className="text-gris-oscuro">{user?.email}</p>
+                  <p className="text-gris-oscuro dark:text-gray-100">{user?.email}</p>
                 </div>
 
                 <div>
@@ -142,7 +142,7 @@ const Profile: React.FC = () => {
                       className="input-field"
                     />
                   ) : (
-                    <p className="text-gris-oscuro">{user?.telefono || 'No especificado'}</p>
+                    <p className="text-gris-oscuro dark:text-gray-100">{user?.telefono || 'No especificado'}</p>
                   )}
                 </div>
 
@@ -158,7 +158,7 @@ const Profile: React.FC = () => {
                       className="input-field"
                     />
                   ) : (
-                    <p className="text-gris-oscuro">{user?.direccion || 'No especificada'}</p>
+                    <p className="text-gris-oscuro dark:text-gray-100">{user?.direccion || 'No especificada'}</p>
                   )}
                 </div>
 
@@ -191,7 +191,7 @@ const Profile: React.FC = () => {
           {/* Historial de pedidos */}
           <div className="lg:col-span-2">
             <div className="card p-6">
-              <h2 className="text-xl font-bold text-gris-oscuro mb-6 flex items-center">
+              <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 mb-6 flex items-center">
                 <Package className="w-6 h-6 mr-2 text-amarillo" />
                 Historial de Pedidos
               </h2>
@@ -207,7 +207,7 @@ const Profile: React.FC = () => {
                     <div key={pedido.id} className="border border-gray-200 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-3">
                         <div>
-                          <p className="font-semibold text-gris-oscuro">
+                          <p className="font-semibold text-gris-oscuro dark:text-gray-100">
                             Pedido #{pedido.id.slice(-8)}
                           </p>
                           <p className="text-sm text-gray-600">

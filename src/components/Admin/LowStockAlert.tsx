@@ -66,7 +66,7 @@ export default function LowStockAlert() {
             <AlertTriangle className="w-5 h-5 text-red-600" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gris-oscuro">
+            <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
               Alertas de Stock Bajo
             </h3>
             <p className="text-sm text-gray-600">
@@ -116,7 +116,7 @@ export default function LowStockAlert() {
 
                 {/* Details */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gris-oscuro truncate">
+                  <h4 className="font-semibold text-gris-oscuro dark:text-gray-100 truncate">
                     {product.nombre}
                   </h4>
                   <div className="flex items-center space-x-3 mt-1 text-sm text-gray-600">

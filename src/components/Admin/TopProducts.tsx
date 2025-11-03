@@ -66,7 +66,7 @@ export default function TopProducts() {
             <Trophy className="w-5 h-5 text-gris-oscuro" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-gris-oscuro">
+            <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
               Top 5 Productos Más Vendidos
             </h3>
             <p className="text-sm text-gray-600">Productos con mejor rendimiento</p>
@@ -108,7 +108,7 @@ export default function TopProducts() {
 
                 {/* Product Info */}
                 <div className="flex-1 min-w-0">
-                  <h4 className="font-semibold text-gris-oscuro truncate">
+                  <h4 className="font-semibold text-gris-oscuro dark:text-gray-100 truncate">
                     {product.name}
                   </h4>
                   <div className="flex items-center space-x-4 mt-1">

@@ -61,7 +61,7 @@ export default function ConversionRate() {
           <Percent className="w-5 h-5 text-purple-600" />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-gris-oscuro">
+          <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
             Tasa de Conversión
           </h3>
           <p className="text-sm text-gray-600">Visitas vs Pedidos</p>

@@ -260,7 +260,7 @@ const AdminProducts: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gris-oscuro">Gestión de Productos</h2>
+          <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Gestión de Productos</h2>
           <p className="text-gray-600">Administra tu catálogo de productos</p>
         </div>
         <button
@@ -320,7 +320,7 @@ const AdminProducts: React.FC = () => {
                         />
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gris-oscuro">
+                        <div className="text-sm font-medium text-gris-oscuro dark:text-gray-100">
                           {producto.nombre}
                         </div>
                         <div className="text-sm text-gray-500">
@@ -381,7 +381,7 @@ const AdminProducts: React.FC = () => {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">
+            <h3 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-white mb-6">
               {editingProduct ? 'Editar Producto' : 'Nuevo Producto'}
             </h3>
 
@@ -566,7 +566,7 @@ const AdminProducts: React.FC = () => {
       {isVariantsOpen && editingProduct && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white dark:bg-gray-900 rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold text-gris-oscuro dark:text-white mb-6">
+            <h3 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-white mb-6">
               📦 Administrar Variantes — {editingProduct.nombre}
             </h3>
             <VariantsEditorNew productoId={editingProduct.id} />

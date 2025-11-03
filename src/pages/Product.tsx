@@ -252,7 +252,7 @@ const Product: React.FC = () => {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gris-oscuro mb-4">
+          <h1 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
             Producto no encontrado
           </h1>
           <button
@@ -284,7 +284,7 @@ const Product: React.FC = () => {
         <div className="mb-6">
           <button
             onClick={() => navigate('/catalogo')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gris-oscuro transition-colors duration-200"
+            className="flex items-center space-x-2 text-gray-600 dark:text-gray-400 hover:text-gris-oscuro dark:hover:text-gray-200 transition-colors duration-200"
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Volver al catálogo</span>
@@ -304,10 +304,10 @@ const Product: React.FC = () => {
           {/* Product Info */}
           <div className="space-y-6">
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro mb-2">
+              <h1 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-2">
                 {producto.nombre}
               </h1>
-              <p className="text-lg text-gray-600 mb-4">
+              <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
                 {producto.categoria}
               </p>
               <div className="flex items-center space-x-2 mb-4">
@@ -423,22 +423,22 @@ const Product: React.FC = () => {
               <div className="flex items-center space-x-3">
                 <Truck className="w-6 h-6 text-amarillo" />
                 <div>
-                  <p className="font-medium text-gris-oscuro">Envío Gratis</p>
-                  <p className="text-sm text-gray-600">En compras +S/50</p>
+                  <p className="font-medium text-gris-oscuro dark:text-gray-100">Envío Gratis</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">En compras +S/50</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <Shield className="w-6 h-6 text-amarillo" />
                 <div>
-                  <p className="font-medium text-gris-oscuro">Garantía</p>
-                  <p className="text-sm text-gray-600">30 días</p>
+                  <p className="font-medium text-gris-oscuro dark:text-gray-100">Garantía</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">30 días</p>
                 </div>
               </div>
               <div className="flex items-center space-x-3">
                 <RotateCcw className="w-6 h-6 text-amarillo" />
                 <div>
-                  <p className="font-medium text-gris-oscuro">Devolución</p>
-                  <p className="text-sm text-gray-600">Fácil y rápida</p>
+                  <p className="font-medium text-gris-oscuro dark:text-gray-100">Devolución</p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Fácil y rápida</p>
                 </div>
               </div>
             </div>

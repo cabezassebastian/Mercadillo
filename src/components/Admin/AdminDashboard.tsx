@@ -75,7 +75,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Productos</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.totalProductos}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.totalProductos}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <Package className="w-6 h-6 text-blue-600" />
@@ -87,7 +87,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Pedidos</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.totalPedidos}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.totalPedidos}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <ShoppingCart className="w-6 h-6 text-green-600" />
@@ -99,7 +99,7 @@ const AdminDashboard: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.totalUsuarios}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.totalUsuarios}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-purple-600" />
@@ -123,7 +123,7 @@ const AdminDashboard: React.FC = () => {
       {/* Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gris-oscuro mb-4">
+          <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100 mb-4">
             Actividad Reciente
           </h3>
           <div className="space-y-4">
@@ -132,7 +132,7 @@ const AdminDashboard: React.FC = () => {
                 <TrendingUp className="w-4 h-4 text-green-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gris-oscuro">Pedidos hoy</p>
+                <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100">Pedidos hoy</p>
                 <p className="text-xs text-gray-600">{stats.pedidosHoy} nuevos pedidos</p>
               </div>
             </div>
@@ -141,7 +141,7 @@ const AdminDashboard: React.FC = () => {
                 <Package className="w-4 h-4 text-blue-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gris-oscuro">Productos activos</p>
+                <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100">Productos activos</p>
                 <p className="text-xs text-gray-600">{stats.totalProductos} productos en catálogo</p>
               </div>
             </div>
@@ -150,7 +150,7 @@ const AdminDashboard: React.FC = () => {
                 <Users className="w-4 h-4 text-purple-600" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gris-oscuro">Usuarios registrados</p>
+                <p className="text-sm font-medium text-gris-oscuro dark:text-gray-100">Usuarios registrados</p>
                 <p className="text-xs text-gray-600">{stats.totalUsuarios} usuarios activos</p>
               </div>
             </div>
@@ -158,13 +158,13 @@ const AdminDashboard: React.FC = () => {
         </div>
 
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-gris-oscuro mb-4">
+          <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100 mb-4">
             Resumen del Mes
           </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Pedidos este mes:</span>
-              <span className="font-semibold text-gris-oscuro">{stats.pedidosMes}</span>
+              <span className="font-semibold text-gris-oscuro dark:text-gray-100">{stats.pedidosMes}</span>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Ingresos totales:</span>
@@ -172,7 +172,7 @@ const AdminDashboard: React.FC = () => {
             </div>
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Promedio por pedido:</span>
-              <span className="font-semibold text-gris-oscuro">
+              <span className="font-semibold text-gris-oscuro dark:text-gray-100">
                 {stats.totalPedidos > 0 ? formatPrice(stats.ingresosTotales / stats.totalPedidos) : 'S/ 0.00'}
               </span>
             </div>

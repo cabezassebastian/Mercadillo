@@ -222,8 +222,8 @@ const AdminOrders: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gris-oscuro">Gestión de Pedidos</h2>
-          <p className="text-gray-600">Administra todos los pedidos de la tienda</p>
+          <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Gestión de Pedidos</h2>
+          <p className="text-gray-600 dark:text-gray-400">Administra todos los pedidos de la tienda</p>
         </div>
       </div>
 
@@ -320,7 +320,7 @@ const AdminOrders: React.FC = () => {
               {filteredPedidos.map((pedido) => (
                 <tr key={pedido.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gris-oscuro">
+                    <div className="text-sm font-medium text-gris-oscuro dark:text-gray-100">
                       #{pedido.id.slice(-8)}
                     </div>
                     <div className="text-sm text-gray-500">
@@ -328,7 +328,7 @@ const AdminOrders: React.FC = () => {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gris-oscuro">
+                    <div className="text-sm text-gris-oscuro dark:text-gray-100">
                       {pedido.usuario_id.slice(-8)}
                     </div>
                   </td>
@@ -398,7 +398,7 @@ const AdminOrders: React.FC = () => {
             isClosing.modal ? 'animate-scale-down-closing' : 'animate-scale-up'
           }`}>
             <div className="sticky top-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex justify-between items-center z-10">
-              <h3 className="text-xl font-bold text-gris-oscuro dark:text-gray-100">
+              <h3 className="text-xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-gray-100">
                 Pedido #{selectedPedido.id.slice(-8)}
               </h3>
               <button
@@ -412,7 +412,7 @@ const AdminOrders: React.FC = () => {
             <div className="p-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Order Items */}
               <div>
-                <h4 className="text-lg font-semibold text-gris-oscuro mb-4">
+                <h4 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100 mb-4">
                   Productos
                 </h4>
                 <div className="space-y-4">
@@ -481,7 +481,7 @@ const AdminOrders: React.FC = () => {
 
               {/* Order Details */}
               <div>
-                <h4 className="text-lg font-semibold text-gris-oscuro mb-4">
+                <h4 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100 mb-4">
                   Detalles del Pedido
                 </h4>
                 <div className="space-y-4">
@@ -495,12 +495,12 @@ const AdminOrders: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Fecha:</label>
-                    <p className="text-gris-oscuro">{formatDate(selectedPedido.created_at)}</p>
+                    <p className="text-gris-oscuro dark:text-gray-100">{formatDate(selectedPedido.created_at)}</p>
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Dirección de envío:</label>
-                    <p className="text-gris-oscuro">{selectedPedido.direccion_envio}</p>
+                    <p className="text-gris-oscuro dark:text-gray-100">{selectedPedido.direccion_envio}</p>
                   </div>
 
                   {/* Información de Entrega */}
@@ -621,7 +621,7 @@ const AdminOrders: React.FC = () => {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-600">Método de pago:</label>
-                    <p className="text-gris-oscuro capitalize">{selectedPedido.metodo_pago}</p>
+                    <p className="text-gris-oscuro dark:text-gray-100 capitalize">{selectedPedido.metodo_pago}</p>
                   </div>
 
                   <div className="border-t border-gray-200 pt-4">

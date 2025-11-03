@@ -382,6 +382,6 @@ El sistema de compartir productos está **100% funcional** y listo para producci
 ---
 
 > 📅 **Implementado:** 3 de noviembre de 2025  
-> 👨‍💻 **Desarrollador:** GitHub Copilot  
+> 👨‍💻 **Desarrollador:** Sebastian Cabezas Q.
 > 🌐 **Proyecto:** Mercadillo - mercadillo.app  
 > 🇵🇪 **Lima, Perú**

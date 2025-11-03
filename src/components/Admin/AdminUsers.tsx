@@ -83,7 +83,7 @@ const AdminUsers: React.FC = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gris-oscuro">Gestión de Usuarios</h2>
+          <h2 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Gestión de Usuarios</h2>
           <p className="text-gray-600">Administra los usuarios de la plataforma</p>
         </div>
       </div>
@@ -94,7 +94,7 @@ const AdminUsers: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Usuarios</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.total}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.total}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
               <Users className="w-6 h-6 text-blue-600" />
@@ -106,7 +106,7 @@ const AdminUsers: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Administradores</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.admins}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.admins}</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
               <UserCheck className="w-6 h-6 text-purple-600" />
@@ -118,7 +118,7 @@ const AdminUsers: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Clientes</p>
-              <p className="text-2xl font-bold text-gris-oscuro">{stats.clientes}</p>
+              <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">{stats.clientes}</p>
             </div>
             <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
               <UserX className="w-6 h-6 text-green-600" />
@@ -175,7 +175,7 @@ const AdminUsers: React.FC = () => {
                         </span>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gris-oscuro">
+                        <div className="text-sm font-medium text-gris-oscuro dark:text-gray-100">
                           {usuario.nombre} {usuario.apellido}
                         </div>
                         <div className="text-sm text-gray-500">

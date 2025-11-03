@@ -108,7 +108,7 @@ const Home: React.FC = () => {
           style={{ display: 'none' }} 
           className="absolute inset-0 bg-gradient-to-r from-amarillo to-dorado dark:from-yellow-600 dark:to-yellow-400 flex items-center justify-center"
         >
-          <div className="text-center text-gris-oscuro">
+          <div className="text-center text-gris-oscuro dark:text-gray-100">
             <div className="text-6xl font-bold mb-4">🏪</div>
             <h2 className="text-2xl font-bold">Mercadillo Lima Perú</h2>
           </div>
@@ -165,7 +165,7 @@ const Home: React.FC = () => {
       <section className="py-16 bg-hueso dark:bg-gray-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-gray-100 mb-4">
               Productos Destacados
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -177,7 +177,7 @@ const Home: React.FC = () => {
           {topWeek && topWeek.length > 0 && (
             <div className="mt-10">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold text-gris-oscuro">Más vendidos de la semana</h3>
+                <h3 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Más vendidos de la semana</h3>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {topWeek.map((p) => (
@@ -231,7 +231,7 @@ const Home: React.FC = () => {
       <section className="py-16 bg-blanco dark:bg-gray-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-gray-100 mb-4">
               Lo que dicen nuestros clientes
             </h2>
           </div>
