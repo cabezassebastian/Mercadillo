@@ -185,11 +185,55 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Generate variants
     if (act === 'generate-variants' && req.method === 'POST') {
-      const { variants } = req.body
+      const { product_id, options, base_price } = req.body
+      
+      // Build all combinations
+      const combinations: string[][] = [[]]
+      
+      for (const option of options) {
+        if (!option.values || option.values.length === 0) continue
+        
+        const newCombinations: string[][] = []
+        for (const combo of combinations) {
+          for (const valueId of option.values) {
+            newCombinations.push([...combo, valueId])
+          }
+        }
+        combinations.length = 0
+        combinations.push(...newCombinations)
+      }
+      
+      // Get existing variants to avoid duplicates
+      const { data: existing } = await supabase
+        .from('product_variants')
+        .select('option_value_ids')
+        .eq('product_id', product_id)
+      
+      const existingCombos = new Set(
+        (existing || []).map(v => JSON.stringify(v.option_value_ids.sort()))
+      )
+      
+      // Build new variants only
+      const newVariants = combinations
+        .filter(combo => !existingCombos.has(JSON.stringify([...combo].sort())))
+        .map(combo => ({
+          product_id,
+          option_value_ids: combo,
+          price: base_price,
+          stock: null,
+          is_active: true,
+          attributes: {}
+        }))
+      
+      if (newVariants.length === 0) {
+        return res.status(200).json({ data: [], count: 0, message: 'No new variants to create' })
+      }
+      
       const { data, error } = await supabase
         .from('product_variants')
-        .insert(variants)
+        .insert(newVariants)
         .select()
+      
       if (error) return res.status(500).json({ error: error.message })
       return res.status(201).json({ data, count: data?.length || 0 })
     }
