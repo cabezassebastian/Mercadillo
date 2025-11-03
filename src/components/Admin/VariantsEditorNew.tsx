@@ -91,7 +91,12 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
         console.error('Error loading variants:', variantsResponse.error)
         setVariants([])
       } else {
-        setVariants(variantsResponse.data || [])
+        // Mapear variante_id a id para compatibilidad
+        const mappedVariants = (variantsResponse.data || []).map((v: any) => ({
+          ...v,
+          id: v.variante_id || v.id
+        }))
+        setVariants(mappedVariants)
       }
     } catch (error) {
       console.error('Error in loadData:', error)
