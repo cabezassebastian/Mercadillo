@@ -85,10 +85,10 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
   return (
     <div className="space-y-4">
       {/* Selected summary */}
-      <div className="text-sm text-gray-600">Seleccionado: <span className="font-medium text-gray-800">{buildVariantLabel() || '—'}</span></div>
+      <div className="text-sm text-gray-600 dark:text-gray-400">Seleccionado: <span className="font-medium text-gray-800 dark:text-gray-100">{buildVariantLabel() || '—'}</span></div>
       {options.map((opt) => (
         <div key={opt.id}>
-          <label className="block text-sm font-medium text-gray-700 mb-2">{opt.name}</label>
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">{opt.name}</label>
       <div role="list" className="mt-2 flex items-center gap-3 flex-wrap">
                 {opt.values.filter(v => {
                   const anyV = v as any
@@ -112,12 +112,12 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
                         aria-pressed={selected[opt.id] === v.id}
                         aria-label={`Seleccionar ${name || v.value}`}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo dark:ring-yellow-500 bg-amarillo/10 dark:bg-yellow-500/20 border-amarillo dark:border-yellow-500' : 'border border-gray-200 dark:border-gray-600 hover:shadow-sm dark:hover:bg-gray-700' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                         disabled={disabled}
                       >
-                        <span className="w-8 h-8 rounded-md flex-shrink-0 border" style={{ backgroundColor: hex || name || v.value }} />
-                        <span className="text-sm text-gray-800">{name || v.value}</span>
-                        {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
+                        <span className="w-8 h-8 rounded-md flex-shrink-0 border dark:border-gray-600" style={{ backgroundColor: hex || name || v.value }} />
+                        <span className="text-sm text-gray-800 dark:text-gray-100">{name || v.value}</span>
+                        {stock > 0 && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{stock}</span>}
                       </button>
                     )
               }
@@ -136,12 +136,12 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                         onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
                         aria-pressed={selected[opt.id] === v.id}
                         aria-label={`Seleccionar ${name || v.value}`}
-                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                        className={`flex items-center gap-3 px-3 py-2 rounded-lg transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo dark:ring-yellow-500 bg-amarillo/10 dark:bg-yellow-500/20 border-amarillo dark:border-yellow-500' : 'border border-gray-200 dark:border-gray-600 hover:shadow-sm dark:hover:bg-gray-700' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                         disabled={disabled}
                       >
-                        <span className="w-8 h-8 rounded-md flex-shrink-0 border" style={{ backgroundColor: hex || v.value }} />
-                        <span className="text-sm text-gray-800">{name || v.value}</span>
-                        {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
+                        <span className="w-8 h-8 rounded-md flex-shrink-0 border dark:border-gray-600" style={{ backgroundColor: hex || v.value }} />
+                        <span className="text-sm text-gray-800 dark:text-gray-100">{name || v.value}</span>
+                        {stock > 0 && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{stock}</span>}
                       </button>
                     )
               }
@@ -155,11 +155,11 @@ export default function VariantsSelector({ options = [], variants = [], onVarian
                     onClick={() => setSelected(prev => ({ ...prev, [opt.id]: v.id }))}
                     onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setSelected(prev => ({ ...prev, [opt.id]: v.id })) }}
                     aria-pressed={selected[opt.id] === v.id}
-                    className={`px-3 py-2 rounded-lg border transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo bg-amarillo/10 border-amarillo' : 'border-gray-200 hover:shadow-sm' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
+                    className={`px-3 py-2 rounded-lg border transition-colors duration-150 focus:outline-none ${selected[opt.id] === v.id ? 'ring-2 ring-amarillo dark:ring-yellow-500 bg-amarillo/10 dark:bg-yellow-500/20 border-amarillo dark:border-yellow-500' : 'border-gray-200 dark:border-gray-600 hover:shadow-sm dark:hover:bg-gray-700' } ${disabled ? 'opacity-40 cursor-not-allowed' : ''}`}
                     disabled={disabled}
                   >
-                    <span className="text-sm text-gray-800">{v.value}</span>
-                    {stock > 0 && <span className="ml-2 text-xs text-gray-500">{stock}</span>}
+                    <span className="text-sm text-gray-800 dark:text-gray-100">{v.value}</span>
+                    {stock > 0 && <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">{stock}</span>}
                   </button>
                 )
                 })}

@@ -312,7 +312,7 @@ const Product: React.FC = () => {
               </p>
               <div className="flex items-center space-x-2 mb-4">
                 <StarRating rating={reviewStats.promedio} readonly size="md" />
-                <span className="text-gray-600">
+                <span className="text-gray-600 dark:text-gray-400">
                   {reviewStats.total > 0 
                     ? `(${reviewStats.promedio.toFixed(1)}) - ${reviewStats.total} reseña${reviewStats.total > 1 ? 's' : ''}` 
                     : 'Sin reseñas aún'
@@ -335,14 +335,14 @@ const Product: React.FC = () => {
                     {availableStock > 0 ? `${availableStock} disponibles` : 'Agotado'}
                   </span>
                   {currentQuantityInCart > 0 && (
-                    <div className="text-xs text-blue-600 mt-1">
+                    <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                       Ya tienes {currentQuantityInCart} en tu carrito
                     </div>
                   )}
                 </div>
               </div>
               
-              <p className="text-gray-700 leading-relaxed">
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
                 {producto.descripcion}
               </p>
               {/* Variant selectors */}
