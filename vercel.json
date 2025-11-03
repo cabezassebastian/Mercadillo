@@ -74,19 +74,7 @@
     }
   ],
   "functions": {
-    "api/admin/index.ts": {
-      "maxDuration": 30
-    },
-    "api/checkout.ts": {
-      "maxDuration": 30
-    },
     "api/clerk.ts": {
-      "maxDuration": 30
-    },
-    "api/orders.ts": {
-      "maxDuration": 30
-    },
-    "api/emails/*.ts": {
       "maxDuration": 30
     }
   },
