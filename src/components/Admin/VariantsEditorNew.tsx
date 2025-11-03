@@ -171,12 +171,117 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       const option = options.find(o => o.id === optionId)
       const isColorOption = option?.name.toLowerCase().includes('color')
       
-      // Si es color, intentar extraer hex
+      // Si es color, intentar extraer o detectar hex
       let metadata = null
       if (isColorOption) {
+        // Primero buscar hex explícito en el texto
         const hexMatch = value.match(/#([0-9A-F]{6}|[0-9A-F]{3})/i)
         if (hexMatch) {
           metadata = { hex: hexMatch[0] }
+        } else {
+          // Diccionario de colores comunes en español
+          const colorMap: Record<string, string> = {
+            // Básicos
+            'negro': '#000000',
+            'blanco': '#FFFFFF',
+            'gris': '#808080',
+            
+            // Primarios
+            'rojo': '#FF0000',
+            'azul': '#0000FF',
+            'amarillo': '#FFFF00',
+            'verde': '#00FF00',
+            'naranja': '#FF8000',
+            'morado': '#800080',
+            'púrpura': '#800080',
+            'rosa': '#FFC0CB',
+            'rosado': '#FFC0CB',
+            'marrón': '#A52A2A',
+            'café': '#A52A2A',
+            
+            // Oscuros
+            'azul marino': '#000080',
+            'verde bosque': '#228B22',
+            'rojo vino': '#800020',
+            'borgoña': '#800020',
+            'burdeos': '#800020',
+            'morado oscuro': '#4B0082',
+            'gris carbón': '#36454F',
+            'antracita': '#36454F',
+            'marrón oscuro': '#654321',
+            'chocolate': '#654321',
+            'verde oliva': '#556B2F',
+            'petróleo': '#2F4F4F',
+            
+            // Pastel
+            'azul cielo': '#87CEEB',
+            'celeste': '#87CEEB',
+            'rosa pastel': '#FFD1DC',
+            'amarillo pálido': '#FFFFE0',
+            'verde menta': '#98FF98',
+            'lila': '#C8A2C8',
+            'lavanda': '#C8A2C8',
+            'salmón': '#FA8072',
+            'crema': '#FFFDD0',
+            'beige claro': '#F5F5DC',
+            'turquesa pálido': '#AFEEEE',
+            
+            // Brillantes
+            'fucsia': '#FF00FF',
+            'magenta': '#FF00FF',
+            'turquesa': '#40E0D0',
+            'verde lima': '#00FF00',
+            'naranja brillante': '#FF6600',
+            'amarillo limón': '#FFFF00',
+            'azul eléctrico': '#7DF9FF',
+            'azul rey': '#7DF9FF',
+            'rojo brillante': '#FF0000',
+            'escarlata': '#FF0000',
+            'verde neón': '#39FF14',
+            'rosa neón': '#FF10F0',
+            'naranja neón': '#FF4500',
+            
+            // Neutros
+            'beige': '#F5F5DC',
+            'marfil': '#FFFFF0',
+            'gris perla': '#E5E4E2',
+            'gris topo': '#848482',
+            'topo': '#848482',
+            'terracota': '#E2725B',
+            'siena': '#A0522D',
+            'ocre': '#CC7722',
+            'caqui': '#C3B091',
+            'arena': '#C2B280',
+            
+            // Metálicos
+            'dorado': '#FFD700',
+            'plateado': '#C0C0C0',
+            'bronce': '#CD7F32',
+            'cobre': '#B87333',
+            'platino': '#E5E4E2',
+            'oro rosa': '#B76E79',
+            'acero': '#71797E',
+            
+            // Especiales
+            'cian': '#00FFFF',
+            'índigo': '#4B0082',
+            'violeta': '#8F00FF',
+            'aguamarina': '#7FFFD4',
+            'jade': '#00A86B',
+            'coral': '#FF7F50',
+            'ámbar': '#FFBF00',
+            'malva': '#E0B0FF',
+            'ciruela': '#8E4585',
+            'esmeralda': '#50C878',
+            'zafiro': '#0F52BA',
+            'rubí': '#E0115F'
+          }
+          
+          // Buscar en el diccionario (case-insensitive)
+          const colorKey = value.toLowerCase().trim()
+          if (colorMap[colorKey]) {
+            metadata = { hex: colorMap[colorKey] }
+          }
         }
       }
       
@@ -196,7 +301,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       // Recargar datos
       await loadData()
       setNewValueInputs({ ...newValueInputs, [optionId]: '' })
-      alert(`✅ Valor "${value}" agregado`)
+      alert(`✅ Valor "${value}" agregado${metadata ? ' con color ' + metadata.hex : ''}`)
     } catch (error) {
       console.error('Error adding value:', error)
       alert('❌ Error al agregar valor: ' + (error as Error).message)
@@ -506,7 +611,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       // Cambiar automáticamente al paso 2 para que vea los valores
       setCurrentStep('values')
       
-      alert(`✅ Plantilla aplicada exitosamente!\n\n- Opción "Talla" creada con 6 valores (XS-XXL)\n- Opción "Color" creada con ${colores ? colores.length : 75} colores\n\nAhora puedes:\n1. Ir al Paso 2 para ocultar colores que no necesites\n2. Ir al Paso 3 para generar las variantes`)
+      alert('✅ Plantilla aplicada exitosamente!\n\n- Opción "Talla" creada con 6 valores (XS-XXL)\n- Opción "Color" creada con 75 colores\n\nAhora puedes:\n1. Ir al Paso 2 para ocultar colores que no necesites\n2. Ir al Paso 3 para generar las variantes')
     } catch (error) {
       console.error('Error applying template:', error)
       alert('❌ Error al aplicar plantilla: ' + (error as Error).message)
