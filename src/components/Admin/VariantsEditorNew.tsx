@@ -400,13 +400,91 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
         if (colorResponse.error) throw new Error(colorResponse.error)
         const colorOptId = colorResponse.data.id
         
-        // Crear valores de color
+        // Crear valores de color - Paleta completa organizada por categorías
         const colores = [
+          // Básicos
           { value: 'Negro', hex: '#000000' },
-          { value: 'Blanco', hex: '#ffffff' },
-          { value: 'Azul', hex: '#007bff' },
-          { value: 'Rojo', hex: '#dc3545' }
+          { value: 'Blanco', hex: '#FFFFFF' },
+          { value: 'Gris', hex: '#808080' },
+          
+          // Colores primarios y secundarios
+          { value: 'Rojo', hex: '#FF0000' },
+          { value: 'Azul', hex: '#0000FF' },
+          { value: 'Amarillo', hex: '#FFFF00' },
+          { value: 'Verde', hex: '#00FF00' },
+          { value: 'Naranja', hex: '#FF8000' },
+          { value: 'Morado', hex: '#800080' },
+          { value: 'Rosa', hex: '#FFC0CB' },
+          
+          // Tonos oscuros
+          { value: 'Azul Marino', hex: '#000080' },
+          { value: 'Verde Bosque', hex: '#228B22' },
+          { value: 'Rojo Vino', hex: '#800020' },
+          { value: 'Morado Oscuro', hex: '#4B0082' },
+          { value: 'Gris Carbón', hex: '#36454F' },
+          { value: 'Marrón Oscuro', hex: '#654321' },
+          { value: 'Verde Oliva', hex: '#556B2F' },
+          { value: 'Petróleo', hex: '#2F4F4F' },
+          
+          // Tonos pastel
+          { value: 'Azul Cielo', hex: '#87CEEB' },
+          { value: 'Rosa Pastel', hex: '#FFD1DC' },
+          { value: 'Amarillo Pálido', hex: '#FFFFE0' },
+          { value: 'Verde Menta', hex: '#98FF98' },
+          { value: 'Lila', hex: '#C8A2C8' },
+          { value: 'Salmón', hex: '#FA8072' },
+          { value: 'Crema', hex: '#FFFDD0' },
+          { value: 'Beige Claro', hex: '#F5F5DC' },
+          { value: 'Turquesa Pálido', hex: '#AFEEEE' },
+          
+          // Tonos brillantes/neón
+          { value: 'Fucsia', hex: '#FF00FF' },
+          { value: 'Turquesa', hex: '#40E0D0' },
+          { value: 'Verde Lima', hex: '#00FF00' },
+          { value: 'Naranja Brillante', hex: '#FF6600' },
+          { value: 'Amarillo Limón', hex: '#FFFF00' },
+          { value: 'Azul Eléctrico', hex: '#7DF9FF' },
+          { value: 'Rojo Brillante', hex: '#FF0000' },
+          { value: 'Verde Neón', hex: '#39FF14' },
+          { value: 'Rosa Neón', hex: '#FF10F0' },
+          { value: 'Naranja Neón', hex: '#FF4500' },
+          
+          // Tonos neutros
+          { value: 'Beige', hex: '#F5F5DC' },
+          { value: 'Marfil', hex: '#FFFFF0' },
+          { value: 'Gris Perla', hex: '#E5E4E2' },
+          { value: 'Gris Topo', hex: '#848482' },
+          { value: 'Terracota', hex: '#E2725B' },
+          { value: 'Siena', hex: '#A0522D' },
+          { value: 'Ocre', hex: '#CC7722' },
+          { value: 'Caqui', hex: '#C3B091' },
+          { value: 'Arena', hex: '#C2B280' },
+          
+          // Metálicos
+          { value: 'Dorado', hex: '#FFD700' },
+          { value: 'Plateado', hex: '#C0C0C0' },
+          { value: 'Bronce', hex: '#CD7F32' },
+          { value: 'Cobre', hex: '#B87333' },
+          { value: 'Platino', hex: '#E5E4E2' },
+          { value: 'Oro Rosa', hex: '#B76E79' },
+          { value: 'Acero', hex: '#71797E' },
+          
+          // Tonos especiales
+          { value: 'Cian', hex: '#00FFFF' },
+          { value: 'Índigo', hex: '#4B0082' },
+          { value: 'Violeta', hex: '#8F00FF' },
+          { value: 'Aguamarina', hex: '#7FFFD4' },
+          { value: 'Jade', hex: '#00A86B' },
+          { value: 'Coral', hex: '#FF7F50' },
+          { value: 'Ámbar', hex: '#FFBF00' },
+          { value: 'Malva', hex: '#E0B0FF' },
+          { value: 'Ciruela', hex: '#8E4585' },
+          { value: 'Esmeralda', hex: '#50C878' },
+          { value: 'Zafiro', hex: '#0F52BA' },
+          { value: 'Rubí', hex: '#E0115F' },
+          { value: 'Marrón', hex: '#A52A2A' }
         ]
+        
         for (let i = 0; i < colores.length; i++) {
           const valueResponse = await fetchAdmin('create-option-value', {
             method: 'POST',
@@ -428,7 +506,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       // Cambiar automáticamente al paso 2 para que vea los valores
       setCurrentStep('values')
       
-      alert('✅ Plantilla aplicada exitosamente!\n\n- Opción "Talla" creada con 6 valores (XS-XXL)\n- Opción "Color" creada con 4 valores\n\nAhora puedes ir al Paso 3 para generar las variantes.')
+      alert(`✅ Plantilla aplicada exitosamente!\n\n- Opción "Talla" creada con 6 valores (XS-XXL)\n- Opción "Color" creada con ${colores ? colores.length : 75} colores\n\nAhora puedes:\n1. Ir al Paso 2 para ocultar colores que no necesites\n2. Ir al Paso 3 para generar las variantes`)
     } catch (error) {
       console.error('Error applying template:', error)
       alert('❌ Error al aplicar plantilla: ' + (error as Error).message)
