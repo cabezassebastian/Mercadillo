@@ -51,15 +51,28 @@ const ChatAnalytics: React.FC = () => {
       const now = new Date()
       const daysAgo = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90
       const startDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000)
+      
+      // Formatear fecha correctamente para Supabase (sin milliseconds)
+      const startDateISO = startDate.toISOString().split('.')[0] + 'Z'
 
       // Obtener estadísticas generales
       const { data: conversations, error: convError } = await supabase
         .from('chat_conversations')
-        .select('*')
-        .gte('created_at', startDate.toISOString())
+        .select('usuario_id, mensaje, metadata, created_at')
+        .gte('created_at', startDateISO)
+        .order('created_at', { ascending: false })
 
       if (convError) {
         console.error('Error fetching conversations:', convError)
+        // Mostrar datos vacíos en lugar de fallar completamente
+        setStats({
+          totalConversations: 0,
+          uniqueUsers: 0,
+          avgConversationsPerUser: 0,
+          totalProductSearches: 0
+        })
+        setTopQuestions([])
+        setDailyStats([])
         return
       }
 
@@ -97,7 +110,7 @@ const ChatAnalytics: React.FC = () => {
       // Estadísticas diarias
       const dailyMap = new Map<string, number>()
       conversations?.forEach(conv => {
-        const date = new Date(conv.timestamp).toISOString().split('T')[0]
+        const date = new Date(conv.created_at).toISOString().split('T')[0]
         dailyMap.set(date, (dailyMap.get(date) || 0) + 1)
       })
 
@@ -109,6 +122,15 @@ const ChatAnalytics: React.FC = () => {
 
     } catch (error) {
       console.error('Error fetching analytics:', error)
+      // Asegurar que siempre se muestren datos vacíos en caso de error
+      setStats({
+        totalConversations: 0,
+        uniqueUsers: 0,
+        avgConversationsPerUser: 0,
+        totalProductSearches: 0
+      })
+      setTopQuestions([])
+      setDailyStats([])
     } finally {
       setLoading(false)
     }
