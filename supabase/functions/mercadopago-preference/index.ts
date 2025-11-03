@@ -112,8 +112,31 @@ serve(async (req: Request) => {
       metadata
     }
 
-    // Codificar datos como base64
-    const encodedOrderData = btoa(JSON.stringify(orderData))
+    // Codificar datos como base64 usando TextEncoder para manejar UTF-8
+    const encoder = new TextEncoder()
+    const orderDataString = JSON.stringify(orderData)
+    const orderDataBytes = encoder.encode(orderDataString)
+    
+    // Convertir bytes a base64 manualmente para evitar problemas con caracteres UTF-8
+    const base64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/'
+    let base64Result = ''
+    let i = 0
+    const len = orderDataBytes.length
+    
+    while (i < len) {
+      const a = orderDataBytes[i++]
+      const b = i < len ? orderDataBytes[i++] : 0
+      const c = i < len ? orderDataBytes[i++] : 0
+      
+      const bitmap = (a << 16) | (b << 8) | c
+      
+      base64Result += base64chars.charAt((bitmap >> 18) & 63)
+      base64Result += base64chars.charAt((bitmap >> 12) & 63)
+      base64Result += i > len + 1 ? '=' : base64chars.charAt((bitmap >> 6) & 63)
+      base64Result += i > len ? '=' : base64chars.charAt(bitmap & 63)
+    }
+    
+    const encodedOrderData = base64Result
     const fullExternalReference = `${externalReference}|${encodedOrderData}`
 
     // Aplicar descuento proporcionalmente
@@ -172,6 +195,7 @@ serve(async (req: Request) => {
     console.log('Preference data to send:', JSON.stringify(preferenceData, null, 2))
 
     // Llamar a la API de MercadoPago
+    console.log('Calling MercadoPago API...')
     const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
       method: 'POST',
       headers: {
@@ -181,13 +205,31 @@ serve(async (req: Request) => {
       body: JSON.stringify(preferenceData)
     })
 
+    console.log('MercadoPago response status:', mpResponse.status)
+
     if (!mpResponse.ok) {
-      const errorData = await mpResponse.json()
+      const errorText = await mpResponse.text()
+      console.error('MercadoPago API error response:', errorText)
+      let errorData
+      try {
+        errorData = JSON.parse(errorText)
+      } catch {
+        errorData = { message: errorText }
+      }
       console.error('MercadoPago API error:', errorData)
-      throw new Error(`MercadoPago API error: ${mpResponse.status}`)
+      
+      return new Response(
+        JSON.stringify({
+          error: 'Error de MercadoPago',
+          details: errorData,
+          status: mpResponse.status
+        }), 
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
     }
 
     const result = await mpResponse.json()
+    console.log('MercadoPago success, preference created:', result.id)
 
     return new Response(
       JSON.stringify({
