@@ -93,26 +93,34 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
     }
   };
 
-  // Zoom al hacer hover en desktop
+  // Zoom al hacer hover en desktop - con debounce para evitar trabas
   const handleMouseEnter = () => {
     if (window.innerWidth >= 768 && !isFullscreen) {
-      setIsZoomed(true);
+      requestAnimationFrame(() => {
+        setIsZoomed(true);
+      });
     }
   };
 
   const handleMouseLeave = () => {
-    setIsZoomed(false);
+    requestAnimationFrame(() => {
+      setIsZoomed(false);
+    });
   };
 
-  // Zoom con seguimiento del mouse
+  // Zoom con seguimiento del mouse - optimizado
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!isZoomed || !imageRef.current) return;
 
-    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - left) / width) * 100;
-    const y = ((e.clientY - top) / height) * 100;
+    requestAnimationFrame(() => {
+      if (!imageRef.current) return;
+      
+      const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+      const x = ((e.clientX - left) / width) * 100;
+      const y = ((e.clientY - top) / height) * 100;
 
-    imageRef.current.style.transformOrigin = `${x}% ${y}%`;
+      imageRef.current.style.transformOrigin = `${x}% ${y}%`;
+    });
   };
 
   if (displayImages.length === 0) {
@@ -219,17 +227,22 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
         </div>
       )}
 
-      {/* Modal Fullscreen - z-index máximo para cubrir TODO */}
+      {/* Modal Fullscreen - Cobertura completa de pantalla */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center">
-          {/* Botón cerrar */}
-          <button
-            onClick={() => setIsFullscreen(false)}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors duration-200 z-10"
-            aria-label="Cerrar"
-          >
-            <X className="w-6 h-6 text-white" />
-          </button>
+        <>
+          {/* Overlay de fondo - capa separada para asegurar cobertura total */}
+          <div className="fixed top-0 left-0 right-0 bottom-0 z-[9998] bg-black/95" />
+          
+          {/* Contenido del modal */}
+          <div className="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center">
+            {/* Botón cerrar */}
+            <button
+              onClick={() => setIsFullscreen(false)}
+              className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors duration-200 z-10"
+              aria-label="Cerrar"
+            >
+              <X className="w-6 h-6 text-white" />
+            </button>
 
           {/* Contador en fullscreen */}
           {displayImages.length > 1 && (
@@ -289,7 +302,8 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
               ))}
             </div>
           )}
-        </div>
+          </div>
+        </>
       )}
     </div>
   );
