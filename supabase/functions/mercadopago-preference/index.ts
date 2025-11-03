@@ -121,7 +121,10 @@ serve(async (req: Request) => {
 
     // Obtener URL base para webhooks y redirects
     const FRONTEND_URL = Deno.env.get('FRONTEND_URL') || 'https://mercadillo.app'
-    const FUNCTIONS_URL = Deno.env.get('SUPABASE_URL') + '/functions/v1'
+    const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || 'https://xwubnuokmfghtyyfpgtl.supabase.co'
+    const FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`
+
+    console.log('Environment URLs:', { FRONTEND_URL, SUPABASE_URL, FUNCTIONS_URL })
 
     // Crear preferencia de pago
     const preferenceData = {
