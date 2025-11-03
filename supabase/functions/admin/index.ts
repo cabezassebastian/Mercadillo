@@ -132,6 +132,15 @@ serve(async (req: Request) => {
       }
     }
 
+    // Product info (price for variants)
+    if (action === 'product-info') {
+      const id = url.searchParams.get('id') || ''
+      if (!id) return new Response(JSON.stringify({ error: 'Product ID required' }), { status: 400, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      const { data, error } = await supabase.from('productos').select('id, precio').eq('id', id).single()
+      if (error) return new Response(JSON.stringify({ error }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ data }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
     // Orders: GET list, PATCH updates
     if (action === 'orders') {
       if (req.method === 'GET') {
