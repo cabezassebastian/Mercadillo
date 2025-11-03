@@ -409,7 +409,7 @@ const AdminOrders: React.FC = () => {
                           <div className="mb-2">
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Variante:</p>
                             <div className="flex flex-wrap gap-1">
-                              {(item.variant_label || item.variant_name).split('/').map((option: string, idx: number) => {
+                              {(item.variant_label || item.variant_name)?.split('/').map((option: string, idx: number) => {
                                 const [optName, optValue] = option.split(':').map((s: string) => s.trim())
                                 return (
                                   <span 
