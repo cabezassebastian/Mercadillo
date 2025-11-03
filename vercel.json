@@ -74,6 +74,9 @@
     }
   ],
   "functions": {
+    "api/admin/index.ts": {
+      "maxDuration": 30
+    },
     "api/checkout.ts": {
       "maxDuration": 30
     },

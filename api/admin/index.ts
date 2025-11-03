@@ -1,7 +1,8 @@
 /**
- * Admin dispatcher
+ * Admin dispatcher v2.1
  * ----------------
  * This file is the single Vercel function entrypoint for admin operations.
+ * Last updated: 2025-11-02 - Added variants CRUD endpoints
  *
  * Rationale: Vercel's Hobby plan counts each file under `api/` as a separate
  * serverless function. To avoid hitting the 12-function limit we keep a single
