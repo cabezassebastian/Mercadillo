@@ -404,12 +404,12 @@ const AdminOrders: React.FC = () => {
                           {item.nombre}
                         </h5>
                         
-                        {/* Mostrar variante si existe */}
-                        {item.variant_name && (
+                        {/* Mostrar variante si existe (variant_label o variant_name) */}
+                        {(item.variant_label || item.variant_name) && (
                           <div className="mb-2">
                             <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Variante:</p>
                             <div className="flex flex-wrap gap-1">
-                              {item.variant_name.split(',').map((option: string, idx: number) => {
+                              {(item.variant_label || item.variant_name).split('/').map((option: string, idx: number) => {
                                 const [optName, optValue] = option.split(':').map((s: string) => s.trim())
                                 return (
                                   <span 
@@ -423,6 +423,13 @@ const AdminOrders: React.FC = () => {
                               })}
                             </div>
                           </div>
+                        )}
+                        
+                        {/* Variant ID si existe */}
+                        {item.variant_id && (
+                          <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mb-1">
+                            Variant ID: {item.variant_id.slice(-8)}
+                          </p>
                         )}
                         
                         {/* SKU si existe */}
