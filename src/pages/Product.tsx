@@ -83,7 +83,7 @@ const Product: React.FC = () => {
           const { data: product, error: pErr } = await supabase
             .from('productos')
             .select('*')
-            .eq('id', id)
+            .or(`id.eq.${id},slug.eq.${id}`)
             .single()
 
           if (!pErr && product) {
