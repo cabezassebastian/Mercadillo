@@ -86,6 +86,7 @@ export interface PedidoItem {
   imagen: string
   variant_id?: string
   variant_name?: string
+  variant_label?: string
   sku?: string
   opciones?: Array<{
     option_name: string
