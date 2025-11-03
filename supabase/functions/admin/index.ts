@@ -185,14 +185,38 @@ serve(async (req: Request) => {
       if (req.method === 'GET') {
         const productId = url.searchParams.get('productId') || url.searchParams.get('product_id') || ''
         if (!productId) return new Response(JSON.stringify({ error: 'Product ID required' }), { status: 400, headers: { ...corsHeaders, 'content-type': 'application/json' } })
-        const { data, error } = await supabase.from('product_options').select('*, product_option_values(*)').eq('producto_id', productId).order('position', { ascending: true })
-        if (error) return new Response(JSON.stringify({ error }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
-        return new Response(JSON.stringify({ data }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+        
+        // Get options
+        const { data: opts, error: optsErr } = await supabase
+          .from('product_options')
+          .select('*')
+          .eq('product_id', productId)
+          .order('position')
+        
+        if (optsErr) return new Response(JSON.stringify({ error: optsErr }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+        
+        // Get values for all options of this product
+        const optionIds = (opts || []).map((o: any) => o.id)
+        let vals: any[] = []
+        
+        if (optionIds.length > 0) {
+          const { data: valsData, error: valsErr } = await supabase
+            .from('product_option_values')
+            .select('*')
+            .in('option_id', optionIds)
+            .order('position')
+          
+          if (valsErr) return new Response(JSON.stringify({ error: valsErr }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+          
+          vals = valsData || []
+        }
+        
+        return new Response(JSON.stringify({ options: opts || [], values: vals }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
       }
       if (req.method === 'POST') {
         const body = await req.json().catch(() => null)
         const { product_id, name } = body || {}
-        const { data, error } = await supabase.from('product_options').insert([{ producto_id: product_id, name }]).select().single()
+        const { data, error } = await supabase.from('product_options').insert([{ product_id, name }]).select().single()
         if (error) return new Response(JSON.stringify({ error }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
         return new Response(JSON.stringify({ data }), { status: 201, headers: { ...corsHeaders, 'content-type': 'application/json' } })
       }
