@@ -1,11 +1,15 @@
 -- Fix RLS para ChatAnalytics
 -- Este script crea una función RPC que permite a los admins acceder a las analíticas del chat
+-- Compatible con Clerk (requiere pasar el user_id desde el frontend)
 
 -- Primero, eliminar la función si existe
 DROP FUNCTION IF EXISTS get_chat_analytics(TIMESTAMP WITH TIME ZONE);
+DROP FUNCTION IF EXISTS get_chat_analytics(TEXT, TIMESTAMP WITH TIME ZONE);
 
 -- Crear función para obtener analíticas del chat (solo admins)
+-- Ahora acepta el user_id como parámetro para Clerk
 CREATE OR REPLACE FUNCTION get_chat_analytics(
+  clerk_user_id TEXT,
   start_date TIMESTAMP WITH TIME ZONE
 )
 RETURNS TABLE (
@@ -21,16 +25,17 @@ AS $$
 DECLARE
   user_rol TEXT;
 BEGIN
-  -- Obtener el rol del usuario actual
+  -- Obtener el rol del usuario desde la tabla usuarios
   SELECT rol INTO user_rol
   FROM usuarios 
-  WHERE id = auth.uid()::text;
+  WHERE id = clerk_user_id;
 
-  -- Verificar que el usuario sea admin
+  -- Verificar que el usuario exista
   IF user_rol IS NULL THEN
-    RAISE EXCEPTION 'Usuario no encontrado en la tabla usuarios. User ID: %', auth.uid();
+    RAISE EXCEPTION 'Usuario no encontrado en la tabla usuarios. User ID: %', clerk_user_id;
   END IF;
 
+  -- Verificar que el usuario sea admin
   IF user_rol != 'admin' THEN
     RAISE EXCEPTION 'Acceso denegado. Se requiere rol admin. Tu rol actual: %', user_rol;
   END IF;
@@ -49,8 +54,8 @@ END;
 $$;
 
 -- Dar permisos a usuarios autenticados para ejecutar la función
-GRANT EXECUTE ON FUNCTION get_chat_analytics(TIMESTAMP WITH TIME ZONE) TO authenticated;
-GRANT EXECUTE ON FUNCTION get_chat_analytics(TIMESTAMP WITH TIME ZONE) TO anon;
+GRANT EXECUTE ON FUNCTION get_chat_analytics(TEXT, TIMESTAMP WITH TIME ZONE) TO authenticated;
+GRANT EXECUTE ON FUNCTION get_chat_analytics(TEXT, TIMESTAMP WITH TIME ZONE) TO anon;
 
 -- Comentario
-COMMENT ON FUNCTION get_chat_analytics IS 'Permite a los administradores obtener analíticas del chatbot. Requiere rol admin en tabla usuarios.';
+COMMENT ON FUNCTION get_chat_analytics IS 'Permite a los administradores obtener analíticas del chatbot. Requiere rol admin en tabla usuarios. Compatible con Clerk.';

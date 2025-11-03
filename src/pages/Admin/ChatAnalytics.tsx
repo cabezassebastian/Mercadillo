@@ -77,8 +77,10 @@ const ChatAnalytics: React.FC = () => {
       console.log('📅 Fetching analytics desde:', startDateISO, 'hasta:', now.toISOString())
 
       // Usar RPC function para bypassear RLS de manera segura
+      // Pasamos el user ID de Clerk como parámetro
       const { data: conversations, error: convError } = await supabase
         .rpc('get_chat_analytics', { 
+          clerk_user_id: user?.id || '',
           start_date: startDateISO 
         }) as { data: ChatConversation[] | null, error: any }
 
