@@ -83,7 +83,7 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
       setOptionValues(valuesMap)
 
       // Cargar variantes usando la nueva vista SQL a través del backend
-      const variantsResponse = await fetchAdmin(`get-variants?product_id=${productoId}`, {
+      const variantsResponse = await fetchAdmin(`get-variants&product_id=${productoId}`, {
         method: 'GET'
       })
       
