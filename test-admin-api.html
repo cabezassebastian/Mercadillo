@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Admin API</title>
+</head>
+<body>
+  <h1>Test Admin API Endpoints</h1>
+  <button onclick="testEndpoints()">Test All Endpoints</button>
+  <pre id="output"></pre>
+
+  <script>
+    const ADMIN_SECRET = 'eGpsRjZ4d01jNlRydzV0Z3V6RTh5UGx0QW1yTjE5YTU=';
+    const BASE_URL = 'https://xwubnuokmfghtyyfpgtl.supabase.co/functions/v1/admin';
+
+    async function testEndpoint(action, method = 'GET', body = null) {
+      const url = `${BASE_URL}?action=${action}`;
+      const options = {
+        method,
+        headers: {
+          'x-admin-secret': ADMIN_SECRET,
+          'Content-Type': 'application/json'
+        }
+      };
+      
+      if (body) {
+        options.body = JSON.stringify(body);
+      }
+
+      try {
+        const response = await fetch(url, options);
+        const data = await response.json().catch(() => null);
+        return {
+          action,
+          method,
+          status: response.status,
+          ok: response.ok,
+          data: data ? JSON.stringify(data).substring(0, 100) : 'no data'
+        };
+      } catch (error) {
+        return {
+          action,
+          method,
+          status: 'ERROR',
+          ok: false,
+          data: error.message
+        };
+      }
+    }
+
+    async function testEndpoints() {
+      const output = document.getElementById('output');
+      output.textContent = 'Testing...\n\n';
+
+      const tests = [
+        { action: 'stats', method: 'GET' },
+        { action: 'sales', method: 'GET' },
+        { action: 'top-products', method: 'GET' },
+        { action: 'product-info', method: 'GET' }, // Should fail - needs id
+        { action: 'create-option', method: 'POST', body: { product_id: 'test', name: 'test' } },
+        { action: 'options', method: 'GET' }, // Should fail - needs product_id
+      ];
+
+      for (const test of tests) {
+        const result = await testEndpoint(test.action, test.method, test.body);
+        output.textContent += `${result.action} (${result.method}): ${result.status} ${result.ok ? '✅' : '❌'}\n`;
+        output.textContent += `  Response: ${result.data}\n\n`;
+      }
+
+      output.textContent += '\nDone! Check results above.\n';
+      output.textContent += '\nExpected:\n';
+      output.textContent += '- stats, sales, top-products should be 200 ✅\n';
+      output.textContent += '- product-info should be 400 (missing id param) but NOT "Invalid admin action"\n';
+      output.textContent += '- create-option should be 500 (missing valid product_id) but NOT "Invalid admin action"\n';
+      output.textContent += '- If you see "Invalid admin action" = backend code is old!\n';
+    }
+  </script>
+</body>
+</html>
