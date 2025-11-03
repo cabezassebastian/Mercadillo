@@ -13,6 +13,7 @@ import { getProductReviewStats } from '@/lib/reviews'
 import { addToNavigationHistory } from '@/lib/userProfile'
 import type { ReviewStats } from '@/types/reviews'
 import VariantsSelector from '@/components/Product/VariantsSelector'
+import { API_ENDPOINTS } from '@/config/api'
 
 const Product: React.FC = () => {
   const { id } = useParams<{ id: string }>()
@@ -43,7 +44,11 @@ const Product: React.FC = () => {
 
       try {
         // try serverless API first (works in Vercel). If it fails (dev or env missing), fallback to client query below.
-        const resp = await fetch(`/api/products/${id}`)
+        const resp = await fetch(API_ENDPOINTS.product(id), {
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+          }
+        })
         if (resp.ok) {
           const json = await resp.json()
           const { product, options: opts, variants: vars } = json

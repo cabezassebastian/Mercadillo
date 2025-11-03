@@ -1,4 +1,5 @@
 import { env } from '@/config/env'
+import { API_ENDPOINTS } from '@/config/api'
 
 // Configuración de Mercado Pago
 export const mercadoPagoConfig = {
@@ -10,10 +11,11 @@ export const mercadoPagoConfig = {
 // Crear preferencia de pago
 export const createPaymentPreference = async (orderData: any) => {
   try {
-    const response = await fetch('/api/mercadopago/create-preference', {
+    const response = await fetch(API_ENDPOINTS.mercadopago.createPreference, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY || '',
       },
       body: JSON.stringify(orderData),
     })
