@@ -80,11 +80,25 @@ const Product: React.FC = () => {
         } else {
           // API failed — fallback to client-side Supabase query so page still shows in dev/local
           console.warn('/api/products failed, falling back to client Supabase')
-          const { data: product, error: pErr } = await supabase
+          
+          // Intentar buscar por ID primero
+          let { data: product, error: pErr } = await supabase
             .from('productos')
             .select('*')
-            .or(`id.eq.${id},slug.eq.${id}`)
-            .single()
+            .eq('id', id)
+            .maybeSingle()
+
+          // Si no se encuentra por ID, intentar por slug
+          if (!product && id) {
+            const result = await supabase
+              .from('productos')
+              .select('*')
+              .eq('slug', id)
+              .maybeSingle()
+            
+            product = result.data
+            pErr = result.error
+          }
 
           if (!pErr && product) {
             setProducto(product)

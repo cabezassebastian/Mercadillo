@@ -29,12 +29,24 @@ serve(async (req: Request) => {
     const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    // Fetch product by ID or slug
-    const { data: product, error: pErr } = await supabase
+    // Try to fetch product by ID first
+    let { data: product, error: pErr } = await supabase
       .from('productos')
       .select('*')
-      .or(`id.eq.${productId},slug.eq.${productId}`)
-      .single()
+      .eq('id', productId)
+      .maybeSingle()
+
+    // If not found by ID, try by slug
+    if (!product && productId) {
+      const result = await supabase
+        .from('productos')
+        .select('*')
+        .eq('slug', productId)
+        .maybeSingle()
+      
+      product = result.data
+      pErr = result.error
+    }
 
     if (pErr || !product) {
       return new Response(
