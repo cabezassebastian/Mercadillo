@@ -24,18 +24,13 @@ export const fetchAdmin = async <T = any>(
     ...options?.headers,
   }
 
-  console.log('[fetchAdmin] Calling:', action, 'URL:', url, 'Secret length:', ADMIN_SECRET.length)
-
   const response = await fetch(url, {
     ...options,
     headers,
   })
 
-  console.log('[fetchAdmin] Response status:', response.status, response.statusText)
-
   if (!response.ok) {
     const error = await response.json().catch(() => ({ error: 'Unknown error' }))
-    console.error('[fetchAdmin] Error response:', error)
     throw new Error(error.error || `HTTP ${response.status}`)
   }
 

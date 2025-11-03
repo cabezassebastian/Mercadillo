@@ -12,7 +12,7 @@ const SUPABASE_FUNCTIONS_URL = `${SUPABASE_URL}/functions/v1`
 const USE_SUPABASE_FUNCTIONS = {
   products: true,    // ✅ Migrada - Fase 1
   orders: true,      // ✅ Migrada - Fase 1
-  admin: false,      // ⚠️ TEMPORALMENTE en Vercel (variantes nuevos endpoints)
+  admin: false,      // ⚠️ Usa Vercel (nuevos endpoints de variantes no están en Supabase Functions)
   checkout: true,    // ✅ Migrada - Fase 2
   emails: true,      // ✅ Migrada - Fase 2
   mercadopago: true, // ✅ Migrada - Fase 2
