@@ -1,3 +1,8 @@
+/**
+ * VariantsEditorNew - Sistema mejorado de gestión de variantes
+ * Versión: 2.0 - Refactorizado para usar backend API exclusivamente
+ * Última actualización: 2025-11-02
+ */
 import { useEffect, useState } from 'react'
 import { fetchAdmin } from '../../lib/adminApi'
 import { Plus, Trash2, RefreshCw, Package, AlertCircle, CheckCircle2, Eye, EyeOff } from 'lucide-react'
@@ -343,8 +348,11 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
     
     setIsLoading(true)
     try {
+      console.log('[VariantsEditor] Aplicando plantilla:', template, 'para producto:', productoId)
+      
       if (template === 'ropa') {
         // Crear opción Talla
+        console.log('[VariantsEditor] Creando opción Talla...')
         const tallaResponse = await fetchAdmin('create-option', {
           method: 'POST',
           body: JSON.stringify({
@@ -354,11 +362,13 @@ export default function VariantsEditorNew({ productoId }: VariantsEditorNewProps
           })
         })
         
+        console.log('[VariantsEditor] Respuesta create-option:', tallaResponse)
         if (tallaResponse.error) throw new Error(tallaResponse.error)
         const tallaOptId = tallaResponse.data.id
         
         // Crear valores de talla
         const tallas = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+        console.log('[VariantsEditor] Creando', tallas.length, 'valores de talla...')
         for (let i = 0; i < tallas.length; i++) {
           const valueResponse = await fetchAdmin('create-option-value', {
             method: 'POST',
