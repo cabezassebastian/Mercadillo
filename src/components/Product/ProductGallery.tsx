@@ -12,6 +12,7 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const imageRef = useRef<HTMLImageElement>(null);
@@ -49,12 +50,22 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
   // Prevenir scroll cuando está en fullscreen
   useEffect(() => {
     if (isFullscreen) {
+      // Prevenir scroll en múltiples niveles
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+      document.documentElement.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
     }
     return () => {
       document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+      document.documentElement.style.overflow = '';
     };
   }, [isFullscreen]);
 
@@ -110,17 +121,19 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
 
   // Zoom con seguimiento del mouse - optimizado
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isZoomed || !imageRef.current) return;
+    if (!imageRef.current) return;
 
-    requestAnimationFrame(() => {
-      if (!imageRef.current) return;
-      
-      const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
-      const x = ((e.clientX - left) / width) * 100;
-      const y = ((e.clientY - top) / height) * 100;
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
 
+    // Actualizar transformOrigin inmediatamente
+    setZoomOrigin({ x, y });
+    
+    // Si está en zoom, aplicar también directamente al estilo para sincronización
+    if (isZoomed) {
       imageRef.current.style.transformOrigin = `${x}% ${y}%`;
-    });
+    }
   };
 
   if (displayImages.length === 0) {
@@ -152,6 +165,9 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
             className={`w-full h-full object-cover transition-transform duration-150 ease-out ${
               isZoomed ? 'scale-150' : 'scale-100'
             }`}
+            style={{
+              transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`
+            }}
           />
 
           {/* Botón de fullscreen - SIEMPRE VISIBLE */}
@@ -231,10 +247,34 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
       {isFullscreen && (
         <>
           {/* Overlay de fondo - capa separada para asegurar cobertura total */}
-          <div className="fixed top-0 left-0 right-0 bottom-0 z-[9998] bg-black/95" />
+          <div 
+            className="fixed z-[9998] bg-black/95"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              margin: 0,
+              padding: 0
+            }}
+          />
           
           {/* Contenido del modal */}
-          <div className="fixed top-0 left-0 right-0 bottom-0 z-[9999] flex items-center justify-center">
+          <div 
+            className="fixed z-[9999] flex items-center justify-center"
+            style={{
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              width: '100vw',
+              height: '100vh',
+              margin: 0,
+              padding: 0
+            }}
+          >
             {/* Botón cerrar */}
             <button
               onClick={() => setIsFullscreen(false)}
