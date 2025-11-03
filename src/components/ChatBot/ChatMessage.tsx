@@ -24,17 +24,31 @@ const linkify = (text: string) => {
 
   return parts.map((part, index) => {
     if (part.match(urlRegex)) {
-      // Es una URL
+      // Remover signos de puntuación al final de la URL (. , ! ? ; :)
+      let cleanUrl = part
+      let trailingPunctuation = ''
+      
+      // Verificar si la URL termina en puntuación
+      const punctuationRegex = /([.,!?;:]+)$/
+      const match = cleanUrl.match(punctuationRegex)
+      
+      if (match) {
+        trailingPunctuation = match[1]
+        cleanUrl = cleanUrl.slice(0, -trailingPunctuation.length)
+      }
+      
       return (
-        <a
-          key={index}
-          href={part}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300 font-medium"
-        >
-          {part}
-        </a>
+        <React.Fragment key={index}>
+          <a
+            href={cleanUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+          >
+            {cleanUrl}
+          </a>
+          {trailingPunctuation}
+        </React.Fragment>
       )
     }
     return part
