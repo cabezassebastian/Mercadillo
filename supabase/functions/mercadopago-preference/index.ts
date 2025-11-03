@@ -37,6 +37,8 @@ serve(async (req: Request) => {
     }
 
     const body = await req.json()
+    console.log('Received request body:', JSON.stringify(body, null, 2))
+    
     const { 
       items, 
       payer, 
@@ -52,6 +54,7 @@ serve(async (req: Request) => {
 
     // Validar datos requeridos
     if (!items || !Array.isArray(items) || items.length === 0) {
+      console.error('Validation error: items missing or invalid')
       return new Response(
         JSON.stringify({ error: 'Items son requeridos' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -59,6 +62,7 @@ serve(async (req: Request) => {
     }
 
     if (!payer || !payer.email) {
+      console.error('Validation error: payer info missing')
       return new Response(
         JSON.stringify({ error: 'Información del pagador es requerida' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -66,6 +70,7 @@ serve(async (req: Request) => {
     }
 
     if (!user_id) {
+      console.error('Validation error: user_id missing')
       return new Response(
         JSON.stringify({ error: 'ID de usuario es requerido' }), 
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -120,22 +125,26 @@ serve(async (req: Request) => {
 
     // Crear preferencia de pago
     const preferenceData = {
-      items: items.map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        quantity: Number(item.quantity),
-        unit_price: descuento > 0 
+      items: items.map((item: any) => {
+        const unitPrice = descuento > 0 
           ? Math.round(Number(item.unit_price) * discountFactor * 100) / 100
-          : Number(item.unit_price),
-        currency_id: 'PEN',
-        picture_url: item.picture_url
-      })),
+          : Number(item.unit_price)
+        
+        return {
+          id: String(item.id),
+          title: String(item.title || 'Producto'),
+          quantity: Number(item.quantity) || 1,
+          unit_price: unitPrice,
+          currency_id: 'PEN',
+          picture_url: item.picture_url || undefined
+        }
+      }),
       payer: {
-        name: payer.name,
+        name: payer.name || 'Cliente',
         email: payer.email,
         phone: payer.phone ? {
           area_code: '51',
-          number: payer.phone
+          number: String(payer.phone)
         } : undefined
       },
       back_urls: {
@@ -156,6 +165,8 @@ serve(async (req: Request) => {
         installments: 12
       }
     }
+
+    console.log('Preference data to send:', JSON.stringify(preferenceData, null, 2))
 
     // Llamar a la API de MercadoPago
     const mpResponse = await fetch('https://api.mercadopago.com/checkout/preferences', {
