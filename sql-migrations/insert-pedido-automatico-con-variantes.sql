@@ -3,24 +3,30 @@
 -- Ejecutar en Supabase SQL Editor
 
 -- Paso 1: Obtener las primeras 2 variantes del producto
-WITH variantes_producto AS (
+WITH variantes_seleccionadas AS (
+  SELECT id, product_id, price, created_at
+  FROM product_variants
+  WHERE product_id = '727773f5-5f29-4ca8-a4f8-435eaeb97cf5'
+    AND is_active = true
+  ORDER BY created_at
+  LIMIT 2
+),
+variantes_producto AS (
   SELECT 
-    pv.id as variant_id,
+    vs.id as variant_id,
     p.id as producto_id,
     p.nombre as producto_nombre,
     p.imagen as producto_imagen,
-    pv.price as variant_price,
+    vs.price as variant_price,
     string_agg(po.name || ': ' || pov.value, ' / ' ORDER BY po.position) as variant_label,
-    ROW_NUMBER() OVER (ORDER BY pv.created_at) as rn
-  FROM product_variants pv
-  JOIN productos p ON pv.product_id = p.id
+    ROW_NUMBER() OVER (ORDER BY vs.created_at) as rn
+  FROM variantes_seleccionadas vs
+  JOIN product_variants pv ON pv.id = vs.id
+  JOIN productos p ON vs.product_id = p.id
   JOIN LATERAL unnest(pv.option_value_ids) WITH ORDINALITY AS vals(value_id, ord) ON true
   JOIN product_option_values pov ON vals.value_id = pov.id
   JOIN product_options po ON pov.option_id = po.id
-  WHERE p.id = '727773f5-5f29-4ca8-a4f8-435eaeb97cf5'
-    AND pv.is_active = true
-  GROUP BY pv.id, p.id, p.nombre, p.imagen, pv.price, pv.created_at
-  LIMIT 2
+  GROUP BY vs.id, p.id, p.nombre, p.imagen, vs.price, vs.created_at
 ),
 -- Paso 2: Construir el array de items
 items_pedido AS (

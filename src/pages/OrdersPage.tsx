@@ -257,21 +257,43 @@ const OrdersPage: React.FC = () => {
                   </h4>
                   <div className="space-y-3">
                     {Array.isArray(order.items) && order.items.map((item: any, index: number) => (
-                      <div key={index} className="flex items-center space-x-4">
+                      <div key={index} className="flex items-start space-x-4 p-3 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                         <img
-                          src={item.image || '/placeholder-product.jpg'}
+                          src={item.image || item.imagen || '/placeholder-product.jpg'}
                           alt={item.title || item.nombre}
-                          className="w-16 h-16 object-cover rounded-lg"
+                          className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
                         />
-                        <div className="flex-1">
+                        <div className="flex-1 min-w-0">
                           <p className="font-medium text-gray-900 dark:text-gray-100">
                             {item.title || item.nombre}
                           </p>
+                          
+                          {/* Mostrar variante si existe */}
+                          {(item.variant_label || item.variant_name) && (
+                            <div className="mt-1 mb-2">
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Variante:</p>
+                              <div className="flex flex-wrap gap-1">
+                                {(item.variant_label || item.variant_name)?.split('/').map((option: string, idx: number) => {
+                                  const [optName, optValue] = option.split(':').map((s: string) => s.trim())
+                                  return (
+                                    <span 
+                                      key={idx}
+                                      className="inline-flex items-center px-2 py-0.5 bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 rounded text-xs font-medium"
+                                    >
+                                      <span className="text-gray-600 dark:text-gray-400">{optName}:</span>
+                                      <span className="ml-1">{optValue}</span>
+                                    </span>
+                                  )
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          
                           <p className="text-sm text-gray-500 dark:text-gray-400">
                             Cantidad: {item.quantity || item.cantidad} × S/ {(item.price || item.precio)?.toFixed(2)}
                           </p>
                         </div>
-                        <p className="font-medium text-gray-900 dark:text-gray-100">
+                        <p className="font-medium text-gray-900 dark:text-gray-100 flex-shrink-0">
                           S/ {((item.quantity || item.cantidad) * (item.price || item.precio)).toFixed(2)}
                         </p>
                       </div>
