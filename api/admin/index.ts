@@ -73,7 +73,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     // Options and values for a product
     if (act === 'options') {
-      return (await import('../../server/admin_handlers/options')).optionsHandler(req, res, supabase)
+      const productId = req.query.productId as string
+      
+      if (!productId) {
+        return res.status(400).json({ error: 'productId is required' })
+      }
+
+      const { data: opts, error: optsErr } = await supabase
+        .from('product_options')
+        .select('*')
+        .eq('product_id', productId)
+        .order('position')
+      
+      if (optsErr) {
+        console.error('Error fetching options:', optsErr)
+        return res.status(500).json({ error: optsErr.message })
+      }
+
+      // Get values for all options of this product
+      const optionIds = (opts || []).map(o => o.id)
+      let vals: any[] = []
+      
+      if (optionIds.length > 0) {
+        const { data: valsData, error: valsErr } = await supabase
+          .from('product_option_values')
+          .select('*')
+          .in('option_id', optionIds)
+          .order('position')
+        
+        if (valsErr) {
+          console.error('Error fetching values:', valsErr)
+          return res.status(500).json({ error: valsErr.message })
+        }
+        
+        vals = valsData || []
+      }
+
+      return res.status(200).json({ options: opts || [], values: vals })
     }
 
     // Variants for product
