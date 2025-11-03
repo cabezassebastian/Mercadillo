@@ -6,7 +6,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4"
   
   - Supports actions (via query param `action`):
       top-products, sales, metrics, stats, product-images, orders, users,
-      options, variants, option-values, option-values-batch, variants-write
+      options, variants, option-values, option-values-batch,
+      create-option, delete-option, create-option-value, delete-option-value,
+      update-option-value-visibility, update-variant, delete-variant,
+      generate-variants, get-variants
   - Uses SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY from environment
   - Protected with ADMIN_SECRET header for security
 */
@@ -219,6 +222,170 @@ serve(async (req: Request) => {
         if (error) return new Response(JSON.stringify({ error }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
         return new Response(JSON.stringify({ data }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
       }
+    }
+
+    // ============================================
+    // NUEVOS ENDPOINTS DE VARIANTES (Sistema mejorado)
+    // ============================================
+
+    // Create option
+    if (action === 'create-option' && req.method === 'POST') {
+      const body = await req.json().catch(() => null)
+      const { product_id, name, position } = body || {}
+      const { data, error } = await supabase
+        .from('product_options')
+        .insert([{ product_id, name, position: position || 0 }])
+        .select()
+        .single()
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ data }), { status: 201, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Delete option
+    if (action === 'delete-option' && req.method === 'DELETE') {
+      const body = await req.json().catch(() => null)
+      const { option_id } = body || {}
+      const { error } = await supabase
+        .from('product_options')
+        .delete()
+        .eq('id', option_id)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Create option value
+    if (action === 'create-option-value' && req.method === 'POST') {
+      const body = await req.json().catch(() => null)
+      const { option_id, value, metadata, position, visible } = body || {}
+      const { data, error } = await supabase
+        .from('product_option_values')
+        .insert([{ option_id, value, metadata, position: position || 0, visible: visible !== false }])
+        .select()
+        .single()
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ data }), { status: 201, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Delete option value
+    if (action === 'delete-option-value' && req.method === 'DELETE') {
+      const body = await req.json().catch(() => null)
+      const { value_id } = body || {}
+      const { error } = await supabase
+        .from('product_option_values')
+        .delete()
+        .eq('id', value_id)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Update option value visibility
+    if (action === 'update-option-value-visibility' && req.method === 'PATCH') {
+      const body = await req.json().catch(() => null)
+      const { value_id, visible } = body || {}
+      const { error } = await supabase
+        .from('product_option_values')
+        .update({ visible })
+        .eq('id', value_id)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Update variant
+    if (action === 'update-variant' && req.method === 'PATCH') {
+      const body = await req.json().catch(() => null)
+      const { variant_id, field, value } = body || {}
+      const { error } = await supabase
+        .from('product_variants')
+        .update({ [field]: value })
+        .eq('id', variant_id)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Delete variant
+    if (action === 'delete-variant' && req.method === 'DELETE') {
+      const body = await req.json().catch(() => null)
+      const { variant_id } = body || {}
+      const { error } = await supabase
+        .from('product_variants')
+        .delete()
+        .eq('id', variant_id)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ ok: true }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Generate variants
+    if (action === 'generate-variants' && req.method === 'POST') {
+      const body = await req.json().catch(() => null)
+      const { product_id, options, base_price } = body || {}
+      
+      // Build all combinations
+      const combinations: string[][] = [[]]
+      
+      for (const option of options || []) {
+        if (!option.values || option.values.length === 0) continue
+        
+        const newCombinations: string[][] = []
+        for (const combo of combinations) {
+          for (const valueId of option.values) {
+            newCombinations.push([...combo, valueId])
+          }
+        }
+        combinations.length = 0
+        combinations.push(...newCombinations)
+      }
+      
+      // Get existing variants to avoid duplicates
+      const { data: existing } = await supabase
+        .from('product_variants')
+        .select('option_value_ids')
+        .eq('product_id', product_id)
+      
+      const existingCombos = new Set(
+        (existing || []).map((v: any) => JSON.stringify(v.option_value_ids.sort()))
+      )
+      
+      // Build new variants only
+      const newVariants = combinations
+        .filter(combo => !existingCombos.has(JSON.stringify([...combo].sort())))
+        .map(combo => ({
+          product_id,
+          option_value_ids: combo,
+          price: base_price,
+          stock: null,
+          is_active: true,
+          attributes: {}
+        }))
+      
+      if (newVariants.length === 0) {
+        return new Response(
+          JSON.stringify({ data: [], count: 0, message: 'No new variants to create' }), 
+          { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } }
+        )
+      }
+      
+      const { data, error } = await supabase
+        .from('product_variants')
+        .insert(newVariants)
+        .select()
+      
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ data, count: data?.length || 0 }), { status: 201, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+    }
+
+    // Get variants with details (for loading variants view)
+    if (action === 'get-variants' && req.method === 'GET') {
+      const product_id = url.searchParams.get('product_id') || url.searchParams.get('productId') || ''
+      if (!product_id) return new Response(JSON.stringify({ error: 'product_id is required' }), { status: 400, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      
+      const { data, error } = await supabase
+        .from('variantes_con_detalles')
+        .select('*')
+        .eq('product_id', product_id)
+        .order('variante_nombre')
+      
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, 'content-type': 'application/json' } })
+      return new Response(JSON.stringify({ data: data || [] }), { status: 200, headers: { ...corsHeaders, 'content-type': 'application/json' } })
     }
 
     return new Response(JSON.stringify({ error: 'Invalid admin action' }), { status: 400, headers: { ...corsHeaders, 'content-type': 'application/json' } })
