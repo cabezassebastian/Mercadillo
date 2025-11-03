@@ -91,6 +91,7 @@ export interface NavigationHistoryItem {
     nombre: string
     precio: number
     imagen: string
+    slug?: string
   }
 }
 

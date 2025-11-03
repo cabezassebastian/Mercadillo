@@ -3,6 +3,7 @@ import { Bot, User, ShoppingCart } from 'lucide-react'
 import { Link } from 'react-router-dom'
 import { useCart } from '../../contexts/CartContext'
 import { useNotificationHelpers } from '../../contexts/NotificationContext'
+import { getProductUrl } from '@/lib/slugify'
 
 interface Message {
   id: string
@@ -112,7 +113,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                   className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg p-3 shadow-sm"
                 >
                   <div className="flex gap-3">
-                    <Link to={`/producto/${product.id}`} className="flex-shrink-0">
+                    <Link to={getProductUrl(product.slug || product.id, product.nombre)} className="flex-shrink-0">
                       <img 
                         src={product.imagen_url} 
                         alt={product.nombre}
@@ -121,7 +122,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
                     </Link>
                     <div className="flex-1 min-w-0">
                       <Link 
-                        to={`/producto/${product.id}`}
+                        to={getProductUrl(product.slug || product.id, product.nombre)}
                         className="text-sm font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 line-clamp-2"
                       >
                         {product.nombre}

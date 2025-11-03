@@ -416,7 +416,7 @@ const Product: React.FC = () => {
                 <ShareButtons
                   productName={producto.nombre}
                   productPrice={selectedVariant?.price || producto.precio}
-                  productUrl={getProductUrl(producto.id, producto.nombre)}
+                  productUrl={getProductUrl(producto.slug || producto.id, producto.nombre)}
                   productImage={productoImagenes[0]?.url || producto.imagen}
                 />
               </div>

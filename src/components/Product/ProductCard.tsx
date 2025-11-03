@@ -87,7 +87,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
           </div>
         )}
 
-        <Link to={getProductUrl(producto.id, producto.nombre)}>
+        <Link to={getProductUrl(producto.slug || producto.id, producto.nombre)}>
           <div className="flex">
             {/* Image Section */}
             <div className="w-48 h-48 flex-shrink-0 overflow-hidden">
@@ -186,7 +186,7 @@ const ProductCard = memo(({ producto, viewMode = 'grid' }: ProductCardProps) => 
         </div>
       )}
       
-      <Link to={getProductUrl(producto.id, producto.nombre)} className="block h-full">
+      <Link to={getProductUrl(producto.slug || producto.id, producto.nombre)} className="block h-full">
         {/* make the whole card full height and use flex column */}
         <div className="flex flex-col h-full">
           {/* Image Section */}

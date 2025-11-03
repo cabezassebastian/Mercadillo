@@ -3,6 +3,7 @@ import { Minus, Plus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react'
 import { useCart } from '@/contexts/CartContext'
 import CheckoutButton from '@/components/Cart/CheckoutButton'
 import CouponInput from '@/components/Cart/CouponInput'
+import { getProductUrl } from '@/lib/slugify'
 
 const Cart = () => {
   const { 
@@ -60,7 +61,7 @@ const Cart = () => {
               <div key={`${item.producto.id}-${item.producto.variant_id || 'base'}`} className="card p-6">
                 <div className="flex items-center space-x-4">
                   <Link 
-                    to={`/producto/${item.producto.id}`}
+                    to={getProductUrl(item.producto.slug || item.producto.id, item.producto.nombre)}
                     className="w-20 h-20 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-700 hover:opacity-80 transition-opacity duration-200"
                   >
                     <img
@@ -72,7 +73,7 @@ const Cart = () => {
                   
                   <div className="flex-1">
                     <Link 
-                      to={`/producto/${item.producto.id}`}
+                      to={getProductUrl(item.producto.slug || item.producto.id, item.producto.nombre)}
                       className="hover:text-dorado dark:hover:text-yellow-400 transition-colors duration-200"
                     >
                       <h3 className="font-semibold text-gris-oscuro dark:text-gray-100 mb-1">

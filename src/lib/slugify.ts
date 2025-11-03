@@ -24,30 +24,51 @@ export function slugify(text: string): string {
 }
 
 /**
- * Generates a product URL with slug
- * Format: /producto/slug-id
- * Example: /producto/smartphone-a20-128gb-abc123
+ * Generates a product URL using the product's slug from database
+ * Format: /producto/slug
+ * Example: /producto/pelado-nuevo
+ * 
+ * If slug is not provided, falls back to old format with ID
  */
-export function getProductUrl(id: string, nombre: string): string {
-  const slug = slugify(nombre)
-  return `/producto/${slug}-${id}`
+export function getProductUrl(idOrSlug: string, nombre?: string): string {
+  // Si ya es un slug (no contiene guiones de UUID), usarlo directamente
+  const uuidRegex = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i
+  
+  if (!uuidRegex.test(idOrSlug)) {
+    // Es un slug, usarlo directamente
+    return `/producto/${idOrSlug}`
+  }
+  
+  // Es un ID, generar slug temporal (para retrocompatibilidad)
+  if (nombre) {
+    const slug = slugify(nombre)
+    return `/producto/${slug}-${idOrSlug.substring(0, 8)}`
+  }
+  
+  // Fallback: solo ID
+  return `/producto/${idOrSlug}`
 }
 
 /**
- * Extracts the product ID from a slug-based URL
- * Supports both formats:
- * - /producto/abc-123 (old format)
- * - /producto/smartphone-a20-128gb-abc123 (new format with slug)
+ * Extracts the product ID or slug from URL parameter
+ * Supports multiple formats:
+ * - "pelado-nuevo" (new slug format) -> returns "pelado-nuevo"
+ * - "pelado-nuevo-abc123" (old format with UUID) -> returns UUID
+ * - "abc-123-def-456..." (UUID only) -> returns UUID
  */
-export function extractProductId(slugWithId: string): string {
-  // Si el parámetro ya es un UUID válido, retornarlo directamente
+export function extractProductIdOrSlug(slugWithId: string): string {
+  // Si es un UUID completo, retornarlo
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   if (uuidRegex.test(slugWithId)) {
     return slugWithId
   }
 
-  // Intentar extraer UUID del formato slug-uuid
-  // Buscar el último segmento que sea un UUID
+  // Si NO contiene ningún UUID, es un slug puro (nuevo formato)
+  if (!slugWithId.match(/[0-9a-f]{8}-[0-9a-f]{4}/i)) {
+    return slugWithId
+  }
+
+  // Intentar extraer UUID del formato antiguo (slug-uuid)
   const parts = slugWithId.split('-')
   
   // Reconstruir posibles UUIDs desde el final
@@ -59,14 +80,17 @@ export function extractProductId(slugWithId: string): string {
   }
 
   // Si no se encuentra UUID, retornar el valor original
-  // (para compatibilidad con IDs antiguos)
+  // (podría ser un slug)
   return slugWithId
 }
 
 /**
  * Generates a full product URL for external sharing
  */
-export function getFullProductUrl(id: string, nombre: string): string {
+export function getFullProductUrl(idOrSlug: string, nombre?: string): string {
   const baseUrl = import.meta.env.VITE_APP_URL || 'https://www.mercadillo.app'
-  return `${baseUrl}${getProductUrl(id, nombre)}`
+  return `${baseUrl}${getProductUrl(idOrSlug, nombre)}`
 }
+
+// Alias for backward compatibility
+export const extractProductId = extractProductIdOrSlug

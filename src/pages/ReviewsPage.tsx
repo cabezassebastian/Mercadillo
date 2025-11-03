@@ -4,6 +4,7 @@ import { Star, MessageCircle, Package, Calendar, Edit3, Trash2 } from 'lucide-re
 import { supabase } from '@/lib/supabaseClient'
 import { Link } from 'react-router-dom'
 import ReviewFilters from '@/components/Reviews/ReviewFilters'
+import { getProductUrl } from '@/lib/slugify'
 
 interface UserReview {
   id: string
@@ -18,6 +19,7 @@ interface UserReview {
     nombre: string
     imagen: string
     precio: number
+    slug?: string
   }
 }
 
@@ -322,7 +324,7 @@ const ReviewsPage: React.FC = () => {
                       />
                       <div>
                         <Link
-                          to={`/producto/${review.producto_id}`}
+                          to={getProductUrl(review.producto?.slug || review.producto_id, review.producto?.nombre)}
                           className="block"
                         >
                           <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 line-clamp-2">

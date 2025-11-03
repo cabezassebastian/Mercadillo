@@ -12,6 +12,7 @@ import { useUserHistory, useUserMutations } from '@/hooks/useUserQueries'
 import Pagination from '@/components/common/Pagination'
 import { Link } from 'react-router-dom'
 import { Producto } from '@/lib/supabase'
+import { getProductUrl } from '@/lib/slugify'
 
 const HistoryPage: React.FC = () => {
   const { user } = useUser()
@@ -294,7 +295,7 @@ const HistoryPage: React.FC = () => {
                           {/* Información del producto */}
                           <div className="p-4">
                             <Link
-                              to={`/producto/${item.producto.id}`}
+                              to={getProductUrl(item.producto.slug || item.producto.id, item.producto.nombre)}
                               className="block mb-2"
                             >
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200 line-clamp-2">
@@ -320,7 +321,7 @@ const HistoryPage: React.FC = () => {
                             {/* Botones de acción */}
                             <div className="flex space-x-2">
                               <Link
-                                to={`/producto/${item.producto.id}`}
+                                to={getProductUrl(item.producto.slug || item.producto.id, item.producto.nombre)}
                                 className="flex-1 flex items-center justify-center px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors duration-200"
                               >
                                 <Eye className="w-4 h-4 mr-2" />

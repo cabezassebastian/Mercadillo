@@ -3,12 +3,14 @@ import { useEffect, useState } from 'react';
 import { Trophy, TrendingUp, DollarSign, ExternalLink, Package } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { fetchAdmin } from '../../lib/adminApi';
+import { getProductUrl } from '@/lib/slugify';
 
 type TopProduct = {
   id: string;
   name: string;
   sold: number;
   revenue: number;
+  slug?: string;
 };
 
 export default function TopProducts() {
@@ -130,7 +132,7 @@ export default function TopProducts() {
 
               {/* Action Button */}
               <Link
-                to={`/producto/${product.id}`}
+                to={getProductUrl(product.slug || product.id, product.name)}
                 target="_blank"
                 className="ml-4 px-4 py-2 bg-amarillo hover:bg-yellow-500 text-gris-oscuro rounded-lg transition-colors flex items-center space-x-2 font-medium text-sm"
               >
