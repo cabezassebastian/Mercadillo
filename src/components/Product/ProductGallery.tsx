@@ -141,29 +141,22 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
             ref={imageRef}
             src={currentImage?.url}
             alt={currentImage?.alt_text || `${productName} - Imagen ${selectedIndex + 1}`}
-            className={`w-full h-full object-cover transition-all duration-300 ${
+            className={`w-full h-full object-cover transition-transform duration-150 ease-out ${
               isZoomed ? 'scale-150' : 'scale-100'
             }`}
           />
 
-          {/* Botón de fullscreen */}
+          {/* Botón de fullscreen - SIEMPRE VISIBLE */}
           <button
             onClick={(e) => {
               e.stopPropagation();
               setIsFullscreen(true);
             }}
-            className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-white dark:hover:bg-gray-700"
+            className="absolute top-4 right-4 p-2 bg-white/90 dark:bg-gray-800/90 rounded-full shadow-lg transition-all duration-200 hover:bg-white dark:hover:bg-gray-700 hover:scale-110"
             aria-label="Ver en pantalla completa"
           >
             <Maximize2 className="w-5 h-5 text-gray-700 dark:text-gray-300" />
           </button>
-
-          {/* Indicador de zoom (desktop) */}
-          {window.innerWidth >= 768 && !isFullscreen && (
-            <div className="absolute bottom-4 right-4 px-3 py-1.5 bg-black/60 text-white text-xs rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-              Hover para zoom
-            </div>
-          )}
 
           {/* Flechas de navegación (si hay más de una imagen) */}
           {displayImages.length > 1 && (
@@ -226,9 +219,9 @@ export default function ProductGallery({ images, productName, fallbackImage }: P
         </div>
       )}
 
-      {/* Modal Fullscreen */}
+      {/* Modal Fullscreen - z-index máximo para cubrir TODO */}
       {isFullscreen && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center">
+        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center">
           {/* Botón cerrar */}
           <button
             onClick={() => setIsFullscreen(false)}
