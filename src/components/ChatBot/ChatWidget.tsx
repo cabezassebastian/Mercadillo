@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react'
 import { MessageCircle, X, Send, Loader2 } from 'lucide-react'
 import ChatMessage from './ChatMessage'
 import { useUser } from '@clerk/clerk-react'
+import { API_ENDPOINTS, getApiHeaders } from '../../config/api'
 
 interface Message {
   id: string
@@ -72,11 +73,11 @@ const ChatWidget: React.FC = () => {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(API_ENDPOINTS.chat, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: getApiHeaders({ 
+          userId: user?.id 
+        }),
         body: JSON.stringify({
           message: userMessage.content,
           history: messages.slice(-5), // Enviar últimos 5 mensajes para contexto
