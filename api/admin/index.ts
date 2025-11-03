@@ -44,6 +44,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const action = (req.query.action as string) || (req.query.route as string) || ''
     // normalize
     const act = action.toLowerCase()
+    
+    // Debug logging
+    console.log('[Admin API]', req.method, act, 'Body:', req.body)
 
     // Top products
     if (act === 'top-products') {
@@ -245,7 +248,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return (await import('../../server/admin_handlers/variantsWrite')).variantsWriteHandler(req, res, supabase)
     }
 
-    return res.status(400).json({ error: 'Invalid admin action' })
+    console.error('[Admin API] Unknown action:', act, 'Method:', req.method)
+    return res.status(400).json({ error: `Invalid admin action: ${act}` })
   } catch (err) {
     console.error('Unexpected error in admin/index:', err)
     return res.status(500).json({ error: String(err) })
