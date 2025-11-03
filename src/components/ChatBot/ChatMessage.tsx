@@ -16,6 +16,31 @@ interface ChatMessageProps {
   message: Message
 }
 
+// Función para convertir URLs en enlaces clickeables
+const linkify = (text: string) => {
+  // Regex para detectar URLs (http, https, www)
+  const urlRegex = /(https?:\/\/[^\s]+)/g
+  const parts = text.split(urlRegex)
+
+  return parts.map((part, index) => {
+    if (part.match(urlRegex)) {
+      // Es una URL
+      return (
+        <a
+          key={index}
+          href={part}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 dark:text-blue-400 underline hover:text-blue-700 dark:hover:text-blue-300 font-medium"
+        >
+          {part}
+        </a>
+      )
+    }
+    return part
+  })
+}
+
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
   const isUser = message.role === 'user'
   const { addToCart } = useCart()
@@ -59,7 +84,9 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               ? 'bg-blue-500 text-white rounded-tr-none'
               : 'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 border border-gray-200 dark:border-gray-600 rounded-tl-none'
           }`}>
-            <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
+            <p className="text-sm whitespace-pre-wrap break-words">
+              {isUser ? message.content : linkify(message.content)}
+            </p>
           </div>
 
           {/* Productos encontrados */}
