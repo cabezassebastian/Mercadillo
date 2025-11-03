@@ -50,10 +50,21 @@ const ChatAnalytics: React.FC = () => {
       // Calcular fecha de inicio según el rango
       const now = new Date()
       const daysAgo = timeRange === '7d' ? 7 : timeRange === '30d' ? 30 : 90
-      const startDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000)
       
-      // Formatear fecha correctamente para Supabase (sin milliseconds)
-      const startDateISO = startDate.toISOString().split('.')[0] + 'Z'
+      // Restar días correctamente
+      const startDate = new Date()
+      startDate.setDate(now.getDate() - daysAgo)
+      
+      // Formatear fecha correctamente para Supabase (ISO 8601 sin milliseconds)
+      const year = startDate.getFullYear()
+      const month = String(startDate.getMonth() + 1).padStart(2, '0')
+      const day = String(startDate.getDate()).padStart(2, '0')
+      const hours = String(startDate.getHours()).padStart(2, '0')
+      const minutes = String(startDate.getMinutes()).padStart(2, '0')
+      const seconds = String(startDate.getSeconds()).padStart(2, '0')
+      const startDateISO = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}Z`
+
+      console.log('📅 Fetching analytics desde:', startDateISO, 'hasta:', now.toISOString())
 
       // Obtener estadísticas generales
       const { data: conversations, error: convError } = await supabase
@@ -63,7 +74,7 @@ const ChatAnalytics: React.FC = () => {
         .order('created_at', { ascending: false })
 
       if (convError) {
-        console.error('Error fetching conversations:', convError)
+        console.error('❌ Error fetching conversations:', convError)
         // Mostrar datos vacíos en lugar de fallar completamente
         setStats({
           totalConversations: 0,
@@ -75,6 +86,8 @@ const ChatAnalytics: React.FC = () => {
         setDailyStats([])
         return
       }
+
+      console.log('✅ Conversaciones cargadas:', conversations?.length || 0)
 
       const totalConvs = conversations?.length || 0
       const uniqueUsers = new Set(conversations?.map(c => c.usuario_id).filter(Boolean)).size
@@ -121,7 +134,7 @@ const ChatAnalytics: React.FC = () => {
       setDailyStats(dailyData)
 
     } catch (error) {
-      console.error('Error fetching analytics:', error)
+      console.error('❌ Error fetching analytics:', error)
       // Asegurar que siempre se muestren datos vacíos en caso de error
       setStats({
         totalConversations: 0,
