@@ -19,8 +19,16 @@ const Home: React.FC = () => {
         setIsLoading(true)
         setError(null)
 
-        let productsQuery = supabase.from('productos').select('*').gt('stock', 0)
-        let { data, error: supabaseError } = await productsQuery.order('created_at', { ascending: false }).limit(8)
+        // Query productos con stock > 0 y activos
+        let productsQuery = supabase
+          .from('productos')
+          .select('*')
+          .eq('activo', true)
+          .gt('stock', 0)
+
+        let { data, error: supabaseError } = await productsQuery
+          .order('created_at', { ascending: false })
+          .limit(8)
 
         if (supabaseError) {
           // Si falla la ordenación por created_at, intentar sin ordenación
@@ -42,7 +50,7 @@ const Home: React.FC = () => {
                 .select('url')
                 .eq('producto_id', producto.id)
                 .eq('es_principal', true)
-                .single()
+                .maybeSingle() // Cambiar de .single() a .maybeSingle() para evitar error si no existe
               
               // Si hay imagen principal en la galería, usarla; si no, usar la imagen original
               return {
@@ -56,11 +64,19 @@ const Home: React.FC = () => {
           setFeaturedProducts(data || [])
         }
 
+        // Top sellers con manejo de errores silencioso
         try {
           const tops = await topSellers('week', 8)
-          setTopWeek(tops as Producto[])
+          // Filtrar productos duplicados por ID y con stock disponible
+          const topsUnicos = tops.filter((producto, index, self) => {
+            const stockDisponible = (producto as any).stock === undefined || (producto as any).stock === null || (producto as any).stock > 0
+            const esUnico = index === self.findIndex((p) => p.id === producto.id)
+            return stockDisponible && esUnico
+          })
+          setTopWeek(topsUnicos as Producto[])
         } catch (err) {
-          console.error('Error fetching top sellers', err)
+          // Silenciar error si la función RPC no existe
+          if (import.meta.env.DEV) console.debug('Top sellers not available:', err)
         }
       } catch (err) {
         setError('Ocurrio un error inesperado al cargar los productos.')
@@ -165,7 +181,7 @@ const Home: React.FC = () => {
       <section className="py-16 bg-hueso dark:bg-gray-900 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-gray-100 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
               Productos Destacados
             </h2>
             <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
@@ -231,7 +247,7 @@ const Home: React.FC = () => {
       <section className="py-16 bg-blanco dark:bg-gray-800 transition-colors duration-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 dark:text-gray-100 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
               Lo que dicen nuestros clientes
             </h2>
           </div>

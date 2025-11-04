@@ -170,7 +170,15 @@ export const topSellers = async (period: 'week' | 'month' | 'all' = 'week', limi
   // Intentar RPC get_top_selling_products
   try {
     const { data, error } = await supabase.rpc('get_top_selling_products', { p_period: period, p_limit: limit })
-    if (!error && data && Array.isArray(data)) return data as RecProduct[]
+    if (!error && data && Array.isArray(data)) {
+      // Filtrar duplicados y productos sin stock
+      const unique = data.filter((producto: any, index: number, self: any[]) => {
+        const esUnico = index === self.findIndex((p: any) => p.id === producto.id)
+        const tieneStock = producto.stock === undefined || producto.stock === null || producto.stock > 0
+        return esUnico && tieneStock
+      })
+      return unique as RecProduct[]
+    }
   } catch (err) {
     // fallback to client-side
   }
@@ -204,12 +212,20 @@ export const topSellers = async (period: 'week' | 'month' | 'all' = 'week', limi
 
   if (topIds.length === 0) return []
 
+  // Filtrar solo productos con stock > 0 y activos
   const { data: products } = await supabase
     .from('productos')
     .select('*')
     .in('id', topIds)
+    .eq('activo', true)
+    .gt('stock', 0)
 
-  return (products || []) as RecProduct[]
+  // Eliminar duplicados por ID
+  const uniqueProducts = (products || []).filter((producto: any, index: number, self: any[]) => 
+    index === self.findIndex((p: any) => p.id === producto.id)
+  )
+
+  return uniqueProducts as RecProduct[]
 }
 
 export default {
