@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trash2, Star, ArrowUp, ArrowDown, Image as ImageIcon } from 'lucide-react';
+import { Upload, Trash2, Star, GripVertical, Image as ImageIcon } from 'lucide-react';
 import { ProductoImagen } from '@/lib/supabase';
 import { uploadImage } from '@/lib/cloudinary';
 import { fetchAdmin } from '../../lib/adminApi';
@@ -13,6 +13,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
   const [imagenes, setImagenes] = useState<ProductoImagen[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
+  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
 
   useEffect(() => {
     fetchImagenes();
@@ -21,7 +22,16 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
   const fetchImagenes = async () => {
     try {
       const json = await fetchAdmin(`product-images&productId=${encodeURIComponent(productoId)}`)
-      setImagenes(json.data || [])
+      const imagenesData = json.data || []
+      
+      // Ordenar: imagen principal primero, luego por orden
+      const sorted = imagenesData.sort((a: ProductoImagen, b: ProductoImagen) => {
+        if (a.es_principal) return -1
+        if (b.es_principal) return 1
+        return a.orden - b.orden
+      })
+      
+      setImagenes(sorted)
     } catch (error) {
       console.error('Error in fetchImagenes:', error);
     } finally {
@@ -68,7 +78,6 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
   const handleSetPrincipal = async (imagenId: string) => {
     try {
       // Primero desmarcar todas las imágenes principales
-      // Use server endpoints to update principal flag
       await fetchAdmin('product-images', { method: 'PUT', body: JSON.stringify({ id: null, updates: { es_principal: false, producto_id: productoId } }) })
       await fetchAdmin('product-images', { method: 'PUT', body: JSON.stringify({ id: imagenId, updates: { es_principal: true } }) })
 
@@ -79,27 +88,37 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
     }
   };
 
-  const handleMoveUp = async (index: number) => {
-    if (index === 0) return;
+  const handleDragStart = (e: React.DragEvent, index: number) => {
+    setDraggedIndex(index)
+    e.dataTransfer.effectAllowed = 'move'
+    // Añadir clase visual al elemento arrastrado
+    const target = e.currentTarget as HTMLElement
+    target.style.opacity = '0.5'
+  }
 
-    const newImagenes = [...imagenes];
-    const temp = newImagenes[index - 1];
-    newImagenes[index - 1] = newImagenes[index];
-    newImagenes[index] = temp;
+  const handleDragEnd = (e: React.DragEvent) => {
+    const target = e.currentTarget as HTMLElement
+    target.style.opacity = '1'
+    setDraggedIndex(null)
+  }
 
-    await updateOrden(newImagenes);
-  };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+  }
 
-  const handleMoveDown = async (index: number) => {
-    if (index === imagenes.length - 1) return;
+  const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
+    e.preventDefault()
+    
+    if (draggedIndex === null || draggedIndex === dropIndex) return
 
-    const newImagenes = [...imagenes];
-    const temp = newImagenes[index + 1];
-    newImagenes[index + 1] = newImagenes[index];
-    newImagenes[index] = temp;
+    const newImagenes = [...imagenes]
+    const [draggedItem] = newImagenes.splice(draggedIndex, 1)
+    newImagenes.splice(dropIndex, 0, draggedItem)
 
-    await updateOrden(newImagenes);
-  };
+    // Actualizar orden en la base de datos
+    await updateOrden(newImagenes)
+  }
 
   const updateOrden = async (newImagenes: ProductoImagen[]) => {
     try {
@@ -170,12 +189,22 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           {imagenes.map((imagen, index) => (
             <div
               key={imagen.id}
-              className={`relative group rounded-lg overflow-hidden border-2 ${
+              draggable
+              onDragStart={(e) => handleDragStart(e, index)}
+              onDragEnd={handleDragEnd}
+              onDragOver={handleDragOver}
+              onDrop={(e) => handleDrop(e, index)}
+              className={`relative group rounded-lg overflow-hidden border-2 cursor-move transition-all ${
                 imagen.es_principal
                   ? 'border-amarillo dark:border-yellow-400'
                   : 'border-gray-200 dark:border-gray-700'
-              }`}
+              } ${draggedIndex === index ? 'scale-105 shadow-lg' : ''}`}
             >
+              {/* Icono de arrastre */}
+              <div className="absolute top-2 left-2 z-10 p-1 bg-black/60 rounded cursor-move">
+                <GripVertical className="w-4 h-4 text-white" />
+              </div>
+
               {/* Imagen */}
               <div className="aspect-square bg-gray-100 dark:bg-gray-800">
                 <img
@@ -187,39 +216,21 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
               {/* Badge de principal */}
               {imagen.es_principal && (
-                <div className="absolute top-2 left-2 px-2 py-1 bg-amarillo dark:bg-yellow-400 text-gray-900 text-xs font-semibold rounded-full flex items-center space-x-1">
+                <div className="absolute top-2 right-2 px-2 py-1 bg-amarillo dark:bg-yellow-400 text-gray-900 text-xs font-semibold rounded-full flex items-center space-x-1">
                   <Star className="w-3 h-3 fill-current" />
                   <span>Principal</span>
                 </div>
               )}
 
-              {/* Orden */}
-              <div className="absolute top-2 right-2 w-6 h-6 bg-black/60 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                {index + 1}
-              </div>
+              {/* Número de orden */}
+              {!imagen.es_principal && (
+                <div className="absolute bottom-2 right-2 w-6 h-6 bg-black/60 text-white text-xs rounded-full flex items-center justify-center font-medium">
+                  {index + 1}
+                </div>
+              )}
 
               {/* Controles (aparecen al hover) */}
               <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center space-y-2">
-                {/* Botones de orden */}
-                <div className="flex space-x-2">
-                  <button
-                    onClick={() => handleMoveUp(index)}
-                    disabled={index === 0}
-                    className="p-1.5 bg-white/90 hover:bg-white rounded disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover arriba"
-                  >
-                    <ArrowUp className="w-4 h-4 text-gray-900" />
-                  </button>
-                  <button
-                    onClick={() => handleMoveDown(index)}
-                    disabled={index === imagenes.length - 1}
-                    className="p-1.5 bg-white/90 hover:bg-white rounded disabled:opacity-30 disabled:cursor-not-allowed"
-                    title="Mover abajo"
-                  >
-                    <ArrowDown className="w-4 h-4 text-gray-900" />
-                  </button>
-                </div>
-
                 {/* Marcar como principal */}
                 {!imagen.es_principal && (
                   <button
@@ -251,8 +262,9 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
         <p className="font-semibold mb-1">💡 Consejos:</p>
         <ul className="list-disc list-inside space-y-1">
           <li>Puedes subir múltiples imágenes a la vez</li>
-          <li>La imagen principal se muestra en el catálogo</li>
-          <li>Usa las flechas para cambiar el orden de visualización</li>
+          <li>La imagen principal siempre aparece primero en la galería</li>
+          <li><strong>Arrastra y suelta</strong> las imágenes para cambiar su orden</li>
+          <li>La imagen principal se muestra en el catálogo y como primera en la galería del producto</li>
           <li>Formatos recomendados: JPG, PNG, WEBP</li>
         </ul>
       </div>
