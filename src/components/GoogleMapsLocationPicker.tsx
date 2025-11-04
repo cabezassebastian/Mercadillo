@@ -33,19 +33,34 @@ export default function GoogleMapsLocationPicker({
     const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY
     
     if (!apiKey) {
-      console.error('Google Maps API Key no configurada')
+      console.error('❌ Google Maps API Key no configurada en .env.local')
       return
     }
 
     // Verificar si ya está cargado
-    if (window.google?.maps) {
+    if ((window as any).google?.maps) {
+      console.log('✅ Google Maps ya está cargado')
       return
     }
 
+    // Verificar si el script ya existe
+    const existingScript = document.querySelector('script[src*="maps.googleapis.com"]')
+    if (existingScript) {
+      console.log('✅ Script de Google Maps ya existe')
+      return
+    }
+
+    console.log('🔄 Cargando Google Maps API...')
     const script = document.createElement('script')
     script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
     script.async = true
     script.defer = true
+    script.onload = () => {
+      console.log('✅ Google Maps API cargada correctamente')
+    }
+    script.onerror = (error) => {
+      console.error('❌ Error cargando Google Maps:', error)
+    }
     document.head.appendChild(script)
 
     return () => {
@@ -61,94 +76,100 @@ export default function GoogleMapsLocationPicker({
 
     const initMap = () => {
       if (!(window as any).google?.maps) {
-        console.error('Google Maps no está disponible')
+        console.error('❌ Google Maps no está disponible')
         setIsLoadingMap(false)
         return
       }
 
+      console.log('🗺️ Inicializando mapa...')
+
       // Ubicación por defecto (Lima, Perú)
       const defaultLocation = { lat: -12.0464, lng: -77.0428 }
 
-      // Crear el mapa
-      const map = new (window as any).google.maps.Map(mapRef.current!, {
-        center: defaultLocation,
-        zoom: 13,
-        mapTypeControl: false,
-        streetViewControl: false,
-        fullscreenControl: false,
-      })
+      try {
+        // Crear el mapa
+        const map = new (window as any).google.maps.Map(mapRef.current!, {
+          center: defaultLocation,
+          zoom: 13,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: false,
+        })
 
-      googleMapRef.current = map
+        googleMapRef.current = map
+        console.log('✅ Mapa creado')
 
-      // Crear marcador
-      const marker = new (window as any).google.maps.Marker({
-        map: map,
-        position: defaultLocation,
-        draggable: true,
-        animation: (window as any).google.maps.Animation.DROP,
-      })
+        // Crear marcador
+        const marker = new (window as any).google.maps.Marker({
+          map: map,
+          position: defaultLocation,
+          draggable: true,
+          animation: (window as any).google.maps.Animation.DROP,
+          title: 'Arrastra este pin para ajustar la ubicación'
+        })
 
-      markerRef.current = marker
+        markerRef.current = marker
+        console.log('✅ Marcador creado')
 
-      // Evento cuando se arrastra el marcador
-      marker.addListener('dragend', () => {
-        const position = marker.getPosition()
-        if (position) {
-          const lat = position.lat()
-          const lng = position.lng()
-          setSelectedLocation({ lat, lng })
-          reverseGeocode(lat, lng)
-        }
-      })
-
-      // Evento cuando se hace clic en el mapa
-      map.addListener('click', (e: any) => {
-        if (e.latLng) {
-          const lat = e.latLng.lat()
-          const lng = e.latLng.lng()
-          marker.setPosition(e.latLng)
-          setSelectedLocation({ lat, lng })
-          reverseGeocode(lat, lng)
-        }
-      })
-
-      // Intentar obtener ubicación actual del usuario
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const userLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
-            }
-            map.setCenter(userLocation)
-            marker.setPosition(userLocation)
-            setSelectedLocation(userLocation)
-            reverseGeocode(userLocation.lat, userLocation.lng)
-          },
-          () => {
-            console.log('No se pudo obtener la ubicación del usuario')
+        // Evento cuando se arrastra el marcador
+        marker.addListener('dragend', () => {
+          const position = marker.getPosition()
+          if (position) {
+            const lat = position.lat()
+            const lng = position.lng()
+            console.log('📍 Nueva posición:', lat, lng)
+            setSelectedLocation({ lat, lng })
+            reverseGeocode(lat, lng)
           }
-        )
-      }
+        })
 
-      setIsLoadingMap(false)
+        // Evento cuando se hace clic en el mapa
+        map.addListener('click', (e: any) => {
+          if (e.latLng) {
+            const lat = e.latLng.lat()
+            const lng = e.latLng.lng()
+            console.log('🖱️ Clic en mapa:', lat, lng)
+            marker.setPosition(e.latLng)
+            setSelectedLocation({ lat, lng })
+            reverseGeocode(lat, lng)
+          }
+        })
+
+        // Establecer ubicación inicial
+        setSelectedLocation(defaultLocation)
+        reverseGeocode(defaultLocation.lat, defaultLocation.lng)
+
+        setIsLoadingMap(false)
+        console.log('✅ Mapa inicializado correctamente')
+
+      } catch (error) {
+        console.error('❌ Error inicializando mapa:', error)
+        setIsLoadingMap(false)
+      }
     }
 
     // Esperar a que Google Maps esté cargado
     if ((window as any).google?.maps) {
+      console.log('✅ Google Maps disponible, inicializando...')
       initMap()
     } else {
+      console.log('⏳ Esperando a que Google Maps se cargue...')
       const checkGoogleMaps = setInterval(() => {
         if ((window as any).google?.maps) {
+          console.log('✅ Google Maps detectado, inicializando...')
           clearInterval(checkGoogleMaps)
           initMap()
         }
       }, 100)
 
+      // Timeout de 10 segundos
       setTimeout(() => {
         clearInterval(checkGoogleMaps)
-        setIsLoadingMap(false)
-      }, 5000)
+        if (!(window as any).google?.maps) {
+          console.error('❌ Timeout esperando Google Maps')
+          setIsLoadingMap(false)
+        }
+      }, 10000)
     }
   }, [showMap])
 
@@ -183,8 +204,19 @@ export default function GoogleMapsLocationPicker({
       return
     }
 
+    console.log('📍 Solicitando ubicación actual...')
+
+    // Opciones para mejor precisión
+    const options = {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }
+
     navigator.geolocation.getCurrentPosition(
       (position) => {
+        console.log('✅ Ubicación obtenida:', position.coords.latitude, position.coords.longitude)
+        
         const userLocation = {
           lat: position.coords.latitude,
           lng: position.coords.longitude,
@@ -199,9 +231,27 @@ export default function GoogleMapsLocationPicker({
         }
       },
       (error) => {
-        console.error('Error obteniendo ubicación:', error)
-        alert('No se pudo obtener tu ubicación. Por favor, activa el GPS y permisos de ubicación.')
-      }
+        console.error('❌ Error obteniendo ubicación:', error)
+        
+        let errorMessage = 'No se pudo obtener tu ubicación. '
+        
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage += 'Por favor, permite el acceso a tu ubicación en el navegador.'
+            break
+          case error.POSITION_UNAVAILABLE:
+            errorMessage += 'La información de ubicación no está disponible.'
+            break
+          case error.TIMEOUT:
+            errorMessage += 'La solicitud de ubicación ha expirado.'
+            break
+          default:
+            errorMessage += 'Error desconocido.'
+        }
+        
+        alert(errorMessage)
+      },
+      options
     )
   }
 
