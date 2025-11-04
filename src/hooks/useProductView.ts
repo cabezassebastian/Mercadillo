@@ -5,12 +5,20 @@ import { useUser } from '@clerk/clerk-react';
 /**
  * Hook para trackear visitas a productos
  * Registra automáticamente cuando un usuario ve un producto
+ * NO trackea visitas de administradores
  */
 export function useProductView(productoId: string | undefined) {
   const { user } = useUser();
 
   useEffect(() => {
     if (!productoId) return;
+
+    // NO trackear visitas de administradores
+    const isAdmin = user?.publicMetadata?.role === 'admin';
+    if (isAdmin) {
+      console.log('🔒 Admin detected - Skipping product view tracking');
+      return;
+    }
 
     const trackView = async () => {
       try {
@@ -61,5 +69,5 @@ export function useProductView(productoId: string | undefined) {
     const timeout = setTimeout(trackView, 2000);
 
     return () => clearTimeout(timeout);
-  }, [productoId, user?.id]);
+  }, [productoId, user?.id, user?.publicMetadata?.role]);
 }
