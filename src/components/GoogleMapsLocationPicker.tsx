@@ -206,34 +206,13 @@ export default function GoogleMapsLocationPicker({
     onChange('')
   }
 
-  const handleGetCurrentLocation = async () => {
+  const handleGetCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert('Tu navegador no soporta geolocalización')
       return
     }
 
-    // Verificar estado de permisos primero
-    if ('permissions' in navigator) {
-      try {
-        const permissionStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
-        
-        if (permissionStatus.state === 'denied') {
-          // Usuario rechazó previamente
-          alert('⚠️ Permisos de ubicación bloqueados.\n\nPara usar tu ubicación actual:\n1. Haz clic en el ícono 🔒 junto a la URL\n2. Permite el acceso a "Ubicación"\n3. Recarga la página e intenta nuevamente')
-          return
-        }
-        
-        if (permissionStatus.state === 'prompt') {
-          // Va a pedir permisos - mostrar mensaje informativo
-          console.log('📍 Solicitando permisos de ubicación...')
-        }
-      } catch (e) {
-        // Si falla la verificación de permisos, continuar normalmente
-        console.log('No se pudo verificar permisos, continuando...')
-      }
-    }
-
-    console.log('📍 Obteniendo ubicación actual...')
+    console.log('📍 Solicitando ubicación actual...')
 
     // Opciones para mejor precisión
     const options = {
@@ -242,6 +221,7 @@ export default function GoogleMapsLocationPicker({
       maximumAge: 0
     }
 
+    // Llamar directamente a getCurrentPosition para que el navegador muestre el popup
     navigator.geolocation.getCurrentPosition(
       (position) => {
         console.log('✅ Ubicación obtenida:', position.coords.latitude, position.coords.longitude)
@@ -267,7 +247,7 @@ export default function GoogleMapsLocationPicker({
         
         switch(error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage = errorTitle + '❌ Permiso denegado\n\nPara usar tu ubicación:\n1. Haz clic en el ícono 🔒 en la barra de direcciones\n2. Cambia "Ubicación" a "Permitir"\n3. Recarga la página e intenta nuevamente\n\n💡 También puedes arrastrar el pin rojo en el mapa manualmente.'
+            errorMessage = errorTitle + '❌ Permiso denegado\n\nPara usar tu ubicación:\n1. Haz clic en el ícono 🔒 en la barra de direcciones\n2. Busca "Ubicación" y cambia a "Permitir"\n3. Recarga la página e intenta nuevamente\n\n💡 También puedes arrastrar el pin rojo en el mapa manualmente.'
             break
           case error.POSITION_UNAVAILABLE:
             errorMessage = errorTitle + '📍 Ubicación no disponible\n\nAsegúrate de que:\n• El GPS esté activado en tu dispositivo\n• Estés en un lugar con buena señal\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
