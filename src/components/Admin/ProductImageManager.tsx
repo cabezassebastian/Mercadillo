@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trash2, Star, GripVertical, Image as ImageIcon } from 'lucide-react';
+import { Upload, Trash2, Star, GripVertical, Image as ImageIcon, ChevronUp, ChevronDown } from 'lucide-react';
 import { ProductoImagen } from '@/lib/supabase';
 import { uploadImage } from '@/lib/cloudinary';
 import { fetchAdmin } from '../../lib/adminApi';
@@ -24,6 +24,13 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
       const json = await fetchAdmin(`product-images&productId=${encodeURIComponent(productoId)}`)
       const imagenesData = json.data || []
       
+      // Si no hay imágenes en la galería pero el producto tiene imagen principal,
+      // sincronizarla automáticamente
+      if (imagenesData.length === 0) {
+        await sincronizarImagenPrincipal()
+        return // fetchImagenes se llamará de nuevo después de sincronizar
+      }
+      
       // Ordenar: imagen principal primero, luego por orden
       const sorted = imagenesData.sort((a: ProductoImagen, b: ProductoImagen) => {
         if (a.es_principal) return -1
@@ -38,6 +45,38 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
       setIsLoading(false);
     }
   };
+
+  const sincronizarImagenPrincipal = async () => {
+    try {
+      // Obtener el producto para verificar si tiene imagen principal
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/rest/v1/productos?id=eq.${productoId}&select=imagen`, {
+        headers: {
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY,
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+        }
+      })
+      
+      const productos = await response.json()
+      const producto = productos[0]
+      
+      if (producto?.imagen) {
+        // Crear registro en producto_imagenes
+        const body = {
+          producto_id: productoId,
+          url: producto.imagen,
+          orden: 0,
+          es_principal: true,
+          alt_text: 'Imagen principal'
+        }
+        await fetchAdmin('product-images', { method: 'POST', body: JSON.stringify(body) })
+        
+        // Re-fetch las imágenes
+        await fetchImagenes()
+      }
+    } catch (error) {
+      console.error('Error sincronizando imagen principal:', error)
+    }
+  }
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -91,6 +130,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
   const handleDragStart = (e: React.DragEvent, index: number) => {
     setDraggedIndex(index)
     e.dataTransfer.effectAllowed = 'move'
+    e.dataTransfer.setData('text/html', index.toString())
     // Añadir clase visual al elemento arrastrado
     const target = e.currentTarget as HTMLElement
     target.style.opacity = '0.5'
@@ -104,13 +144,18 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
+    e.stopPropagation()
     e.dataTransfer.dropEffect = 'move'
   }
 
   const handleDrop = async (e: React.DragEvent, dropIndex: number) => {
     e.preventDefault()
+    e.stopPropagation()
     
     if (draggedIndex === null || draggedIndex === dropIndex) return
+    
+    // No permitir soltar antes de la imagen principal
+    if (dropIndex === 0 && imagenes[0].es_principal) return
 
     const newImagenes = [...imagenes]
     const [draggedItem] = newImagenes.splice(draggedIndex, 1)
@@ -122,6 +167,9 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const updateOrden = async (newImagenes: ProductoImagen[]) => {
     try {
+        // Actualizar localmente primero para feedback instantáneo
+        setImagenes(newImagenes)
+        
         // Update order individually for each image
         for (let i = 0; i < newImagenes.length; i++) {
           await fetchAdmin('product-images', { 
@@ -133,14 +181,33 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           })
         }
         
-        // Re-fetch para asegurar ordenamiento correcto (principal primero)
-        await fetchImagenes()
         if (onImagesChange) onImagesChange()
     } catch (error) {
       console.error('Error updating orden:', error);
       alert('Error al actualizar el orden de las imágenes')
+      // Revertir en caso de error
+      await fetchImagenes()
     }
   };
+
+  const moveImage = async (fromIndex: number, direction: 'up' | 'down') => {
+    // No permitir mover la imagen principal
+    if (imagenes[fromIndex].es_principal) return
+    
+    const toIndex = direction === 'up' ? fromIndex - 1 : fromIndex + 1
+    
+    // Verificar límites
+    if (toIndex < 0 || toIndex >= imagenes.length) return
+    
+    // No permitir mover una imagen antes de la principal
+    if (toIndex === 0 && imagenes[0].es_principal) return
+    
+    const newImagenes = [...imagenes]
+    const [movedItem] = newImagenes.splice(fromIndex, 1)
+    newImagenes.splice(toIndex, 0, movedItem)
+    
+    await updateOrden(newImagenes)
+  }
 
   const handleDelete = async (imagenId: string) => {
     if (!confirm('¿Eliminar esta imagen?')) return;
@@ -204,16 +271,43 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
               onDragEnd={handleDragEnd}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, index)}
+              onDragEnter={(e) => e.preventDefault()}
               className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
                 imagen.es_principal
                   ? 'border-amarillo dark:border-yellow-400 cursor-default'
-                  : 'border-gray-200 dark:border-gray-700 cursor-move'
-              } ${draggedIndex === index ? 'scale-105 shadow-lg' : ''}`}
+                  : 'border-gray-200 dark:border-gray-700 cursor-move hover:border-amarillo dark:hover:border-yellow-400'
+              } ${draggedIndex === index ? 'scale-105 shadow-lg opacity-50' : ''} ${draggedIndex !== null && draggedIndex !== index ? 'border-dashed border-amarillo/50' : ''}`}
             >
               {/* Icono de arrastre - solo para imágenes no principales */}
               {!imagen.es_principal && (
                 <div className="absolute top-2 left-2 z-10 p-1 bg-black/60 rounded cursor-move">
                   <GripVertical className="w-4 h-4 text-white" />
+                </div>
+              )}
+
+              {/* Botones de ordenamiento con flechas - solo para imágenes no principales */}
+              {!imagen.es_principal && (
+                <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+                  {/* Flecha arriba - solo si no es la primera imagen después de la principal */}
+                  {index > (imagenes[0].es_principal ? 1 : 0) && (
+                    <button
+                      onClick={() => moveImage(index, 'up')}
+                      className="p-1 bg-black/60 hover:bg-black/80 rounded transition-colors"
+                      title="Mover arriba"
+                    >
+                      <ChevronUp className="w-4 h-4 text-white" />
+                    </button>
+                  )}
+                  {/* Flecha abajo - solo si no es la última */}
+                  {index < imagenes.length - 1 && (
+                    <button
+                      onClick={() => moveImage(index, 'down')}
+                      className="p-1 bg-black/60 hover:bg-black/80 rounded transition-colors"
+                      title="Mover abajo"
+                    >
+                      <ChevronDown className="w-4 h-4 text-white" />
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -275,7 +369,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
         <ul className="list-disc list-inside space-y-1">
           <li>Puedes subir múltiples imágenes a la vez</li>
           <li>La imagen principal siempre aparece primero en la galería</li>
-          <li><strong>Arrastra y suelta</strong> las imágenes para cambiar su orden</li>
+          <li><strong>Arrastra y suelta</strong> las imágenes o usa las <strong>flechitas ↑↓</strong> para cambiar su orden</li>
           <li>La imagen principal se muestra en el catálogo y como primera en la galería del producto</li>
           <li>Formatos recomendados: JPG, PNG, WEBP</li>
         </ul>
