@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { fetchAdmin } from '@/lib/adminApi';
-import { TrendingUp, Eye, ShoppingCart, Percent, Activity } from 'lucide-react';
+import { TrendingUp, Eye, ShoppingCart, Percent, Activity, RefreshCw } from 'lucide-react';
 
 type ConversionData = {
   total_views: number;
@@ -12,34 +12,41 @@ export default function ConversionRate() {
   const [conversionData, setConversionData] = useState<ConversionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchConversionRate = async () => {
-      setLoading(true);
-      setError(null);
+  const fetchConversionRate = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const json = await fetchAdmin('metrics&sub=conversion')
       
-      try {
-        const json = await fetchAdmin('metrics&sub=conversion')
-        
-        if (json.error) {
-          console.error('Error fetching conversion rate:', json.error);
-          setError('Error al cargar tasa de conversión');
-          setConversionData(null);
-        } else {
-          // La función retorna un array con un solo objeto
-          setConversionData(json.data && json.data.length > 0 ? json.data[0] : null);
-        }
-      } catch (err) {
-        console.error('Exception fetching conversion rate:', err);
+      if (json.error) {
+        console.error('Error fetching conversion rate:', json.error);
         setError('Error al cargar tasa de conversión');
         setConversionData(null);
-      } finally {
-        setLoading(false);
+      } else {
+        // La función retorna un array con un solo objeto
+        setConversionData(json.data && json.data.length > 0 ? json.data[0] : null);
       }
-    };
-    
+    } catch (err) {
+      console.error('Exception fetching conversion rate:', err);
+      setError('Error al cargar tasa de conversión');
+      setConversionData(null);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     fetchConversionRate();
   }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await fetchConversionRate();
+  };
 
   const getConversionColor = (rate: number) => {
     if (rate >= 5) return 'text-green-600';
@@ -56,16 +63,28 @@ export default function ConversionRate() {
   return (
     <div className="card p-6">
       {/* Header */}
-      <div className="flex items-center space-x-2 mb-6">
-        <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
-          <Percent className="w-5 h-5 text-purple-600" />
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center space-x-2">
+          <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <Percent className="w-5 h-5 text-purple-600" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
+              Tasa de Conversión
+            </h3>
+            <p className="text-sm text-gray-600">Visitas vs Pedidos</p>
+          </div>
         </div>
-        <div>
-          <h3 className="text-lg font-semibold text-gris-oscuro dark:text-gray-100">
-            Tasa de Conversión
-          </h3>
-          <p className="text-sm text-gray-600">Visitas vs Pedidos</p>
-        </div>
+        
+        {/* Botón Refrescar */}
+        <button
+          onClick={handleRefresh}
+          disabled={loading || refreshing}
+          className="p-2 hover:bg-purple-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Actualizar datos"
+        >
+          <RefreshCw className={`w-5 h-5 text-purple-600 ${refreshing ? 'animate-spin' : ''}`} />
+        </button>
       </div>
 
       {/* Content */}

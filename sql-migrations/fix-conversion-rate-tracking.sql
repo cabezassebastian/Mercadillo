@@ -161,6 +161,11 @@ $$;
 -- 5. Dar permisos y configurar RLS
 -- =====================================================
 
+-- Primero eliminar políticas existentes si existen
+DROP POLICY IF EXISTS "Permitir insertar visitas a todos" ON product_views;
+DROP POLICY IF EXISTS "Usuarios pueden ver sus visitas" ON product_views;
+DROP POLICY IF EXISTS "Permitir leer visitas a anon" ON product_views;
+
 -- Habilitar RLS en la tabla
 ALTER TABLE product_views ENABLE ROW LEVEL SECURITY;
 
@@ -171,18 +176,11 @@ CREATE POLICY "Permitir insertar visitas a todos"
   TO anon, authenticated
   WITH CHECK (true);
 
--- Permitir a usuarios autenticados ver sus propias visitas
-CREATE POLICY "Usuarios pueden ver sus visitas"
+-- Permitir a todos leer todas las visitas (necesario para las funciones de analytics)
+CREATE POLICY "Permitir leer todas las visitas"
   ON product_views
   FOR SELECT
-  TO authenticated
-  USING (user_id = auth.uid() OR user_id IS NULL);
-
--- Permitir a anon ver visitas (para que funcionen las funciones)
-CREATE POLICY "Permitir leer visitas a anon"
-  ON product_views
-  FOR SELECT
-  TO anon
+  TO anon, authenticated
   USING (true);
 
 -- Dar permisos a las funciones
