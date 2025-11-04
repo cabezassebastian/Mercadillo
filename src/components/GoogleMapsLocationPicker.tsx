@@ -22,6 +22,7 @@ export default function GoogleMapsLocationPicker({
 }: GoogleMapsLocationPickerProps) {
   const [showMap, setShowMap] = useState(false)
   const [isLoadingMap, setIsLoadingMap] = useState(false)
+  const [isGettingLocation, setIsGettingLocation] = useState(false)
   const [selectedLocation, setSelectedLocation] = useState<{ lat: number; lng: number } | null>(null)
   const [address, setAddress] = useState('')
   const mapRef = useRef<HTMLDivElement>(null)
@@ -213,18 +214,20 @@ export default function GoogleMapsLocationPicker({
     }
 
     console.log('📍 Solicitando ubicación actual...')
+    setIsGettingLocation(true)
 
-    // Opciones para mejor precisión
+    // Opciones para MÁXIMA precisión
     const options = {
-      enableHighAccuracy: true,
-      timeout: 10000,
-      maximumAge: 0
+      enableHighAccuracy: true, // Usa GPS en móviles
+      timeout: 30000, // 30 segundos de timeout
+      maximumAge: 0 // No usar caché, siempre obtener ubicación fresca
     }
 
     // Llamar directamente a getCurrentPosition para que el navegador muestre el popup
     navigator.geolocation.getCurrentPosition(
       (position) => {
         console.log('✅ Ubicación obtenida:', position.coords.latitude, position.coords.longitude)
+        console.log('📏 Precisión:', position.coords.accuracy, 'metros')
         
         const userLocation = {
           lat: position.coords.latitude,
@@ -233,14 +236,23 @@ export default function GoogleMapsLocationPicker({
         
         if (googleMapRef.current && markerRef.current) {
           googleMapRef.current.setCenter(userLocation)
-          googleMapRef.current.setZoom(16)
+          googleMapRef.current.setZoom(18) // Zoom más cercano para ver mejor
           markerRef.current.setPosition(userLocation)
           setSelectedLocation(userLocation)
           reverseGeocode(userLocation.lat, userLocation.lng)
         }
+        
+        setIsGettingLocation(false)
+        
+        // Mostrar precisión al usuario
+        const accuracyMeters = Math.round(position.coords.accuracy)
+        if (accuracyMeters > 100) {
+          alert(`📍 Ubicación obtenida\n\n⚠️ Precisión: ${accuracyMeters} metros\n\nPara mayor precisión:\n• Activa el GPS en tu dispositivo\n• Sal al exterior si estás en interiores\n• Ajusta manualmente arrastrando el pin rojo`)
+        }
       },
       (error) => {
         console.error('❌ Error obteniendo ubicación:', error)
+        setIsGettingLocation(false)
         
         let errorMessage = ''
         let errorTitle = '⚠️ No se pudo obtener tu ubicación\n\n'
@@ -250,10 +262,10 @@ export default function GoogleMapsLocationPicker({
             errorMessage = errorTitle + '❌ Permiso denegado\n\nPara usar tu ubicación:\n1. Haz clic en el ícono 🔒 en la barra de direcciones\n2. Busca "Ubicación" y cambia a "Permitir"\n3. Recarga la página e intenta nuevamente\n\n💡 También puedes arrastrar el pin rojo en el mapa manualmente.'
             break
           case error.POSITION_UNAVAILABLE:
-            errorMessage = errorTitle + '📍 Ubicación no disponible\n\nAsegúrate de que:\n• El GPS esté activado en tu dispositivo\n• Estés en un lugar con buena señal\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
+            errorMessage = errorTitle + '📍 Ubicación no disponible\n\nAsegúrate de que:\n• El GPS esté activado en tu dispositivo\n• Estés en un lugar con buena señal\n• No estés usando VPN o proxy\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
             break
           case error.TIMEOUT:
-            errorMessage = errorTitle + '⏱️ Tiempo de espera agotado\n\nLa solicitud tardó demasiado.\n\n💡 Intenta nuevamente o arrastra el pin rojo en el mapa manualmente.'
+            errorMessage = errorTitle + '⏱️ Tiempo de espera agotado\n\nLa solicitud tardó demasiado (30 segundos).\n\n💡 Intenta nuevamente o arrastra el pin rojo en el mapa manualmente.'
             break
           default:
             errorMessage = errorTitle + '🔧 Error desconocido\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
@@ -390,10 +402,15 @@ export default function GoogleMapsLocationPicker({
                 <button
                   type="button"
                   onClick={handleGetCurrentLocation}
-                  className="absolute top-4 right-4 p-3 bg-white dark:bg-gray-800 shadow-lg rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600"
+                  disabled={isGettingLocation}
+                  className="absolute top-4 right-4 p-3 bg-white dark:bg-gray-800 shadow-lg rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors border border-gray-200 dark:border-gray-600 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Usar mi ubicación actual"
                 >
-                  <Navigation className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  {isGettingLocation ? (
+                    <Loader2 className="w-5 h-5 text-amarillo dark:text-yellow-400 animate-spin" />
+                  ) : (
+                    <Navigation className="w-5 h-5 text-gray-700 dark:text-gray-300" />
+                  )}
                 </button>
               </div>
 
