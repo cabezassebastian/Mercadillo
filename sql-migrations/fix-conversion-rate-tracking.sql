@@ -3,22 +3,57 @@
 -- Trackea visitas a productos y calcula conversión real
 -- =====================================================
 
--- 1. Asegurar que la tabla product_views existe
+-- 1. Asegurar que la tabla product_views existe con todas las columnas
 -- =====================================================
+
+-- Crear tabla si no existe
 CREATE TABLE IF NOT EXISTS product_views (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   producto_id uuid REFERENCES productos(id) ON DELETE CASCADE,
-  user_id uuid, -- NULL si es anónimo
-  session_id text, -- Para trackear sesiones anónimas
-  viewed_at timestamptz DEFAULT now(),
-  referrer text, -- De dónde vino el visitante
-  user_agent text -- Navegador/dispositivo
+  viewed_at timestamptz DEFAULT now()
 );
 
--- Índices para optimizar consultas
+-- Agregar columnas faltantes si no existen
+DO $$ 
+BEGIN
+  -- Agregar user_id si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'product_views' AND column_name = 'user_id'
+  ) THEN
+    ALTER TABLE product_views ADD COLUMN user_id uuid;
+  END IF;
+
+  -- Agregar session_id si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'product_views' AND column_name = 'session_id'
+  ) THEN
+    ALTER TABLE product_views ADD COLUMN session_id text;
+  END IF;
+
+  -- Agregar referrer si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'product_views' AND column_name = 'referrer'
+  ) THEN
+    ALTER TABLE product_views ADD COLUMN referrer text;
+  END IF;
+
+  -- Agregar user_agent si no existe
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name = 'product_views' AND column_name = 'user_agent'
+  ) THEN
+    ALTER TABLE product_views ADD COLUMN user_agent text;
+  END IF;
+END $$;
+
+-- Índices para optimizar consultas (solo si no existen)
 CREATE INDEX IF NOT EXISTS idx_product_views_producto_id ON product_views(producto_id);
 CREATE INDEX IF NOT EXISTS idx_product_views_viewed_at ON product_views(viewed_at);
 CREATE INDEX IF NOT EXISTS idx_product_views_session_id ON product_views(session_id);
+CREATE INDEX IF NOT EXISTS idx_product_views_user_id ON product_views(user_id);
 
 -- =====================================================
 -- 2. Función mejorada para calcular tasa de conversión
@@ -123,15 +158,41 @@ END;
 $$;
 
 -- =====================================================
--- 5. Dar permisos
+-- 5. Dar permisos y configurar RLS
 -- =====================================================
+
+-- Habilitar RLS en la tabla
+ALTER TABLE product_views ENABLE ROW LEVEL SECURITY;
+
+-- Permitir a TODOS (anónimos y autenticados) insertar visitas
+CREATE POLICY "Permitir insertar visitas a todos"
+  ON product_views
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+-- Permitir a usuarios autenticados ver sus propias visitas
+CREATE POLICY "Usuarios pueden ver sus visitas"
+  ON product_views
+  FOR SELECT
+  TO authenticated
+  USING (user_id = auth.uid() OR user_id IS NULL);
+
+-- Permitir a anon ver visitas (para que funcionen las funciones)
+CREATE POLICY "Permitir leer visitas a anon"
+  ON product_views
+  FOR SELECT
+  TO anon
+  USING (true);
+
+-- Dar permisos a las funciones
 GRANT EXECUTE ON FUNCTION get_conversion_rate() TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION track_product_view(uuid, uuid, text, text, text) TO anon, authenticated;
 GRANT EXECUTE ON FUNCTION get_most_viewed_products(INTEGER, INTEGER) TO anon, authenticated;
 
--- Permitir insertar visitas a usuarios anónimos
+-- Permitir operaciones en la tabla
 GRANT INSERT ON product_views TO anon, authenticated;
-GRANT SELECT ON product_views TO authenticated;
+GRANT SELECT ON product_views TO anon, authenticated;
 
 -- =====================================================
 -- 6. Comentarios descriptivos
