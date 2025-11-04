@@ -188,8 +188,16 @@ export default function GoogleMapsLocationPicker({
       // Generar enlace de Google Maps
       const googleMapsUrl = `https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}`
       onChange(googleMapsUrl, selectedLocation.lat, selectedLocation.lng)
-      setShowMap(false)
+      handleCloseMap()
     }
+  }
+
+  const handleCloseMap = () => {
+    // Limpiar referencias del mapa al cerrar
+    googleMapRef.current = null
+    markerRef.current = null
+    setShowMap(false)
+    setIsLoadingMap(false)
   }
 
   const handleClear = () => {
@@ -198,13 +206,34 @@ export default function GoogleMapsLocationPicker({
     onChange('')
   }
 
-  const handleGetCurrentLocation = () => {
+  const handleGetCurrentLocation = async () => {
     if (!navigator.geolocation) {
       alert('Tu navegador no soporta geolocalización')
       return
     }
 
-    console.log('📍 Solicitando ubicación actual...')
+    // Verificar estado de permisos primero
+    if ('permissions' in navigator) {
+      try {
+        const permissionStatus = await navigator.permissions.query({ name: 'geolocation' as PermissionName })
+        
+        if (permissionStatus.state === 'denied') {
+          // Usuario rechazó previamente
+          alert('⚠️ Permisos de ubicación bloqueados.\n\nPara usar tu ubicación actual:\n1. Haz clic en el ícono 🔒 junto a la URL\n2. Permite el acceso a "Ubicación"\n3. Recarga la página e intenta nuevamente')
+          return
+        }
+        
+        if (permissionStatus.state === 'prompt') {
+          // Va a pedir permisos - mostrar mensaje informativo
+          console.log('📍 Solicitando permisos de ubicación...')
+        }
+      } catch (e) {
+        // Si falla la verificación de permisos, continuar normalmente
+        console.log('No se pudo verificar permisos, continuando...')
+      }
+    }
+
+    console.log('📍 Obteniendo ubicación actual...')
 
     // Opciones para mejor precisión
     const options = {
@@ -233,20 +262,21 @@ export default function GoogleMapsLocationPicker({
       (error) => {
         console.error('❌ Error obteniendo ubicación:', error)
         
-        let errorMessage = 'No se pudo obtener tu ubicación. '
+        let errorMessage = ''
+        let errorTitle = '⚠️ No se pudo obtener tu ubicación\n\n'
         
         switch(error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage += 'Por favor, permite el acceso a tu ubicación en el navegador.'
+            errorMessage = errorTitle + '❌ Permiso denegado\n\nPara usar tu ubicación:\n1. Haz clic en el ícono 🔒 en la barra de direcciones\n2. Cambia "Ubicación" a "Permitir"\n3. Recarga la página e intenta nuevamente\n\n💡 También puedes arrastrar el pin rojo en el mapa manualmente.'
             break
           case error.POSITION_UNAVAILABLE:
-            errorMessage += 'La información de ubicación no está disponible.'
+            errorMessage = errorTitle + '📍 Ubicación no disponible\n\nAsegúrate de que:\n• El GPS esté activado en tu dispositivo\n• Estés en un lugar con buena señal\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
             break
           case error.TIMEOUT:
-            errorMessage += 'La solicitud de ubicación ha expirado.'
+            errorMessage = errorTitle + '⏱️ Tiempo de espera agotado\n\nLa solicitud tardó demasiado.\n\n💡 Intenta nuevamente o arrastra el pin rojo en el mapa manualmente.'
             break
           default:
-            errorMessage += 'Error desconocido.'
+            errorMessage = errorTitle + '🔧 Error desconocido\n\n💡 Puedes arrastrar el pin rojo en el mapa manualmente.'
         }
         
         alert(errorMessage)
@@ -333,7 +363,7 @@ export default function GoogleMapsLocationPicker({
             {/* Overlay */}
             <div 
               className="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75 dark:bg-gray-900 dark:bg-opacity-75"
-              onClick={() => setShowMap(false)}
+              onClick={handleCloseMap}
             />
 
             {/* Modal */}
@@ -345,7 +375,7 @@ export default function GoogleMapsLocationPicker({
                     Selecciona tu ubicación exacta
                   </h3>
                   <button
-                    onClick={() => setShowMap(false)}
+                    onClick={handleCloseMap}
                     className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                   >
                     <X className="w-5 h-5" />
@@ -396,7 +426,7 @@ export default function GoogleMapsLocationPicker({
                   <div className="flex space-x-3">
                     <button
                       type="button"
-                      onClick={() => setShowMap(false)}
+                      onClick={handleCloseMap}
                       className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                     >
                       Cancelar
