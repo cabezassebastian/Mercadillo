@@ -3,13 +3,11 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, Star, Truck, Shield, Headphones } from 'lucide-react'
 import { supabase, Producto } from '@/lib/supabase'
 import ProductCard from '@/components/Product/ProductCard'
-import { topSellers } from '@/lib/recommendations'
 import RecommendedForYou from '@/components/Home/RecommendedForYou'
 import NewProducts from '@/components/Home/NewProducts'
 
 const Home: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState<Producto[]>([])
-  const [topWeek, setTopWeek] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null) 
 
@@ -64,20 +62,6 @@ const Home: React.FC = () => {
           setFeaturedProducts(data || [])
         }
 
-        // Top sellers con manejo de errores silencioso
-        try {
-          const tops = await topSellers('week', 8)
-          // Filtrar productos duplicados por ID y con stock disponible
-          const topsUnicos = tops.filter((producto, index, self) => {
-            const stockDisponible = (producto as any).stock === undefined || (producto as any).stock === null || (producto as any).stock > 0
-            const esUnico = index === self.findIndex((p) => p.id === producto.id)
-            return stockDisponible && esUnico
-          })
-          setTopWeek(topsUnicos as Producto[])
-        } catch (err) {
-          // Silenciar error si la función RPC no existe
-          if (import.meta.env.DEV) console.debug('Top sellers not available:', err)
-        }
       } catch (err) {
         setError('Ocurrio un error inesperado al cargar los productos.')
       } finally {
@@ -188,20 +172,6 @@ const Home: React.FC = () => {
               Descubre nuestra seleccion de productos mas populares y mejor valorados
             </p>
           </div>
-
-          {/* Top sellers de la semana */}
-          {topWeek && topWeek.length > 0 && (
-            <div className="mt-10">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Más vendidos de la semana</h3>
-              </div>
-              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {topWeek.map((p) => (
-                  <ProductCard key={p.id} producto={p} />
-                ))}
-              </div>
-            </div>
-          )}
 
           {isLoading ? (
             <div className="flex justify-center">
