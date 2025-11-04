@@ -45,7 +45,8 @@ const Product: React.FC = () => {
   const id = slugOrId ? extractProductId(slugOrId) : undefined
 
   // Trackear visita al producto para analytics
-  useProductView(id)
+  // IMPORTANTE: Solo trackear cuando tenemos el UUID real del producto cargado
+  useProductView(producto?.id)
 
   useEffect(() => {
     const fetchProducto = async () => {
