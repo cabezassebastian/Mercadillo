@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Plus, Edit, Trash2, Upload, Search } from 'lucide-react'
+import { useLocation } from 'react-router-dom'
 import { Producto } from '@/lib/supabase'
 import { uploadImage } from '@/lib/cloudinary'
 import { supabaseAdmin } from '@/lib/supabaseAdmin'
@@ -7,6 +8,7 @@ import ProductImageManager from './ProductImageManager'
 import VariantsEditorNew from './VariantsEditorNew'
 
 const AdminProducts: React.FC = () => {
+  const location = useLocation()
   const [productos, setProductos] = useState<Producto[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [isModalOpen, setIsModalOpen] = useState(false)
@@ -25,6 +27,29 @@ const AdminProducts: React.FC = () => {
   useEffect(() => {
     fetchProductos()
   }, [])
+
+  // Detectar si se navegó desde LowStockAlert para editar un producto
+  useEffect(() => {
+    const state = location.state as { editProductId?: string; productData?: LowStockProduct } | null
+    if (state?.editProductId && state?.productData && productos.length > 0) {
+      // Buscar el producto completo en la lista
+      const producto = productos.find(p => p.id === state.editProductId)
+      if (producto) {
+        handleEdit(producto)
+      }
+      // Limpiar el state para que no se abra nuevamente si recarga
+      window.history.replaceState({}, document.title)
+    }
+  }, [location.state, productos])
+
+  // Tipo para datos de LowStockAlert
+  type LowStockProduct = {
+    id: string
+    nombre: string
+    stock: number
+    precio: number
+    categoria: string
+  }
 
   const fetchProductos = async () => {
     try {

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 // Server-side admin endpoints used via /api/admin/*
 import { AlertTriangle, Package, Edit, CheckCircle } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { fetchAdmin } from '../../lib/adminApi';
 
 type LowStockProduct = {
@@ -16,6 +16,7 @@ export default function LowStockAlert() {
   const [lowStockProducts, setLowStockProducts] = useState<LowStockProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchLowStock = async () => {
@@ -131,17 +132,21 @@ export default function LowStockAlert() {
               </div>
 
               {/* Action Button */}
-              <Link
-                to={`/admin`}
-                className="ml-4 px-4 py-2 bg-amarillo hover:bg-yellow-500 text-gris-oscuro rounded-lg transition-colors flex items-center space-x-2 font-medium text-sm"
+              <button
                 onClick={() => {
-                  // Guardar el ID del producto para abrir el modal de edición
-                  sessionStorage.setItem('editProductId', product.id);
+                  // Navegar a la página de productos con el ID del producto para editar
+                  navigate('/admin/productos', { 
+                    state: { 
+                      editProductId: product.id,
+                      productData: product
+                    } 
+                  });
                 }}
+                className="ml-4 px-4 py-2 bg-amarillo hover:bg-yellow-500 text-gris-oscuro rounded-lg transition-colors flex items-center space-x-2 font-medium text-sm"
               >
                 <Edit className="w-4 h-4" />
                 <span>Editar</span>
-              </Link>
+              </button>
             </div>
           ))}
         </div>
