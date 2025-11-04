@@ -58,16 +58,19 @@ export default function NewProducts({ limit = 8 }: { limit?: number }) {
 
   if (loading) return <div className="py-8">Cargando nuevos productos...</div>
 
-  // Header: mimic the featured section style with centered description
   return (
-    <section className="py-8">
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">Productos Nuevos</h2>
-        <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Descubre los productos más recientes agregados a nuestra tienda</p>
-      </div>
-
+    <section className="py-16 bg-hueso dark:bg-gray-900 transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-gris-oscuro dark:text-gray-100 mb-4">
+            Productos Nuevos
+          </h2>
+          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+            Descubre los productos más recientes agregados a nuestra tienda
+          </p>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {products.map((producto) => (
             <ProductCard key={producto.id} producto={producto} />
           ))}

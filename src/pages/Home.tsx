@@ -207,12 +207,12 @@ const Home: React.FC = () => {
 
           {/* Quizás te interese (basado en historial) */}
           <div className="mt-12">
-            <RecommendedForYou />
+            <RecommendedForYou limit={4} />
           </div>
 
           {/* Nuevos productos */}
           <div className="mt-12">
-            <NewProducts limit={8} />
+            <NewProducts limit={4} />
           </div>
 
           <div className="text-center mt-12">
