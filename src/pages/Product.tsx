@@ -16,6 +16,7 @@ import type { ReviewStats } from '@/types/reviews'
 import VariantsSelector from '@/components/Product/VariantsSelector'
 import { API_ENDPOINTS } from '@/config/api'
 import { extractProductId, getProductUrl } from '@/lib/slugify'
+import { useProductView } from '@/hooks/useProductView'
 
 const Product: React.FC = () => {
   const { id: slugOrId } = useParams<{ id: string }>()
@@ -42,6 +43,9 @@ const Product: React.FC = () => {
 
   // Extraer el ID real del slug
   const id = slugOrId ? extractProductId(slugOrId) : undefined
+
+  // Trackear visita al producto para analytics
+  useProductView(id)
 
   useEffect(() => {
     const fetchProducto = async () => {

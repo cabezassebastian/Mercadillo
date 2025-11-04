@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { supabaseAdmin } from '@/lib/supabaseAdmin';
-import { TrendingUp, Eye, ShoppingCart, Percent } from 'lucide-react';
+import { fetchAdmin } from '@/lib/adminApi';
+import { TrendingUp, Eye, ShoppingCart, Percent, Activity } from 'lucide-react';
 
 type ConversionData = {
   total_views: number;
@@ -19,15 +19,15 @@ export default function ConversionRate() {
       setError(null);
       
       try {
-        const { data, error } = await supabaseAdmin.rpc('get_conversion_rate');
+        const json = await fetchAdmin('metrics&sub=conversion')
         
-        if (error) {
-          console.error('Error fetching conversion rate:', error);
+        if (json.error) {
+          console.error('Error fetching conversion rate:', json.error);
           setError('Error al cargar tasa de conversión');
           setConversionData(null);
         } else {
           // La función retorna un array con un solo objeto
-          setConversionData(data && data.length > 0 ? data[0] : null);
+          setConversionData(json.data && json.data.length > 0 ? json.data[0] : null);
         }
       } catch (err) {
         console.error('Exception fetching conversion rate:', err);
@@ -77,14 +77,17 @@ export default function ConversionRate() {
         <div className="flex flex-col items-center justify-center h-48 text-red-500">
           <p className="font-medium">{error}</p>
           <p className="text-sm text-gray-600 mt-2">
-            Verifica que la función SQL y la tabla product_views estén creadas
+            Ejecuta el archivo fix-conversion-rate-tracking.sql en Supabase
           </p>
         </div>
       ) : !conversionData ? (
         <div className="flex flex-col items-center justify-center h-48 text-gray-500">
-          <Eye className="w-12 h-12 mb-2 opacity-50" />
-          <p className="font-medium">No hay datos disponibles</p>
-          <p className="text-sm">Comienza a trackear visitas de productos</p>
+          <Activity className="w-12 h-12 mb-2 opacity-50" />
+          <p className="font-medium">Iniciando tracking de visitas...</p>
+          <p className="text-sm">Los datos aparecerán cuando haya visitas a productos</p>
+          <p className="text-xs text-gray-400 mt-2">
+            Sistema de analytics activado - Visita algunos productos para ver métricas
+          </p>
         </div>
       ) : (
         <div className="space-y-6">
@@ -131,9 +134,12 @@ export default function ConversionRate() {
               ¿Qué es la tasa de conversión?
             </h4>
             <p className="text-sm text-gray-600 leading-relaxed">
-              Es el porcentaje de visitas que se convierten en pedidos. 
+              Es el porcentaje de visitas a productos que se convierten en pedidos. 
               Una tasa del <strong>2-5%</strong> es considerada buena para e-commerce. 
               Mejora tu tasa optimizando descripciones, imágenes y precios.
+            </p>
+            <p className="text-xs text-purple-600 mt-2 font-medium">
+              📊 Período: Últimos 30 días
             </p>
           </div>
 
