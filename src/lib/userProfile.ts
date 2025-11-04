@@ -107,6 +107,7 @@ export interface UserAddress {
   codigo_postal?: string
   referencia?: string
   telefono_contacto?: string
+  google_maps_url?: string
   es_predeterminada: boolean
   created_at: string
   updated_at: string
@@ -121,6 +122,7 @@ export interface CreateUserAddress {
   codigo_postal?: string
   referencia?: string
   telefono_contacto?: string
+  google_maps_url?: string
   es_predeterminada?: boolean
 }
 

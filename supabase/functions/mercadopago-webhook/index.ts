@@ -133,6 +133,7 @@ serve(async (req) => {
                 total: orderData.total,
                 estado: 'completado',
                 direccion_envio: orderData.shipping_address,
+                google_maps_url: orderData.delivery_data?.google_maps_url || null,
                 metodo_pago: 'mercadopago',
                 mercadopago_external_reference: refId,
                 mercadopago_preference_id: paymentInfo.id?.toString(),

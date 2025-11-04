@@ -69,6 +69,7 @@ export interface Pedido {
   estado: 'pendiente' | 'procesando' | 'enviado' | 'entregado' | 'cancelado'
   fecha: string
   direccion_envio: string
+  google_maps_url?: string
   metodo_pago: string
   created_at: string
   // Campos de entrega

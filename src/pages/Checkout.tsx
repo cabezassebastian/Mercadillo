@@ -3,6 +3,7 @@ import { useCart } from '@/contexts/CartContext'
 import { useUser } from '@clerk/clerk-react'
 import { useNavigate } from 'react-router-dom'
 import MercadoPagoCheckout from '@/components/Checkout/MercadoPagoCheckout'
+import GoogleMapsLocationPicker from '@/components/GoogleMapsLocationPicker'
 import { CreditCard, User, ShoppingBag, MapPin, Plus, ChevronDown, Train } from 'lucide-react'
 import { getUserAddresses, type UserAddress, updateUserDNI } from '@/lib/userProfile'
 import { useNotificationHelpers } from '@/contexts/NotificationContext'
@@ -53,6 +54,7 @@ const Checkout: React.FC = () => {
     dni: string
     telefono: string
     direccion: string
+    googleMapsUrl: string
     metodoEntrega: 'envio' | 'contraentrega' | 'tienda'
     terminos: boolean
   }>({
@@ -60,6 +62,7 @@ const Checkout: React.FC = () => {
     dni: '',
     telefono: '',
     direccion: '',
+    googleMapsUrl: '',
     metodoEntrega: 'envio',
     terminos: false
   })
@@ -116,7 +119,8 @@ const Checkout: React.FC = () => {
         setSelectedAddress(defaultAddress)
         setFormData(prev => ({
           ...prev,
-          direccion: `${defaultAddress.direccion_completa}, ${defaultAddress.distrito ? defaultAddress.distrito + ', ' : ''}${defaultAddress.provincia}, ${defaultAddress.departamento}${defaultAddress.codigo_postal ? ' - ' + defaultAddress.codigo_postal : ''}`
+          direccion: `${defaultAddress.direccion_completa}, ${defaultAddress.distrito ? defaultAddress.distrito + ', ' : ''}${defaultAddress.provincia}, ${defaultAddress.departamento}${defaultAddress.codigo_postal ? ' - ' + defaultAddress.codigo_postal : ''}`,
+          googleMapsUrl: defaultAddress.google_maps_url || ''
         }))
       }
     }
@@ -198,7 +202,8 @@ const Checkout: React.FC = () => {
     setUseNewAddress(false)
     setFormData(prev => ({
       ...prev,
-      direccion: `${address.direccion_completa}, ${address.distrito ? address.distrito + ', ' : ''}${address.provincia}, ${address.departamento}${address.codigo_postal ? ' - ' + address.codigo_postal : ''}`
+      direccion: `${address.direccion_completa}, ${address.distrito ? address.distrito + ', ' : ''}${address.provincia}, ${address.departamento}${address.codigo_postal ? ' - ' + address.codigo_postal : ''}`,
+      googleMapsUrl: address.google_maps_url || ''
     }))
   }
 
@@ -207,7 +212,8 @@ const Checkout: React.FC = () => {
     setUseNewAddress(true)
     setFormData(prev => ({
       ...prev,
-      direccion: ''
+      direccion: '',
+      googleMapsUrl: ''
     }))
   }
 
@@ -626,6 +632,15 @@ const Checkout: React.FC = () => {
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                             {formData.direccion.length}/255 caracteres
                           </p>
+                          
+                          {/* Google Maps Location Picker - Solo para envío a domicilio */}
+                          <div className="mt-4">
+                            <GoogleMapsLocationPicker
+                              value={formData.googleMapsUrl}
+                              onChange={(url) => setFormData(prev => ({ ...prev, googleMapsUrl: url }))}
+                              helpText="para asegurar la ubicación exacta"
+                            />
+                          </div>
                         </>
                       )}
                     </div>
@@ -710,6 +725,7 @@ const Checkout: React.FC = () => {
                   dni: formData.dni,
                   telefono: formData.telefono,
                   direccion: formData.direccion,
+                  googleMapsUrl: formData.googleMapsUrl,
                   metodoEntrega: formData.metodoEntrega
                 }}
               />

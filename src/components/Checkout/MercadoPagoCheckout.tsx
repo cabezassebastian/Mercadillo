@@ -21,6 +21,7 @@ interface MercadoPagoCheckoutProps {
     dni: string
     telefono: string
     direccion: string
+    googleMapsUrl?: string
     metodoEntrega: 'envio' | 'contraentrega' | 'tienda'
   }
 }
@@ -87,6 +88,7 @@ const MercadoPagoCheckout: React.FC<MercadoPagoCheckoutProps> = ({
           dni: deliveryData.dni || null, // null si está vacío
           telefono: deliveryData.telefono || '',
           direccion: deliveryData.direccion || null, // null si está vacío para tienda
+          google_maps_url: deliveryData.googleMapsUrl || null,
           metodo_entrega: deliveryData.metodoEntrega
         } : null,
         metadata: {

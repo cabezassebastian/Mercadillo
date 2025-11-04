@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useUser } from '@clerk/clerk-react'
 import { MapPin, Plus, Edit, Trash2, Star, Check, X } from 'lucide-react'
+import GoogleMapsLocationPicker from '@/components/GoogleMapsLocationPicker'
 import { 
   getUserAddresses, 
   createUserAddress, 
@@ -30,6 +31,7 @@ const AddressesPage: React.FC = () => {
     codigo_postal: '',
     referencia: '',
     telefono_contacto: '',
+    google_maps_url: '',
     es_predeterminada: false
   })
 
@@ -64,6 +66,7 @@ const AddressesPage: React.FC = () => {
       codigo_postal: '',
       referencia: '',
       telefono_contacto: '',
+      google_maps_url: '',
       es_predeterminada: false
     })
     setEditingAddress(null)
@@ -81,6 +84,7 @@ const AddressesPage: React.FC = () => {
       codigo_postal: address.codigo_postal || '',
       referencia: address.referencia || '',
       telefono_contacto: address.telefono_contacto || '',
+      google_maps_url: address.google_maps_url || '',
       es_predeterminada: address.es_predeterminada || false
     })
     setShowForm(true)
@@ -382,6 +386,13 @@ const AddressesPage: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Campo de Google Maps */}
+              <GoogleMapsLocationPicker
+                value={formData.google_maps_url}
+                onChange={(url) => setFormData({ ...formData, google_maps_url: url })}
+                helpText="para asegurar la ubicación exacta"
+              />
 
               <div className="flex items-center">
                 <input
