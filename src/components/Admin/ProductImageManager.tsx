@@ -122,13 +122,23 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
   const updateOrden = async (newImagenes: ProductoImagen[]) => {
     try {
-        // Update order via server endpoint batch updates
-        const updates = newImagenes.map((img, i) => ({ id: img.id, updates: { orden: i } }))
-        await fetchAdmin('product-images', { method: 'PATCH', body: JSON.stringify({ updates }) })
-        setImagenes(newImagenes)
+        // Update order individually for each image
+        for (let i = 0; i < newImagenes.length; i++) {
+          await fetchAdmin('product-images', { 
+            method: 'PUT', 
+            body: JSON.stringify({ 
+              id: newImagenes[i].id, 
+              updates: { orden: i } 
+            }) 
+          })
+        }
+        
+        // Re-fetch para asegurar ordenamiento correcto (principal primero)
+        await fetchImagenes()
         if (onImagesChange) onImagesChange()
     } catch (error) {
       console.error('Error updating orden:', error);
+      alert('Error al actualizar el orden de las imágenes')
     }
   };
 
@@ -189,21 +199,23 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
           {imagenes.map((imagen, index) => (
             <div
               key={imagen.id}
-              draggable
-              onDragStart={(e) => handleDragStart(e, index)}
+              draggable={!imagen.es_principal}
+              onDragStart={(e) => !imagen.es_principal && handleDragStart(e, index)}
               onDragEnd={handleDragEnd}
               onDragOver={handleDragOver}
               onDrop={(e) => handleDrop(e, index)}
-              className={`relative group rounded-lg overflow-hidden border-2 cursor-move transition-all ${
+              className={`relative group rounded-lg overflow-hidden border-2 transition-all ${
                 imagen.es_principal
-                  ? 'border-amarillo dark:border-yellow-400'
-                  : 'border-gray-200 dark:border-gray-700'
+                  ? 'border-amarillo dark:border-yellow-400 cursor-default'
+                  : 'border-gray-200 dark:border-gray-700 cursor-move'
               } ${draggedIndex === index ? 'scale-105 shadow-lg' : ''}`}
             >
-              {/* Icono de arrastre */}
-              <div className="absolute top-2 left-2 z-10 p-1 bg-black/60 rounded cursor-move">
-                <GripVertical className="w-4 h-4 text-white" />
-              </div>
+              {/* Icono de arrastre - solo para imágenes no principales */}
+              {!imagen.es_principal && (
+                <div className="absolute top-2 left-2 z-10 p-1 bg-black/60 rounded cursor-move">
+                  <GripVertical className="w-4 h-4 text-white" />
+                </div>
+              )}
 
               {/* Imagen */}
               <div className="aspect-square bg-gray-100 dark:bg-gray-800">
@@ -216,7 +228,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
 
               {/* Badge de principal */}
               {imagen.es_principal && (
-                <div className="absolute top-2 right-2 px-2 py-1 bg-amarillo dark:bg-yellow-400 text-gray-900 text-xs font-semibold rounded-full flex items-center space-x-1">
+                <div className="absolute top-2 right-2 px-2 py-1 bg-amarillo dark:bg-yellow-400 text-gray-900 text-xs font-semibold rounded-full flex items-center space-x-1 z-10">
                   <Star className="w-3 h-3 fill-current" />
                   <span>Principal</span>
                 </div>
@@ -225,7 +237,7 @@ export default function ProductImageManager({ productoId, onImagesChange }: Prod
               {/* Número de orden */}
               {!imagen.es_principal && (
                 <div className="absolute bottom-2 right-2 w-6 h-6 bg-black/60 text-white text-xs rounded-full flex items-center justify-center font-medium">
-                  {index + 1}
+                  {index}
                 </div>
               )}
 
