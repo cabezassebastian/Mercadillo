@@ -244,10 +244,11 @@ export default function GoogleMapsLocationPicker({
         
         setIsGettingLocation(false)
         
-        // Mostrar precisión al usuario
+        // Log de precisión en consola (sin molestar al usuario)
         const accuracyMeters = Math.round(position.coords.accuracy)
+        console.log('� Precisión de ubicación:', accuracyMeters, 'metros')
         if (accuracyMeters > 100) {
-          alert(`📍 Ubicación obtenida\n\n⚠️ Precisión: ${accuracyMeters} metros\n\nPara mayor precisión:\n• Activa el GPS en tu dispositivo\n• Sal al exterior si estás en interiores\n• Ajusta manualmente arrastrando el pin rojo`)
+          console.warn('⚠️ Baja precisión. Considera ajustar manualmente el pin.')
         }
       },
       (error) => {
