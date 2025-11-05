@@ -197,79 +197,235 @@ const AdminCoupons: React.FC = () => {
         </button>
       </div>
 
-      {/* Estadísticas Generales */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Cupones Activos</p>
-              <p className="text-3xl font-bold text-gris-oscuro dark:text-gray-100 mt-1">
-                {cupones.filter(c => c.activo).length}
-              </p>
+      {/* Panel de Estadísticas Globales Mejorado */}
+      <div className="card p-6 bg-gradient-to-br from-amarillo/10 to-orange-100/20 dark:from-yellow-900/20 dark:to-orange-900/20 border-2 border-amarillo/30 dark:border-yellow-600/30">
+        <div className="flex items-center mb-4">
+          <div className="p-2 bg-amarillo dark:bg-yellow-600 rounded-lg mr-3">
+            <TrendingUp className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-gris-oscuro dark:text-gray-100">
+              📊 Estadísticas Globales de Cupones
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Métricas en tiempo real del sistema de cupones
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 mt-4">
+          {/* Total Cupones */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <Ticket className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400 bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded">
+                TOTAL
+              </span>
             </div>
-            <div className="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-              <Ticket className="w-6 h-6 text-green-600 dark:text-green-400" />
+            <p className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">
+              {cupones.length}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Cupones creados
+            </p>
+          </div>
+
+          {/* Cupones Activos */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <Check className="w-5 h-5 text-green-600 dark:text-green-400" />
+              <span className="text-xs font-medium text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-0.5 rounded">
+                ACTIVOS
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              {cupones.filter(c => c.activo).length}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Disponibles ahora
+            </p>
+          </div>
+
+          {/* Cupones Expirados */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <X className="w-5 h-5 text-red-600 dark:text-red-400" />
+              <span className="text-xs font-medium text-red-600 dark:text-red-400 bg-red-100 dark:bg-red-900/30 px-2 py-0.5 rounded">
+                EXPIRADOS
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-red-600 dark:text-red-400">
+              {cupones.filter(c => c.fecha_expiracion && new Date(c.fecha_expiracion) < new Date()).length}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Vencidos
+            </p>
+          </div>
+
+          {/* Usos Totales */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <Users className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+              <span className="text-xs font-medium text-purple-600 dark:text-purple-400 bg-purple-100 dark:bg-purple-900/30 px-2 py-0.5 rounded">
+                USOS
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+              {cupones.reduce((sum, c) => sum + (c.veces_usado || 0), 0)}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Veces aplicado
+            </p>
+          </div>
+
+          {/* Descuento Total Aplicado */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <DollarSign className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />
+              <span className="text-xs font-medium text-yellow-600 dark:text-yellow-400 bg-yellow-100 dark:bg-yellow-900/30 px-2 py-0.5 rounded">
+                💰 TOTAL
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+              S/ {cupones.reduce((sum, c) => sum + (c.total_descuento_aplicado || 0), 0).toFixed(2)}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              En descuentos
+            </p>
+          </div>
+
+          {/* Usuarios Únicos */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+            <div className="flex items-center justify-between mb-2">
+              <Users className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-100 dark:bg-indigo-900/30 px-2 py-0.5 rounded">
+                USUARIOS
+              </span>
+            </div>
+            <p className="text-2xl font-bold text-indigo-600 dark:text-indigo-400">
+              {Array.from(stats.values()).reduce((sum, s) => sum + s.usuarios_unicos, 0)}
+            </p>
+            <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
+              Clientes únicos
+            </p>
+          </div>
+        </div>
+
+        {/* Desglose por Tipo de Cupón */}
+        <div className="mt-6 pt-6 border-t border-amarillo/20 dark:border-yellow-600/20">
+          <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 mb-3">
+            🏷️ Desglose por Tipo de Cupón
+          </h4>
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-gray-400"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                General: <span className="font-semibold">{cupones.filter(c => c.tipo_cupon === 'general' || !c.tipo_cupon).length}</span>
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                1ª Compra: <span className="font-semibold">{cupones.filter(c => c.only_first_purchase).length}</span>
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-pink-500"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Cumpleaños: <span className="font-semibold">{cupones.filter(c => c.es_cumpleanos).length}</span>
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Retorno: <span className="font-semibold">{cupones.filter(c => c.es_carrito_abandonado).length}</span>
+              </span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+              <span className="text-sm text-gray-600 dark:text-gray-300">
+                Referidos: <span className="font-semibold">{cupones.filter(c => c.tipo_cupon === 'referido').length}</span>
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Total Cupones</p>
-              <p className="text-3xl font-bold text-gris-oscuro dark:text-gray-100 mt-1">
-                {cupones.length}
-              </p>
-            </div>
-            <div className="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-              <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+        {/* Top 3 Cupones Más Usados */}
+        {cupones.length > 0 && (
+          <div className="mt-6 pt-6 border-t border-amarillo/20 dark:border-yellow-600/20">
+            <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 mb-3">
+              🏆 Top 3 Cupones Más Usados
+            </h4>
+            <div className="space-y-2">
+              {cupones
+                .filter(c => (c.veces_usado || 0) > 0)
+                .sort((a, b) => (b.veces_usado || 0) - (a.veces_usado || 0))
+                .slice(0, 3)
+                .map((cupon, index) => (
+                  <div key={cupon.id} className="flex items-center justify-between bg-white dark:bg-gray-800 rounded-lg p-3">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-600'
+                      }`}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-sm text-gris-oscuro dark:text-gray-100">
+                          {cupon.codigo}
+                        </p>
+                        <p className="text-xs text-gray-500 dark:text-gray-400">
+                          {cupon.tipo === 'porcentaje' ? `${cupon.valor}% descuento` : `S/ ${cupon.valor} descuento`}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-bold text-green-600 dark:text-green-400">
+                        💰 S/ {(cupon.total_descuento_aplicado || 0).toFixed(2)}
+                      </p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">
+                        {cupon.veces_usado || 0} usos
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              {cupones.filter(c => (c.veces_usado || 0) > 0).length === 0 && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">
+                  No hay cupones usados todavía
+                </p>
+              )}
             </div>
           </div>
-        </div>
-
-        <div className="card p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Descuento Total</p>
-              <p className="text-3xl font-bold text-gris-oscuro dark:text-gray-100 mt-1">
-                S/ {Array.from(stats.values()).reduce((sum, s) => sum + s.descuento_total, 0).toFixed(2)}
-              </p>
-            </div>
-            <div className="p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-              <DollarSign className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
-            </div>
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Tabla de Cupones */}
       <div className="card overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+          <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Código
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Tipo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Descuento
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Usos
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Mínimo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Expira
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -279,7 +435,7 @@ const AdminCoupons: React.FC = () => {
                 const cuponStats = stats.get(cupon.id)
                 return (
                   <tr key={cupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         <Ticket className="w-4 h-4 mr-2 text-gray-400" />
                         <div>
@@ -317,7 +473,7 @@ const AdminCoupons: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         cupon.tipo === 'porcentaje'
                           ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
@@ -326,10 +482,10 @@ const AdminCoupons: React.FC = () => {
                         {cupon.tipo === 'porcentaje' ? 'Porcentaje' : 'Monto Fijo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gris-oscuro dark:text-gray-100">
+                    <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gris-oscuro dark:text-gray-100">
                       {cupon.tipo === 'porcentaje' ? `${cupon.valor}%` : `S/ ${cupon.valor.toFixed(2)}`}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       <div className="text-sm text-gris-oscuro dark:text-gray-100">
                         {cupon.usos_actuales || 0} / {cupon.usos_maximos || '∞'}
                       </div>
@@ -346,10 +502,10 @@ const AdminCoupons: React.FC = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gris-oscuro dark:text-gray-100">
+                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gris-oscuro dark:text-gray-100">
                       S/ {cupon.monto_minimo?.toFixed(2) || '0.00'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-3 whitespace-nowrap">
                       {cupon.fecha_expiracion ? (
                         <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                           <Calendar className="w-3 h-3 mr-1" />
@@ -359,7 +515,7 @@ const AdminCoupons: React.FC = () => {
                         <span className="text-xs text-gray-400 dark:text-gray-500">Sin expiración</span>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
+                    <td className="px-3 py-3 whitespace-nowrap text-center">
                       <button
                         onClick={() => toggleActivo(cupon)}
                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
@@ -381,8 +537,8 @@ const AdminCoupons: React.FC = () => {
                         )}
                       </button>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                      <div className="flex space-x-2">
+                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                      <div className="flex justify-center space-x-2">
                         <button
                           onClick={() => handleEdit(cupon)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
