@@ -52,31 +52,65 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
 
   // Inicializar Web Speech API
   useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
-      recognitionRef.current = new SpeechRecognition()
-      recognitionRef.current.continuous = false
-      recognitionRef.current.interimResults = false
-      recognitionRef.current.lang = 'es-PE'
+    // Verificar soporte en diferentes navegadores incluyendo Opera
+    const hasSpeechRecognition = 'webkitSpeechRecognition' in window || 
+                                  'SpeechRecognition' in window ||
+                                  ('webkitSpeechRecognition' in (window as any))
+    
+    if (hasSpeechRecognition) {
+      const SpeechRecognition = (window as any).SpeechRecognition || 
+                                 (window as any).webkitSpeechRecognition
+      
+      try {
+        recognitionRef.current = new SpeechRecognition()
+        recognitionRef.current.continuous = false
+        recognitionRef.current.interimResults = false
+        recognitionRef.current.lang = 'es-PE'
 
-      recognitionRef.current.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
-        onChange(transcript)
-        setIsListening(false)
-      }
+        recognitionRef.current.onstart = () => {
+          console.log('Reconocimiento de voz iniciado')
+          setIsListening(true)
+        }
 
-      recognitionRef.current.onerror = () => {
-        setIsListening(false)
-      }
+        recognitionRef.current.onresult = (event: any) => {
+          const transcript = event.results[0][0].transcript
+          console.log('Texto reconocido:', transcript)
+          onChange(transcript)
+          setIsListening(false)
+        }
 
-      recognitionRef.current.onend = () => {
-        setIsListening(false)
+        recognitionRef.current.onerror = (event: any) => {
+          console.error('Error en reconocimiento de voz:', event.error)
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            alert('Permiso de micrófono denegado. Por favor permite el acceso al micrófono en la configuración de tu navegador.')
+          } else if (event.error === 'no-speech') {
+            console.log('No se detectó voz')
+          } else if (event.error === 'network') {
+            alert('Error de red. Verifica tu conexión a internet.')
+          } else {
+            console.log('Error:', event.error)
+          }
+          setIsListening(false)
+        }
+
+        recognitionRef.current.onend = () => {
+          console.log('Reconocimiento de voz finalizado')
+          setIsListening(false)
+        }
+      } catch (error) {
+        console.error('Error al inicializar reconocimiento de voz:', error)
       }
+    } else {
+      console.warn('El navegador no soporta reconocimiento de voz')
     }
 
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop()
+        try {
+          recognitionRef.current.stop()
+        } catch (e) {
+          console.log('Error al detener reconocimiento:', e)
+        }
       }
     }
   }, [onChange])
@@ -225,16 +259,37 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
 
   const handleVoiceSearch = () => {
     if (!recognitionRef.current) {
-      alert('Tu navegador no soporta búsqueda por voz')
+      const isOpera = (navigator.userAgent.indexOf('OPR') !== -1) || (navigator.userAgent.indexOf('Opera') !== -1)
+      if (isOpera) {
+        alert('Búsqueda por voz no disponible en Opera. Por favor usa Chrome, Edge o Safari, o habilita los permisos de micrófono en opera://settings/privacy.')
+      } else {
+        alert('Tu navegador no soporta búsqueda por voz. Por favor usa Chrome, Edge o Safari.')
+      }
       return
     }
 
     if (isListening) {
-      recognitionRef.current.stop()
-      setIsListening(false)
+      try {
+        recognitionRef.current.stop()
+        setIsListening(false)
+      } catch (error) {
+        console.error('Error al detener el reconocimiento de voz:', error)
+        setIsListening(false)
+      }
     } else {
-      recognitionRef.current.start()
-      setIsListening(true)
+      try {
+        recognitionRef.current.start()
+        setIsListening(true)
+      } catch (error) {
+        console.error('Error al iniciar el reconocimiento de voz:', error)
+        const isOpera = (navigator.userAgent.indexOf('OPR') !== -1) || (navigator.userAgent.indexOf('Opera') !== -1)
+        if (isOpera) {
+          alert('No se pudo iniciar la búsqueda por voz en Opera. Verifica los permisos del micrófono en opera://settings/privacy o usa Chrome/Edge.')
+        } else {
+          alert('No se pudo iniciar la búsqueda por voz. Asegúrate de permitir el acceso al micrófono.')
+        }
+        setIsListening(false)
+      }
     }
   }
 
