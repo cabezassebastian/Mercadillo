@@ -44,6 +44,7 @@ const Catalog: React.FC = () => {
   const [showRatingDropdown, setShowRatingDropdown] = useState(false) // Dropdown de calificación
   const [showCategoryDropdown, setShowCategoryDropdown] = useState(false) // Dropdown de categoría (mobile)
   const [priceRange, setPriceRange] = useState({ min: '', max: '' })
+  const [priceSlider, setPriceSlider] = useState({ min: 0, max: 1000 }) // Slider values
   const [onlyInStock, setOnlyInStock] = useState(true) // Solo productos disponibles
   const [minRating, setMinRating] = useState(0) // Filtro por calificación
   
@@ -197,13 +198,10 @@ const Catalog: React.FC = () => {
       filtered = filtered.filter(producto => (producto.stock ?? 0) > 0)
     }
 
-    // Filtrar por rango de precios
-    if (priceRange.min) {
-      filtered = filtered.filter(producto => producto.precio >= parseFloat(priceRange.min))
-    }
-    if (priceRange.max) {
-      filtered = filtered.filter(producto => producto.precio <= parseFloat(priceRange.max))
-    }
+    // Filtrar por rango de precios (usando slider)
+    filtered = filtered.filter(producto => 
+      producto.precio >= priceSlider.min && producto.precio <= priceSlider.max
+    )
 
     // Filtrar por calificación mínima (si existe el campo)
     if (minRating > 0) {
@@ -257,12 +255,12 @@ const Catalog: React.FC = () => {
     })
 
     setFilteredProductos(filtered)
-  }, [productos, searchTerm, selectedCategory, sortBy, priceRange, onlyInStock, minRating])
+  }, [productos, searchTerm, selectedCategory, sortBy, priceSlider, onlyInStock, minRating])
 
   // Resetear a la página 1 cuando cambian los filtros
   useEffect(() => {
     setCurrentPage(1)
-  }, [searchTerm, selectedCategory, sortBy, priceRange, onlyInStock, minRating])
+  }, [searchTerm, selectedCategory, sortBy, priceSlider, onlyInStock, minRating])
 
   // Calcular paginación
   const totalPages = Math.ceil(filteredProductos.length / itemsPerPage)
@@ -295,8 +293,7 @@ const Catalog: React.FC = () => {
   // Contar filtros activos
   const activeFiltersCount = [
     selectedCategory,
-    priceRange.min,
-    priceRange.max,
+    priceSlider.min > 0 || priceSlider.max < 1000, // Filtro de precio activo si no es rango completo
     !onlyInStock, // Si está desactivado cuenta como filtro
     minRating > 0
   ].filter(Boolean).length
@@ -305,6 +302,7 @@ const Catalog: React.FC = () => {
     setSearchTerm('')
     setSelectedCategory('')
     setPriceRange({ min: '', max: '' })
+    setPriceSlider({ min: 0, max: 1000 })
     setOnlyInStock(true)
     setMinRating(0)
     setSearchParams({})
@@ -340,6 +338,26 @@ const Catalog: React.FC = () => {
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">Por favor, verifica tu conexión a internet o inténtalo de nuevo más tarde.</p>
           </div>
         )}
+
+        {/* Categories Pills - Desktop (arriba de búsqueda) */}
+        <div className="mb-6 hidden lg:block">
+          <div className="flex flex-wrap justify-center gap-4">
+            {categoriesConfig.map(({ name, icon: Icon, value }) => (
+              <button
+                key={name}
+                onClick={() => setSelectedCategory(value)}
+                className={`flex flex-col items-center p-4 rounded-xl transition-all duration-200 min-w-[110px] ${
+                  selectedCategory === value
+                    ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-lg transform scale-105'
+                    : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 shadow-md'
+                }`}
+              >
+                <Icon className="w-7 h-7 mb-2" />
+                <span className="text-sm font-medium">{name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Categories Pills - Mobile Only */}
         <div className="mb-8 lg:hidden">
@@ -501,6 +519,8 @@ const Catalog: React.FC = () => {
                   setOnlyInStock={setOnlyInStock}
                   priceRange={priceRange}
                   setPriceRange={setPriceRange}
+                  priceSlider={priceSlider}
+                  setPriceSlider={setPriceSlider}
                   minRating={minRating}
                   setMinRating={setMinRating}
                   selectedCategory={selectedCategory}
@@ -539,7 +559,7 @@ const Catalog: React.FC = () => {
           
           {/* Sidebar - Desktop Only */}
           <aside className="hidden lg:block lg:w-72 flex-shrink-0">
-            <div className="sticky top-4 bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-colors duration-200 max-h-[calc(100vh-2rem)] overflow-hidden flex flex-col">
+            <div className="sticky top-2 bg-white dark:bg-gray-800 rounded-2xl shadow-lg transition-colors duration-200 min-h-[825px] h-auto overflow-visible flex flex-col">
               <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <h2 className="text-xl font-bold text-gris-oscuro dark:text-gray-100">
                   Filtros
@@ -551,12 +571,14 @@ const Catalog: React.FC = () => {
                 )}
               </div>
 
-              <div className="overflow-y-auto flex-1 p-6 pt-6">
+              <div className="p-6 pt-4 pb-4">
                 <FilterContent
                 onlyInStock={onlyInStock}
                 setOnlyInStock={setOnlyInStock}
                 priceRange={priceRange}
                 setPriceRange={setPriceRange}
+                priceSlider={priceSlider}
+                setPriceSlider={setPriceSlider}
                 minRating={minRating}
                 setMinRating={setMinRating}
                 selectedCategory={selectedCategory}
@@ -841,6 +863,8 @@ interface FilterContentProps {
   setOnlyInStock: (value: boolean) => void
   priceRange: { min: string; max: string }
   setPriceRange: React.Dispatch<React.SetStateAction<{ min: string; max: string }>>
+  priceSlider: { min: number; max: number }
+  setPriceSlider: React.Dispatch<React.SetStateAction<{ min: number; max: number }>>
   minRating: number
   setMinRating: (value: number) => void
   selectedCategory: string
@@ -863,8 +887,8 @@ interface FilterContentProps {
 const FilterContent: React.FC<FilterContentProps> = ({
   onlyInStock,
   setOnlyInStock,
-  priceRange,
-  setPriceRange,
+  priceSlider,
+  setPriceSlider,
   minRating,
   setMinRating,
   selectedCategory,
@@ -886,29 +910,6 @@ const FilterContent: React.FC<FilterContentProps> = ({
   return (
     <div className="space-y-6">
       
-      {/* Categories - Desktop Sidebar */}
-      <div className="hidden lg:block">
-        <h3 className="text-sm font-semibold text-gris-oscuro dark:text-gray-200 mb-3">
-          Categorías
-        </h3>
-        <div className="space-y-2">
-          {categoriesConfig.map(({ name, icon: Icon, value }) => (
-            <button
-              key={name}
-              onClick={() => setSelectedCategory(value)}
-              className={`w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 ${
-                selectedCategory === value
-                  ? 'bg-amarillo dark:bg-yellow-500 text-gris-oscuro dark:text-gray-900 shadow-md'
-                  : 'bg-gray-50 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-              }`}
-            >
-              <Icon className="w-5 h-5 flex-shrink-0" />
-              <span className="text-sm font-medium">{name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
-
       {/* Disponibilidad - Toggle Switch Mejorado */}
       <div>
         <h3 className="text-sm font-semibold text-gris-oscuro dark:text-gray-200 mb-3">
@@ -959,27 +960,78 @@ const FilterContent: React.FC<FilterContentProps> = ({
         </button>
       </div>
 
-      {/* Price Range */}
+      {/* Price Range con Slider Dual */}
       <div>
-        <h3 className="text-sm font-semibold text-gris-oscuro dark:text-gray-200 mb-3">
-          Rango de Precio
-        </h3>
-        <div className="flex items-center space-x-2">
-          <input
-            type="number"
-            placeholder="Min"
-            value={priceRange.min}
-            onChange={(e) => setPriceRange(prev => ({ ...prev, min: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition-all duration-200"
-          />
-          <span className="text-gray-500 dark:text-gray-400">—</span>
-          <input
-            type="number"
-            placeholder="Max"
-            value={priceRange.max}
-            onChange={(e) => setPriceRange(prev => ({ ...prev, max: e.target.value }))}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 text-sm hover:border-gray-400 dark:hover:border-gray-500 hover:shadow-sm transition-all duration-200"
-          />
+        <div className="flex items-center justify-between mb-3">
+          <h3 className="text-sm font-semibold text-gris-oscuro dark:text-gray-200">
+            Rango de Precio
+          </h3>
+          <span className="text-sm font-medium text-amarillo dark:text-yellow-400">
+            S/ {priceSlider.min} - S/ {priceSlider.max}
+          </span>
+        </div>
+        
+        <div className="px-2 py-4 bg-gradient-to-br from-amarillo/10 to-yellow-50 dark:from-yellow-900/20 dark:to-yellow-800/10 rounded-xl border-2 border-amarillo/30 dark:border-yellow-500/30">
+          {/* Slider para precio mínimo */}
+          <div className="mb-4">
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+              Precio Mínimo
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1000"
+              step="10"
+              value={priceSlider.min}
+              onChange={(e) => {
+                const newMin = parseInt(e.target.value)
+                if (newMin <= priceSlider.max) {
+                  setPriceSlider(prev => ({ ...prev, min: newMin }))
+                }
+              }}
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-amarillo slider-thumb-amarillo"
+              style={{
+                background: `linear-gradient(to right, #fbbf24 0%, #fbbf24 ${(priceSlider.min / 1000) * 100}%, #e5e7eb ${(priceSlider.min / 1000) * 100}%, #e5e7eb 100%)`
+              }}
+            />
+          </div>
+
+          {/* Slider para precio máximo */}
+          <div>
+            <label className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1 block">
+              Precio Máximo
+            </label>
+            <input
+              type="range"
+              min="0"
+              max="1000"
+              step="10"
+              value={priceSlider.max}
+              onChange={(e) => {
+                const newMax = parseInt(e.target.value)
+                if (newMax >= priceSlider.min) {
+                  setPriceSlider(prev => ({ ...prev, max: newMax }))
+                }
+              }}
+              className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer accent-amarillo slider-thumb-amarillo"
+              style={{
+                background: `linear-gradient(to right, #e5e7eb 0%, #e5e7eb ${(priceSlider.max / 1000) * 100}%, #fbbf24 ${(priceSlider.max / 1000) * 100}%, #fbbf24 100%)`
+              }}
+            />
+          </div>
+
+          {/* Indicadores de valores */}
+          <div className="flex items-center justify-between mt-3 pt-3 border-t border-amarillo/20 dark:border-yellow-500/20">
+            <div className="text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Mínimo</div>
+              <div className="text-lg font-bold text-amarillo dark:text-yellow-400">S/ {priceSlider.min}</div>
+            </div>
+            <div className="text-gray-400 dark:text-gray-500">—</div>
+            <div className="text-center">
+              <div className="text-xs text-gray-500 dark:text-gray-400">Máximo</div>
+              <div className="text-lg font-bold text-amarillo dark:text-yellow-400">S/ {priceSlider.max}</div>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { Search, X, TrendingUp, Clock } from 'lucide-react'
+import { Search, X, TrendingUp, Clock, Mic } from 'lucide-react'
 import { Producto } from '@/lib/supabase'
 
 interface SearchWithSuggestionsProps {
@@ -8,6 +8,24 @@ interface SearchWithSuggestionsProps {
   onSearch: (term: string) => void
   productos: Producto[]
   placeholder?: string
+}
+
+// Diccionario de sinónimos en español
+const synonyms: Record<string, string[]> = {
+  'polo': ['camiseta', 'playera', 't-shirt', 'tshirt'],
+  'camiseta': ['polo', 'playera', 't-shirt', 'remera'],
+  'pantalón': ['jean', 'jeans', 'pantalones', 'pants'],
+  'jean': ['pantalón', 'jeans', 'vaquero', 'denim'],
+  'zapatillas': ['zapatos', 'tenis', 'sneakers', 'deportivos'],
+  'zapatos': ['zapatillas', 'calzado', 'footwear'],
+  'celular': ['móvil', 'teléfono', 'smartphone', 'phone'],
+  'laptop': ['portátil', 'notebook', 'computadora', 'pc'],
+  'ropa': ['vestimenta', 'indumentaria', 'prendas', 'clothes'],
+  'vestido': ['dress', 'vestidos'],
+  'blusa': ['camisa', 'top', 'shirt'],
+  'short': ['shorts', 'bermuda', 'pantalón corto'],
+  'falda': ['skirt', 'pollera'],
+  'chompa': ['suéter', 'sweater', 'pullover', 'jersey'],
 }
 
 const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
@@ -21,14 +39,65 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
   const [recentSearches, setRecentSearches] = useState<string[]>([])
   const [isOpen, setIsOpen] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [isListening, setIsListening] = useState(false)
   const searchRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const recognitionRef = useRef<any>(null)
 
   // Popular searches (could be dynamic from backend)
   const popularSearches = [
     'smartphone', 'laptop', 'camiseta', 'zapatillas', 
     'sofá', 'mesa', 'pelota', 'raqueta'
   ]
+
+  // Inicializar Web Speech API
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition
+      recognitionRef.current = new SpeechRecognition()
+      recognitionRef.current.continuous = false
+      recognitionRef.current.interimResults = false
+      recognitionRef.current.lang = 'es-PE'
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript
+        onChange(transcript)
+        setIsListening(false)
+      }
+
+      recognitionRef.current.onerror = () => {
+        setIsListening(false)
+      }
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false)
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [onChange])
+
+  // Función para expandir búsqueda con sinónimos
+  const expandSearchWithSynonyms = (term: string): string[] => {
+    const lowerTerm = term.toLowerCase().trim()
+    const expanded = [lowerTerm]
+    
+    // Buscar sinónimos
+    for (const [key, syns] of Object.entries(synonyms)) {
+      if (lowerTerm.includes(key)) {
+        expanded.push(...syns)
+      }
+      if (syns.some(syn => lowerTerm.includes(syn))) {
+        expanded.push(key, ...syns)
+      }
+    }
+    
+    return [...new Set(expanded)]
+  }
 
   // Load recent searches from localStorage
   useEffect(() => {
@@ -45,19 +114,31 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
       return
     }
 
+    // Expandir búsqueda con sinónimos
+    const expandedTerms = expandSearchWithSynonyms(value)
+
     const productSuggestions = productos
-      .filter(producto => 
-        producto.nombre.toLowerCase().includes(value.toLowerCase()) ||
-        producto.descripcion.toLowerCase().includes(value.toLowerCase()) ||
-        producto.categoria.toLowerCase().includes(value.toLowerCase())
-      )
+      .filter(producto => {
+        const nombreLower = producto.nombre.toLowerCase()
+        const descripcionLower = producto.descripcion.toLowerCase()
+        const categoriaLower = producto.categoria.toLowerCase()
+        
+        // Buscar coincidencias con el término original y sus sinónimos
+        return expandedTerms.some(term =>
+          nombreLower.includes(term) ||
+          descripcionLower.includes(term) ||
+          categoriaLower.includes(term)
+        )
+      })
       .slice(0, 5)
       .map(producto => producto.nombre)
 
     const categorySuggestions = Array.from(new Set(
       productos
         .filter(producto => 
-          producto.categoria.toLowerCase().includes(value.toLowerCase())
+          expandedTerms.some(term =>
+            producto.categoria.toLowerCase().includes(term)
+          )
         )
         .map(producto => producto.categoria)
     )).slice(0, 3)
@@ -142,6 +223,21 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
     localStorage.removeItem('recentSearches')
   }
 
+  const handleVoiceSearch = () => {
+    if (!recognitionRef.current) {
+      alert('Tu navegador no soporta búsqueda por voz')
+      return
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    } else {
+      recognitionRef.current.start()
+      setIsListening(true)
+    }
+  }
+
   return (
     <div className="relative flex-1" ref={searchRef}>
       <div className="relative">
@@ -154,8 +250,22 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          className="w-full pl-12 pr-12 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 text-lg transition-all duration-200"
+          className="w-full pl-12 pr-24 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-amarillo dark:focus:ring-yellow-500 focus:border-transparent bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 text-lg transition-all duration-200"
         />
+        
+        {/* Botón de búsqueda por voz */}
+        <button
+          onClick={handleVoiceSearch}
+          className={`absolute right-12 top-1/2 transform -translate-y-1/2 transition-all duration-200 ${
+            isListening 
+              ? 'text-red-500 animate-pulse' 
+              : 'text-gray-400 hover:text-amarillo dark:hover:text-yellow-500'
+          }`}
+          title="Búsqueda por voz"
+        >
+          <Mic className="w-5 h-5" />
+        </button>
+
         {value && (
           <button
             onClick={() => onChange('')}
