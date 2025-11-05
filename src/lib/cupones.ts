@@ -235,7 +235,6 @@ export async function verificarCodigoReferido(codigo: string): Promise<CodigoRef
  * Crear cupón de referido para nuevo usuario
  */
 export async function crearCuponReferido(
-  usuarioId: string,
   codigoReferido: string,
   descuentoPorcentaje: number = 15
 ): Promise<boolean> {
