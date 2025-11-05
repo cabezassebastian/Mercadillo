@@ -176,7 +176,7 @@ const AdminCoupons: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6 max-w-[1600px]">
+    <div className="space-y-6 max-w-full">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
