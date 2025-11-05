@@ -216,8 +216,8 @@ SELECT
   c.id,
   c.codigo,
   c.tipo_cupon,
-  c.descuento_porcentaje,
-  c.descuento_monto,
+  c.tipo,
+  c.valor,
   c.veces_usado,
   c.total_descuento_aplicado,
   c.usos_maximos,
@@ -226,10 +226,10 @@ SELECT
     ELSE ROUND((c.veces_usado::DECIMAL / c.usos_maximos) * 100, 2)
   END as porcentaje_uso,
   c.fecha_inicio,
-  c.fecha_fin,
+  c.fecha_expiracion,
   CASE
-    WHEN c.fecha_fin < NOW() THEN 'Expirado'
-    WHEN c.veces_usado >= c.usos_maximos THEN 'Agotado'
+    WHEN c.fecha_expiracion IS NOT NULL AND c.fecha_expiracion < NOW() THEN 'Expirado'
+    WHEN c.usos_maximos IS NOT NULL AND c.veces_usado >= c.usos_maximos THEN 'Agotado'
     WHEN c.fecha_inicio > NOW() THEN 'Programado'
     ELSE 'Activo'
   END as estado_actual,
@@ -256,16 +256,16 @@ GRANT SELECT ON cupones_estadisticas TO authenticated;
 
 -- Cupón de primera compra automático
 /*
-INSERT INTO cupones (codigo, descuento_porcentaje, tipo_cupon, only_first_purchase, fecha_inicio, fecha_fin, usos_maximos)
-VALUES ('BIENVENIDO10', 10, 'primera_compra', TRUE, NOW(), NOW() + INTERVAL '1 year', NULL);
+INSERT INTO cupones (codigo, tipo, valor, tipo_cupon, only_first_purchase, fecha_inicio, fecha_expiracion, usos_maximos, activo)
+VALUES ('BIENVENIDO10', 'porcentaje', 10, 'primera_compra', TRUE, NOW(), NOW() + INTERVAL '1 year', NULL, true);
 
 -- Cupón por categoría (ejemplo: Ropa)
-INSERT INTO cupones (codigo, descuento_porcentaje, tipo_cupon, categoria, fecha_inicio, fecha_fin)
-VALUES ('ROPA20', 20, 'general', 'Ropa', NOW(), NOW() + INTERVAL '30 days');
+INSERT INTO cupones (codigo, tipo, valor, tipo_cupon, categoria, fecha_inicio, fecha_expiracion, activo)
+VALUES ('ROPA20', 'porcentaje', 20, 'general', 'Ropa', NOW(), NOW() + INTERVAL '30 days', true);
 
 -- Cupón de cumpleaños (ejemplo)
-INSERT INTO cupones (codigo, descuento_monto, tipo_cupon, es_cumpleanos, fecha_inicio, fecha_fin, usos_maximos)
-VALUES ('CUMPLE2024', 50, 'cumpleanos', TRUE, NOW(), NOW() + INTERVAL '7 days', 1);
+INSERT INTO cupones (codigo, tipo, valor, tipo_cupon, es_cumpleanos, fecha_inicio, fecha_expiracion, usos_maximos, activo)
+VALUES ('CUMPLE2024', 'monto_fijo', 50, 'cumpleanos', TRUE, NOW(), NOW() + INTERVAL '7 days', 1, true);
 */
 
 -- ============================================================================
