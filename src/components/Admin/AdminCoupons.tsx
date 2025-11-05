@@ -29,7 +29,12 @@ const AdminCoupons: React.FC = () => {
     fecha_expiracion: '',
     usos_maximos: '',
     monto_minimo: 0,
-    activo: true
+    activo: true,
+    categoria: '',
+    only_first_purchase: false,
+    tipo_cupon: 'general' as 'general' | 'primera_compra' | 'cumpleanos' | 'carrito_abandonado' | 'referido',
+    es_cumpleanos: false,
+    es_carrito_abandonado: false
   })
 
   useEffect(() => {
@@ -116,7 +121,12 @@ const AdminCoupons: React.FC = () => {
       fecha_expiracion: cupon.fecha_expiracion ? cupon.fecha_expiracion.split('T')[0] : '',
       usos_maximos: cupon.usos_maximos?.toString() || '',
       monto_minimo: cupon.monto_minimo || 0,
-      activo: cupon.activo
+      activo: cupon.activo,
+      categoria: cupon.categoria || '',
+      only_first_purchase: cupon.only_first_purchase || false,
+      tipo_cupon: (cupon.tipo_cupon || 'general') as 'general' | 'primera_compra' | 'cumpleanos' | 'carrito_abandonado' | 'referido',
+      es_cumpleanos: cupon.es_cumpleanos || false,
+      es_carrito_abandonado: cupon.es_carrito_abandonado || false
     })
     setShowModal(true)
   }
@@ -142,7 +152,12 @@ const AdminCoupons: React.FC = () => {
       fecha_expiracion: '',
       usos_maximos: '',
       monto_minimo: 0,
-      activo: true
+      activo: true,
+      categoria: '',
+      only_first_purchase: false,
+      tipo_cupon: 'general',
+      es_cumpleanos: false,
+      es_carrito_abandonado: false
     })
     setEditingCoupon(null)
   }
@@ -276,6 +291,29 @@ const AdminCoupons: React.FC = () => {
                               {cupon.descripcion}
                             </div>
                           )}
+                          {/* Badges para tipo de cupón especial */}
+                          <div className="flex gap-1 mt-1">
+                            {cupon.only_first_purchase && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                                1ª Compra
+                              </span>
+                            )}
+                            {cupon.es_cumpleanos && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-pink-100 text-pink-800 dark:bg-pink-900/30 dark:text-pink-300">
+                                🎂 Cumple
+                              </span>
+                            )}
+                            {cupon.es_carrito_abandonado && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+                                🛒 Retorno
+                              </span>
+                            )}
+                            {cupon.categoria && (
+                              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300">
+                                {cupon.categoria}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </td>
@@ -299,6 +337,12 @@ const AdminCoupons: React.FC = () => {
                         <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center mt-1">
                           <Users className="w-3 h-3 mr-1" />
                           {cuponStats.usuarios_unicos} usuarios
+                        </div>
+                      )}
+                      {/* Mostrar estadísticas avanzadas si existen */}
+                      {(cupon.veces_usado !== undefined && cupon.veces_usado > 0) && (
+                        <div className="text-xs text-green-600 dark:text-green-400 mt-1">
+                          💰 S/ {(cupon.total_descuento_aplicado || 0).toFixed(2)}
                         </div>
                       )}
                     </td>
@@ -470,6 +514,95 @@ const AdminCoupons: React.FC = () => {
                     onChange={handleInputChange}
                     className="input-field"
                   />
+                </div>
+
+                {/* NUEVOS CAMPOS AVANZADOS */}
+                <div>
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                    Tipo de Cupón
+                  </label>
+                  <select
+                    name="tipo_cupon"
+                    value={formData.tipo_cupon}
+                    onChange={handleInputChange}
+                    className="input-field"
+                  >
+                    <option value="general">General</option>
+                    <option value="primera_compra">Primera Compra</option>
+                    <option value="cumpleanos">Cumpleaños</option>
+                    <option value="carrito_abandonado">Carrito Abandonado</option>
+                    <option value="referido">Referido</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gris-oscuro dark:text-gray-200 mb-2">
+                    Categoría Específica
+                  </label>
+                  <select
+                    name="categoria"
+                    value={formData.categoria}
+                    onChange={handleInputChange}
+                    className="input-field"
+                  >
+                    <option value="">Todas las categorías</option>
+                    <option value="Decoración">Decoración</option>
+                    <option value="Ropa">Ropa</option>
+                    <option value="Accesorios">Accesorios</option>
+                    <option value="Hogar">Hogar</option>
+                    <option value="Electrónica">Electrónica</option>
+                    <option value="Deportes">Deportes</option>
+                    <option value="Juguetes">Juguetes</option>
+                    <option value="Libros">Libros</option>
+                  </select>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Deja en blanco para aplicar a todas
+                  </p>
+                </div>
+              </div>
+
+              {/* Checkboxes Especiales */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="only_first_purchase"
+                    name="only_first_purchase"
+                    checked={formData.only_first_purchase}
+                    onChange={(e) => setFormData(prev => ({ ...prev, only_first_purchase: e.target.checked }))}
+                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                  />
+                  <label htmlFor="only_first_purchase" className="text-sm text-gray-700 dark:text-gray-300">
+                    Solo primera compra
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="es_cumpleanos"
+                    name="es_cumpleanos"
+                    checked={formData.es_cumpleanos}
+                    onChange={(e) => setFormData(prev => ({ ...prev, es_cumpleanos: e.target.checked }))}
+                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                  />
+                  <label htmlFor="es_cumpleanos" className="text-sm text-gray-700 dark:text-gray-300">
+                    Cupón de cumpleaños
+                  </label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    id="es_carrito_abandonado"
+                    name="es_carrito_abandonado"
+                    checked={formData.es_carrito_abandonado}
+                    onChange={(e) => setFormData(prev => ({ ...prev, es_carrito_abandonado: e.target.checked }))}
+                    className="text-amarillo dark:text-yellow-400 focus:ring-amarillo dark:focus:ring-yellow-400"
+                  />
+                  <label htmlFor="es_carrito_abandonado" className="text-sm text-gray-700 dark:text-gray-300">
+                    Recuperar carrito abandonado
+                  </label>
                 </div>
               </div>
 
