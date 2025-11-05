@@ -257,7 +257,7 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
     localStorage.removeItem('recentSearches')
   }
 
-  const handleVoiceSearch = () => {
+  const handleVoiceSearch = async () => {
     if (!recognitionRef.current) {
       const isOpera = (navigator.userAgent.indexOf('OPR') !== -1) || (navigator.userAgent.indexOf('Opera') !== -1)
       if (isOpera) {
@@ -278,6 +278,25 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
       }
     } else {
       try {
+        // Primero solicitar permiso explícito del micrófono
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+            // Detener el stream inmediatamente (solo lo usamos para pedir permiso)
+            stream.getTracks().forEach(track => track.stop())
+          } catch (permissionError: any) {
+            console.error('Permiso de micrófono denegado:', permissionError)
+            if (permissionError.name === 'NotAllowedError' || permissionError.name === 'PermissionDeniedError') {
+              alert('Permiso de micrófono denegado. Por favor permite el acceso al micrófono cuando el navegador lo solicite.')
+            } else {
+              alert('No se pudo acceder al micrófono. Verifica que esté conectado y funcionando.')
+            }
+            setIsListening(false)
+            return
+          }
+        }
+
+        // Una vez tenemos permiso, iniciar el reconocimiento de voz
         recognitionRef.current.start()
         setIsListening(true)
       } catch (error) {
