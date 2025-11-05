@@ -399,33 +399,33 @@ const AdminCoupons: React.FC = () => {
       </div>
 
       {/* Tabla de Cupones */}
-      <div className="card overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden w-full">
+        <div className="overflow-x-auto w-full">
+          <table className="w-full min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800">
               <tr>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Código
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Tipo
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Descuento
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Usos
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Mínimo
                 </th>
-                <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Expira
                 </th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Estado
                 </th>
-                <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                <th className="px-4 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Acciones
                 </th>
               </tr>
@@ -435,7 +435,7 @@ const AdminCoupons: React.FC = () => {
                 const cuponStats = stats.get(cupon.id)
                 return (
                   <tr key={cupon.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
-                    <td className="px-4 py-3 whitespace-nowrap">
+                    <td className="px-6 py-3 whitespace-nowrap">
                       <div className="flex items-center">
                         <Ticket className="w-4 h-4 mr-2 text-gray-400" />
                         <div>
@@ -473,7 +473,7 @@ const AdminCoupons: React.FC = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                         cupon.tipo === 'porcentaje'
                           ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
@@ -482,10 +482,10 @@ const AdminCoupons: React.FC = () => {
                         {cupon.tipo === 'porcentaje' ? 'Porcentaje' : 'Monto Fijo'}
                       </span>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm font-semibold text-gris-oscuro dark:text-gray-100">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-semibold text-gris-oscuro dark:text-gray-100">
                       {cupon.tipo === 'porcentaje' ? `${cupon.valor}%` : `S/ ${cupon.valor.toFixed(2)}`}
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       <div className="text-sm text-gris-oscuro dark:text-gray-100">
                         {cupon.usos_actuales || 0} / {cupon.usos_maximos || '∞'}
                       </div>
@@ -502,10 +502,10 @@ const AdminCoupons: React.FC = () => {
                         </div>
                       )}
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm text-gris-oscuro dark:text-gray-100">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm text-gris-oscuro dark:text-gray-100">
                       S/ {cupon.monto_minimo?.toFixed(2) || '0.00'}
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap">
+                    <td className="px-4 py-3 whitespace-nowrap">
                       {cupon.fecha_expiracion ? (
                         <div className="flex items-center text-xs text-gray-600 dark:text-gray-400">
                           <Calendar className="w-3 h-3 mr-1" />
@@ -515,7 +515,7 @@ const AdminCoupons: React.FC = () => {
                         <span className="text-xs text-gray-400 dark:text-gray-500">Sin expiración</span>
                       )}
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-center">
+                    <td className="px-4 py-3 whitespace-nowrap text-center">
                       <button
                         onClick={() => toggleActivo(cupon)}
                         className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium transition-colors ${
@@ -537,7 +537,7 @@ const AdminCoupons: React.FC = () => {
                         )}
                       </button>
                     </td>
-                    <td className="px-3 py-3 whitespace-nowrap text-sm font-medium">
+                    <td className="px-4 py-3 whitespace-nowrap text-sm font-medium">
                       <div className="flex justify-center space-x-2">
                         <button
                           onClick={() => handleEdit(cupon)}
