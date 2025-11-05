@@ -278,7 +278,26 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
       }
     } else {
       try {
-        // Primero solicitar permiso explícito del micrófono
+        // Verificar primero el estado actual del permiso
+        if (navigator.permissions && navigator.permissions.query) {
+          try {
+            const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName })
+            
+            if (permissionStatus.state === 'denied') {
+              alert('❌ Permiso de micrófono bloqueado.\n\n' +
+                    '📍 Para habilitarlo:\n' +
+                    '1. Haz clic en el icono del candado 🔒 (o ℹ️) en la barra de direcciones\n' +
+                    '2. Busca "Micrófono"\n' +
+                    '3. Cambia de "Bloquear" a "Permitir"\n' +
+                    '4. Recarga la página')
+              return
+            }
+          } catch (e) {
+            console.log('No se pudo verificar permisos:', e)
+          }
+        }
+
+        // Solicitar permiso explícito del micrófono
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
           try {
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
@@ -287,7 +306,12 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
           } catch (permissionError: any) {
             console.error('Permiso de micrófono denegado:', permissionError)
             if (permissionError.name === 'NotAllowedError' || permissionError.name === 'PermissionDeniedError') {
-              alert('Permiso de micrófono denegado. Por favor permite el acceso al micrófono cuando el navegador lo solicite.')
+              alert('❌ Permiso de micrófono denegado.\n\n' +
+                    '📍 Para permitir el acceso:\n' +
+                    '1. Haz clic en el icono del candado 🔒 en la barra de direcciones (arriba a la izquierda)\n' +
+                    '2. Busca la opción "Micrófono"\n' +
+                    '3. Selecciona "Permitir"\n' +
+                    '4. Recarga la página y vuelve a intentar')
             } else {
               alert('No se pudo acceder al micrófono. Verifica que esté conectado y funcionando.')
             }
