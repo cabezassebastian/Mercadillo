@@ -4,7 +4,7 @@ import { relatedByCategoryAndPrice, alsoBought } from '@/lib/recommendations'
 import { supabase } from '@/lib/supabase'
 import OptimizedImage from '@/components/common/OptimizedImage'
 import StarRating from '@/components/common/StarRating'
-import { ArrowLeft, ArrowRight } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Sparkles, ShoppingBag } from 'lucide-react'
 import { getProductUrl } from '@/lib/slugify'
 
 type Props = {
@@ -14,24 +14,68 @@ type Props = {
 }
 
 const SkeletonCard = () => (
-  <div className="w-48 sm:w-56 p-3 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
-    <div className="h-40 w-full mb-3 overflow-hidden rounded-md bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 animate-pulse"></div>
-    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4 mb-2"></div>
-    <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+  <div className="flex-shrink-0 w-[200px] bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+    <div className="relative h-[200px] w-full bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 animate-shimmer bg-[length:200%_100%]"></div>
+    <div className="p-3 space-y-2">
+      <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-4/5 animate-shimmer bg-[length:200%_100%]"></div>
+      <div className="h-3 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-2/3 animate-shimmer bg-[length:200%_100%]"></div>
+      <div className="h-5 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700 rounded w-1/2 animate-shimmer bg-[length:200%_100%]"></div>
+    </div>
   </div>
 )
 
-const ProductCardMini: React.FC<{ p: any }> = ({ p }) => {
+const ProductCardMini: React.FC<{ p: any; index: number }> = ({ p, index }) => {
   const precio = typeof p.precio === 'number' ? p.precio : Number(p.precio || 0)
+  const isNew = p.created_at && new Date(p.created_at) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  
   return (
-    <Link to={getProductUrl(p.slug || p.id, p.nombre)} className="min-w-[220px] w-56 bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-xl transition-transform transform hover:-translate-y-1 active:translate-y-0 p-3">
-      <div className="aspect-square overflow-hidden rounded-xl relative bg-gray-50 mb-3">
-        <OptimizedImage src={p.imagen || p.imagenes?.[0]?.url || p.imagenes?.url || ''} alt={p.nombre} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+    <Link 
+      to={getProductUrl(p.slug || p.id, p.nombre)} 
+      className="group flex-shrink-0 w-[200px] bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 overflow-hidden"
+      style={{ animationDelay: `${index * 50}ms` }}
+    >
+      {/* Image Container */}
+      <div className="relative w-full h-[200px] overflow-hidden bg-gray-50 dark:bg-gray-900">
+        <OptimizedImage 
+          src={p.imagen || p.imagenes?.[0]?.url || p.imagenes?.url || ''} 
+          alt={p.nombre} 
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" 
+        />
+        
+        {/* Badge Nuevo */}
+        {isNew && (
+          <div className="absolute top-2 left-2">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-amarillo text-gris-oscuro text-xs font-bold rounded-full shadow-lg">
+              <Sparkles className="w-3 h-3" />
+              Nuevo
+            </span>
+          </div>
+        )}
+
+        {/* Hover Overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300" />
       </div>
-      <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 mb-1 line-clamp-2">{p.nombre}</h4>
-      <div className="flex items-center justify-between">
-        <StarRating rating={p.rating_promedio || 0} readonly size="sm" />
-        <div className="text-dorado font-bold text-sm">{new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(precio)}</div>
+
+      {/* Content */}
+      <div className="p-3 space-y-2">
+        <h4 className="text-sm font-semibold text-gris-oscuro dark:text-gray-100 line-clamp-2 min-h-[40px] group-hover:text-dorado transition-colors">
+          {p.nombre}
+        </h4>
+        
+        <div className="flex items-center gap-1">
+          <StarRating rating={p.rating_promedio || 0} readonly size="sm" />
+          {p.rating_promedio > 0 && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              ({p.rating_promedio.toFixed(1)})
+            </span>
+          )}
+        </div>
+        
+        <div className="flex items-center justify-between pt-1">
+          <div className="text-lg font-bold text-dorado dark:text-amarillo">
+            {new Intl.NumberFormat('es-PE', { style: 'currency', currency: 'PEN' }).format(precio)}
+          </div>
+        </div>
       </div>
     </Link>
   )
@@ -181,55 +225,100 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
   }
 
   const renderList = (items: any[], ref?: React.RefObject<HTMLDivElement>) => (
-    <div className="relative group">
-      <button aria-label="Desplazar izquierda" onClick={() => scrollBy(ref || relatedRef, -320)} className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-90 hover:opacity-100 focus:outline-none focus:ring">
+    <div className="relative">
+      {/* Left Arrow */}
+      <button 
+        aria-label="Desplazar izquierda" 
+        onClick={() => scrollBy(ref || relatedRef, -220)} 
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-20 p-2.5 bg-white dark:bg-gray-800 hover:bg-amarillo dark:hover:bg-amarillo rounded-full shadow-lg border border-gray-200 dark:border-gray-700 opacity-90 hover:opacity-100 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-amarillo"
+      >
         <ArrowLeft className="w-5 h-5 text-gris-oscuro dark:text-gray-100" />
       </button>
+      
+      {/* Scrollable Container */}
       <div
         ref={ref || relatedRef}
         tabIndex={0}
         onKeyDown={(e) => handleKeyDown(e, ref)}
-        className="flex space-x-4 overflow-x-auto py-2 px-1 focus:outline-none no-scrollbar"
+        className="flex gap-4 overflow-x-auto py-2 px-1 focus:outline-none scrollbar-hide scroll-smooth"
         role="list"
         aria-label="Lista de productos"
       >
-        {items.map((p) => (
-          <ProductCardMini key={p.id} p={p} />
+        {items.map((p, index) => (
+          <ProductCardMini key={p.id} p={p} index={index} />
         ))}
       </div>
-      <button aria-label="Desplazar derecha" onClick={() => scrollBy(ref || relatedRef, 320)} className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-2 bg-white dark:bg-gray-800 rounded-full shadow-md opacity-90 hover:opacity-100 focus:outline-none focus:ring">
+      
+      {/* Right Arrow */}
+      <button 
+        aria-label="Desplazar derecha" 
+        onClick={() => scrollBy(ref || relatedRef, 220)} 
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-20 p-2.5 bg-white dark:bg-gray-800 hover:bg-amarillo dark:hover:bg-amarillo rounded-full shadow-lg border border-gray-200 dark:border-gray-700 opacity-90 hover:opacity-100 transition-all duration-200 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-amarillo"
+      >
         <ArrowRight className="w-5 h-5 text-gris-oscuro dark:text-gray-100" />
       </button>
     </div>
   )
 
   return (
-    <div className="mt-12">
+    <div className="mt-12 py-8 bg-hueso dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">Productos relacionados</h3>
+        
+        {/* Productos Relacionados Section */}
+        <div className="mb-12">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="p-2.5 bg-amarillo dark:bg-amarillo rounded-lg shadow-md">
+              <Sparkles className="w-5 h-5 text-gris-oscuro" />
+            </div>
+            <div>
+              <h3 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">
+                Productos relacionados
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Descubre productos similares que podrían interesarte
+              </p>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex gap-4 overflow-x-auto py-2">
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          ) : related.length > 0 ? (
+            renderList(related, relatedRef)
+          ) : (
+            <div className="text-center py-8 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <Sparkles className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No se encontraron productos relacionados
+              </p>
+            </div>
+          )}
         </div>
 
-        {loading ? (
-          <div className="flex space-x-4">
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
-            <SkeletonCard />
+        {/* También Compraron Section */}
+        <div className="pt-8 border-t border-gray-200 dark:border-gray-700">
+          <div className="mb-6 flex items-center gap-3">
+            <div className="p-2.5 bg-dorado dark:bg-dorado rounded-lg shadow-md">
+              <ShoppingBag className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h4 className="text-2xl font-bold text-gris-oscuro dark:text-gray-100">
+                Otros clientes también compraron
+              </h4>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Productos frecuentemente comprados juntos
+              </p>
+            </div>
           </div>
-        ) : related.length > 0 ? (
-          renderList(related, relatedRef)
-        ) : (
-          <div className="text-gray-600 dark:text-gray-400">No se encontraron productos relacionados.</div>
-        )}
-
-        {/* Also bought */}
-        <div className="mt-8">
-          <div className="mb-4 flex items-center justify-between">
-            <h4 className="text-xl font-semibold text-gris-oscuro dark:text-gray-100">Otros clientes también compraron</h4>
-          </div>
+          
           {loading ? (
-            <div className="flex space-x-4">
+            <div className="flex gap-4 overflow-x-auto py-2">
+              <SkeletonCard />
               <SkeletonCard />
               <SkeletonCard />
               <SkeletonCard />
@@ -237,7 +326,12 @@ const RelatedProducts: React.FC<Props> = ({ productId, category, price }) => {
           ) : also.length > 0 ? (
             renderList(also, alsoRef)
           ) : (
-            <div className="text-gray-600">No hay datos de compras relacionadas.</div>
+            <div className="text-center py-8 px-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+              <ShoppingBag className="w-12 h-12 text-gray-300 dark:text-gray-600 mx-auto mb-3" />
+              <p className="text-gray-500 dark:text-gray-400">
+                No hay datos de compras relacionadas
+              </p>
+            </div>
           )}
         </div>
       </div>

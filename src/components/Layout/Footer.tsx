@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom'
-import { Package, Mail, Phone, MapPin, Facebook, MessageCircle } from 'lucide-react'
+import { Mail, Phone, MapPin, Facebook, MessageCircle } from 'lucide-react'
 
 const Footer = () => {
   return (
@@ -9,9 +9,14 @@ const Footer = () => {
           {/* Logo y descripción */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="w-8 h-8 bg-amarillo rounded-full flex items-center justify-center">
-                <Package className="w-5 h-5 text-gris-oscuro" />
-              </div>
+              <img 
+                src="/logo.webp" 
+                alt="Mercadillo Logo" 
+                className="w-8 h-8 rounded-full object-cover bg-white p-0.5"
+                onError={(e) => {
+                  e.currentTarget.style.display = 'none';
+                }}
+              />
               <span className="text-xl font-bold">Mercadillo Lima Perú</span>
             </div>
             <p className="text-gris-claro mb-4 max-w-md">

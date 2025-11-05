@@ -1,6 +1,6 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { Home, ArrowLeft, ShoppingBag, Package } from 'lucide-react'
+import { Home, ArrowLeft, ShoppingBag } from 'lucide-react'
 
 const NotFound404: React.FC = () => {
   return (
@@ -9,12 +9,21 @@ const NotFound404: React.FC = () => {
         
         {/* 404 Illustration */}
         <div className="relative">
-          <div className="text-[200px] sm:text-[250px] font-bold text-gray-200 dark:text-gray-700 leading-none select-none">
+          <div className="text-[200px] sm:text-[250px] font-bold text-gray-200 dark:text-gray-700 leading-none select-none -ml-7 sm:-ml-7">
             404
           </div>
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="bg-amarillo dark:bg-yellow-500 rounded-full p-8 shadow-xl animate-bounce">
-              <Package className="w-16 h-16 text-gris-oscuro dark:text-gray-900" />
+            <div className="animate-bounce">
+              <div className="w-32 h-32 rounded-full bg-white dark:bg-gray-800 shadow-xl overflow-hidden border-4 border-amarillo dark:border-yellow-500">
+                <img 
+                  src="/logo.webp" 
+                  alt="Mercadillo Logo" 
+                  className="w-full h-full object-cover scale-110"
+                  onError={(e) => {
+                    e.currentTarget.style.display = 'none';
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
