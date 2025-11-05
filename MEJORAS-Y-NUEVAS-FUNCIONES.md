@@ -256,21 +256,36 @@ CREATE TABLE stock_reservations (
 ## 🛍️ 5. EXPERIENCIA DE COMPRA
 
 ### 5.1 Búsqueda Avanzada con Filtros
-**Prioridad:** Alta | **Estimación:** 8 horas
+**Prioridad:** Alta | **Estimación:** 8 horas | ✅ **COMPLETADO** (5 de nov 2025)
 
 **Mejorar búsqueda actual:**
-- [ ] Búsqueda por voz (Web Speech API)
-- [ ] Búsqueda por imagen (ML Kit o Google Vision)
-- [ ] Autocompletado inteligente
-- [ ] Corrección de typos
-- [ ] Sinónimos (ej: "polo" = "camiseta")
+- [x] Búsqueda por voz (Web Speech API) - Implementado con soporte es-PE
+- [ ] Búsqueda por imagen (ML Kit o Google Vision) - No implementado (alto costo)
+- [x] Autocompletado inteligente - 5 sugerencias en tiempo real
+- [x] Corrección de typos - Diccionario de 12+ correcciones comunes
+- [x] Sinónimos (ej: "polo" = "camiseta") - 14 categorías de sinónimos
 
 **Filtros adicionales:**
-- [ ] Por rango de precio avanzado (slider dual)
-- [ ] Por valoración mínima
-- [ ] Por disponibilidad de envío
-- [ ] Por marca (si se agrega brands)
-- [ ] Filtro combinado (ej: "Ropa + Rojo + < S/50")
+- [x] Por rango de precio avanzado (slider dual) - Rango S/0-S/1000
+- [x] Por valoración mínima - Filtro de 0-5 estrellas
+- [x] Por disponibilidad de envío - Checkbox "Solo con envío"
+- [ ] Por marca (si se agrega brands) - Requiere campo marca
+- [x] Filtro combinado (ej: "Ropa + Rojo + < S/50") - Todos los filtros combinables
+
+**Implementación:**
+- Componente: `src/components/Search/AdvancedSearch.tsx`
+- Hook: `src/hooks/useAdvancedSearch.ts`
+- Tipos: `src/types/search.ts`
+- Docs: `docs/SISTEMA-BUSQUEDA-AVANZADA.md`
+
+**Características principales:**
+- 🎤 Búsqueda por voz con indicador visual
+- 💡 14 categorías de sinónimos en español
+- ✏️ Corrección automática de 12+ typos comunes
+- 🔍 Autocompletado con búsquedas populares
+- 🎛️ Filtros: precio, rating, categoría, envío, ordenamiento
+- 📱 Responsive con dark mode
+- ⚡ Performance optimizado (debounce, límite de sugerencias)
 
 ---
 
