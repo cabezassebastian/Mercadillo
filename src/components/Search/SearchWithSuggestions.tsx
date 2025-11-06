@@ -261,7 +261,7 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
     if (!recognitionRef.current) {
       const isOpera = (navigator.userAgent.indexOf('OPR') !== -1) || (navigator.userAgent.indexOf('Opera') !== -1)
       if (isOpera) {
-        alert('Búsqueda por voz no disponible en Opera. Por favor usa Chrome, Edge o Safari, o habilita los permisos de micrófono en opera://settings/privacy.')
+        alert('Búsqueda por voz no disponible en Opera. Por favor usa Chrome, Edge o Safari.')
       } else {
         alert('Tu navegador no soporta búsqueda por voz. Por favor usa Chrome, Edge o Safari.')
       }
@@ -276,63 +276,51 @@ const SearchWithSuggestions: React.FC<SearchWithSuggestionsProps> = ({
         console.error('Error al detener el reconocimiento de voz:', error)
         setIsListening(false)
       }
-    } else {
+      return
+    }
+
+    // Solicitar permiso del micrófono
+    try {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Tu navegador no soporta acceso al micrófono.')
+        return
+      }
+
+      console.log('Solicitando acceso al micrófono...')
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
+      console.log('Permiso de micrófono otorgado')
+      
+      // Detener el stream inmediatamente
+      stream.getTracks().forEach(track => track.stop())
+      
+      // Ahora iniciar el reconocimiento de voz
       try {
-        // Verificar primero el estado actual del permiso
-        if (navigator.permissions && navigator.permissions.query) {
-          try {
-            const permissionStatus = await navigator.permissions.query({ name: 'microphone' as PermissionName })
-            
-            if (permissionStatus.state === 'denied') {
-              alert('❌ Permiso de micrófono bloqueado.\n\n' +
-                    '📍 Para habilitarlo:\n' +
-                    '1. Haz clic en el icono del candado 🔒 (o ℹ️) en la barra de direcciones\n' +
-                    '2. Busca "Micrófono"\n' +
-                    '3. Cambia de "Bloquear" a "Permitir"\n' +
-                    '4. Recarga la página')
-              return
-            }
-          } catch (e) {
-            console.log('No se pudo verificar permisos:', e)
-          }
-        }
-
-        // Solicitar permiso explícito del micrófono
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-            // Detener el stream inmediatamente (solo lo usamos para pedir permiso)
-            stream.getTracks().forEach(track => track.stop())
-          } catch (permissionError: any) {
-            console.error('Permiso de micrófono denegado:', permissionError)
-            if (permissionError.name === 'NotAllowedError' || permissionError.name === 'PermissionDeniedError') {
-              alert('❌ Permiso de micrófono denegado.\n\n' +
-                    '📍 Para permitir el acceso:\n' +
-                    '1. Haz clic en el icono del candado 🔒 en la barra de direcciones (arriba a la izquierda)\n' +
-                    '2. Busca la opción "Micrófono"\n' +
-                    '3. Selecciona "Permitir"\n' +
-                    '4. Recarga la página y vuelve a intentar')
-            } else {
-              alert('No se pudo acceder al micrófono. Verifica que esté conectado y funcionando.')
-            }
-            setIsListening(false)
-            return
-          }
-        }
-
-        // Una vez tenemos permiso, iniciar el reconocimiento de voz
+        console.log('Iniciando reconocimiento de voz...')
         recognitionRef.current.start()
         setIsListening(true)
-      } catch (error) {
-        console.error('Error al iniciar el reconocimiento de voz:', error)
-        const isOpera = (navigator.userAgent.indexOf('OPR') !== -1) || (navigator.userAgent.indexOf('Opera') !== -1)
-        if (isOpera) {
-          alert('No se pudo iniciar la búsqueda por voz en Opera. Verifica los permisos del micrófono en opera://settings/privacy o usa Chrome/Edge.')
-        } else {
-          alert('No se pudo iniciar la búsqueda por voz. Asegúrate de permitir el acceso al micrófono.')
-        }
+      } catch (startError) {
+        console.error('Error al iniciar reconocimiento:', startError)
+        alert('Error al iniciar el reconocimiento de voz. Intenta de nuevo.')
         setIsListening(false)
       }
+      
+    } catch (error: any) {
+      console.error('Error con permisos de micrófono:', error)
+      
+      if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+        alert('❌ Permiso de micrófono denegado.\n\n' +
+              '📍 Para permitir el acceso:\n' +
+              '1. Haz clic en el icono 🔒 o ℹ️ en la barra de direcciones\n' +
+              '2. Busca "Micrófono" y selecciona "Permitir"\n' +
+              '3. Recarga la página (F5) y vuelve a intentar')
+      } else if (error.name === 'NotFoundError') {
+        alert('No se encontró un micrófono. Verifica que esté conectado.')
+      } else if (error.name === 'NotReadableError') {
+        alert('El micrófono está siendo usado por otra aplicación. Ciérrala e intenta de nuevo.')
+      } else {
+        alert('Error al acceder al micrófono: ' + error.message)
+      }
+      setIsListening(false)
     }
   }
 
